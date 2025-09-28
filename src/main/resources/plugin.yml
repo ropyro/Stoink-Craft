@@ -1,0 +1,14 @@
+name: StoinkCore
+main: com.stoinkcraft.StoinkCore
+version: 0.1
+api-version: 1.21.8
+depend: [Vault]
+commands:
+  enterprise:
+    description: Enterprise commands
+    usage: /enterprise <create/join/info>
+    aliases: ['ep','biz','business','corp','llc']
+#  market:
+#    description: View item market prices
+#    usage: /market
+#    aliases: ['mv','marketvalue','m']
