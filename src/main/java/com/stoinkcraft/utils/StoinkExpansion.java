@@ -53,6 +53,7 @@ public class StoinkExpansion extends PlaceholderExpansion {
             case "enterprise":
                 return e.getName();
             case "role":
+                if(e.getMemberRole(player.getUniqueId()) == null) return "";
                 return e.getMemberRole(player.getUniqueId()).roleName();
             case "networth":
                 return String.format("$%.2f", e.getNetWorth());

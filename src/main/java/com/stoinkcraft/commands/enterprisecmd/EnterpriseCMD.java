@@ -34,6 +34,7 @@ public class EnterpriseCMD implements CommandExecutor {
         registerSubcommand(new PromoteSubCommand());
         registerSubcommand(new ResignSubCommand());
         registerSubcommand(new ReloadSubCMD(plugin));
+        registerSubcommand(new DisbandSubCommand());
     }
 
     private void registerSubcommand(SubCommand sub) {

@@ -10,12 +10,12 @@ import org.bukkit.entity.Player;
 public class DisbandSubCommand implements SubCommand {
     @Override
     public String getName() {
-        return null;
+        return "disband";
     }
 
     @Override
     public String getUsage() {
-        return null;
+        return "/enterprise disband - dissolves the enterprise";
     }
 
     @Override

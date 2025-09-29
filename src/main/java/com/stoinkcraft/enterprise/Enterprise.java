@@ -97,18 +97,9 @@ public class Enterprise {
         return false;
     }
 
-    public Role getMemberRole(UUID member){
-        Role role = null;
-        if(isMember(member)){
-            for(UUID uuid : members.keySet()){
-                if(uuid == member){
-                   return members.get(uuid);
-                }
-            }
-        }
-        return role;
+    public Role getMemberRole(UUID member) {
+        return members.getOrDefault(member, null);
     }
-
 
 
     /*
