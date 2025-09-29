@@ -3,6 +3,7 @@ package com.stoinkcraft;
 import com.stoinkcraft.commands.enterprisecmd.EnterpriseCMD;
 import com.stoinkcraft.commands.enterprisecmd.EnterpriseTabCompleter;
 import com.stoinkcraft.earnings.EarningListener;
+import com.stoinkcraft.enterprise.EnterpriseStorage;
 import com.stoinkcraft.market.MarketManager;
 import com.stoinkcraft.enterprise.EnterpriseManager;
 import net.milkbowl.vault.economy.Economy;
@@ -10,6 +11,7 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
+import java.io.IOException;
 
 public class StoinkCore extends JavaPlugin {
 
@@ -17,6 +19,9 @@ public class StoinkCore extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        File enterpriseFile = new File(getDataFolder(), "enterprises.yml");
+        EnterpriseStorage.saveAllEnterprises(enterpriseFile);
+
         getLogger().info(String.format("[%s] Disabled Version %s", getDescription().getName(), getDescription().getVersion()));
     }
 
@@ -37,6 +42,17 @@ public class StoinkCore extends JavaPlugin {
             saveResource("market.yml", false);
         }
         MarketManager.loadMarketPrices(marketFile);
+
+        File enterpriseFile = new File(getDataFolder(), "enterprises.yml");
+        if (!enterpriseFile.exists()) {
+            try {
+                enterpriseFile.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        EnterpriseStorage.loadAllEnterprises(enterpriseFile);
 
         //Register /enterprise command + tap completer
         EnterpriseCMD enterpriseCMD = new EnterpriseCMD(this);
