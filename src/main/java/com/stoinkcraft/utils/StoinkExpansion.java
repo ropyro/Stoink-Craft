@@ -1,0 +1,63 @@
+package com.stoinkcraft.utils;
+
+import com.stoinkcraft.StoinkCore;
+import com.stoinkcraft.enterprise.Enterprise;
+import com.stoinkcraft.enterprise.EnterpriseManager;
+import me.clip.placeholderapi.expansion.PlaceholderExpansion;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
+
+public class StoinkExpansion extends PlaceholderExpansion {
+
+    private StoinkCore plugin;
+
+    public StoinkExpansion(StoinkCore plugin){
+        this.plugin = plugin;
+    }
+
+    @Override
+    public @NotNull String getIdentifier() {
+        return "stoinkcraft";
+    }
+
+    @Override
+    public @NotNull String getAuthor() {
+        return "ropyro";
+    }
+
+    @Override
+    public @NotNull String getVersion() {
+        return "1.0.0";
+    }
+
+    @Override
+    public boolean persist() {
+        return true; // Makes it survive /papi reload
+    }
+
+    @Override
+    public boolean canRegister() {
+        return true;
+    }
+
+    @Override
+    public String onRequest(OfflinePlayer offlinePlayer, String identifier) {
+        Player player = offlinePlayer.getPlayer();
+        if (player == null) return "";
+
+        Enterprise e = EnterpriseManager.getEnterpriseManager().getEnterpriseByMember(player.getUniqueId());
+        if (e == null) return "";
+
+        switch (identifier.toLowerCase()) {
+            case "enterprise":
+                return e.getName();
+            case "role":
+                return e.getMemberRole(player.getUniqueId()).roleName();
+            case "networth":
+                return String.format("$%.2f", e.getNetWorth());
+            default:
+                return null;
+        }
+    }
+}

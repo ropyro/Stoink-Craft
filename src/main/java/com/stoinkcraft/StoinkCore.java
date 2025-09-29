@@ -6,6 +6,7 @@ import com.stoinkcraft.earnings.EarningListener;
 import com.stoinkcraft.enterprise.EnterpriseStorage;
 import com.stoinkcraft.market.MarketManager;
 import com.stoinkcraft.enterprise.EnterpriseManager;
+import com.stoinkcraft.utils.StoinkExpansion;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.RegisteredServiceProvider;
@@ -37,6 +38,10 @@ public class StoinkCore extends JavaPlugin {
 
         //Inititalize the enterprise manager class TODO: pull enterprise list from saved data
         EnterpriseManager em = new EnterpriseManager(this, econ, 5);
+
+        if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) { //
+            new StoinkExpansion(this).register(); //
+        }
 
         File marketFile = new File(getDataFolder(), "market.yml");
         if(!marketFile.exists()){
