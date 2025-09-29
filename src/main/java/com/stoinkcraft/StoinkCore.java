@@ -7,6 +7,7 @@ import com.stoinkcraft.enterprise.EnterpriseStorage;
 import com.stoinkcraft.market.MarketManager;
 import com.stoinkcraft.enterprise.EnterpriseManager;
 import net.milkbowl.vault.economy.Economy;
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -55,9 +56,11 @@ public class StoinkCore extends JavaPlugin {
         EnterpriseStorage.loadAllEnterprises(enterpriseFile);
 
         //Register /enterprise command + tap completer
-        EnterpriseCMD enterpriseCMD = new EnterpriseCMD(this);
-        getCommand("enterprise").setExecutor(enterpriseCMD);
-        getCommand("enterprise").setTabCompleter(new EnterpriseTabCompleter(enterpriseCMD.getSubcommands()));
+        Bukkit.getScheduler().runTask(this, () -> {
+            EnterpriseCMD enterpriseCMD = new EnterpriseCMD(this);
+            getCommand("enterprise").setExecutor(enterpriseCMD);
+            getCommand("enterprise").setTabCompleter(new EnterpriseTabCompleter(enterpriseCMD.getSubcommands()));
+        });
 
         //Register Earning listeners
         getServer().getPluginManager().registerEvents(new EarningListener(this), this);
