@@ -2,7 +2,11 @@ package com.stoinkcraft.enterprise;
 
 import com.stoinkcraft.StoinkCore;
 import net.milkbowl.vault.economy.Economy;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.entity.Player;
 
+import java.io.File;
 import java.util.*;
 
 
@@ -28,6 +32,33 @@ public class EnterpriseManager {
         enterpriseManager = this;
         this.maximumEmployees = maximumEmployees;
     }
+
+    public void disband(Enterprise enterprise) {
+        if (!enterpriseList.contains(enterprise)) return;
+
+        // Notify online members
+        for (UUID uuid : enterprise.getMembers().keySet()) {
+            Player p = Bukkit.getPlayer(uuid);
+            if (p != null && p.isOnline()) {
+                p.sendMessage(ChatColor.RED + "Your enterprise '" + enterprise.getName() + "' has been disbanded.");
+            }
+        }
+
+        // Optional: clear member maps (clean up references)
+        enterprise.getMembers().clear();
+        enterprise.getShares().clear();
+
+        // Remove from enterprise list
+        enterpriseList.remove(enterprise);
+
+        // Optional: log to console
+        Bukkit.getLogger().info("[StoinkCore] Disbanded enterprise: " + enterprise.getName());
+
+        // Optional: trigger save
+        File enterpriseFile = new File(plugin.getDataFolder(), "enterprises.yml");
+        EnterpriseStorage.saveAllEnterprises(enterpriseFile);
+    }
+
 
     public boolean createEnterprise(Enterprise enterprise){
         if(getEnterpriseByMember(enterprise.getCeo()) == null){
