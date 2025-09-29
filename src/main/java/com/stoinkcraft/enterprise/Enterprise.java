@@ -160,6 +160,10 @@ public class Enterprise {
         return bankBalance;
     }
 
+    public void increaseBankBalance(double value){
+        this.bankBalance += value;
+    }
+
     public void setBankBalance(double bankBalance) {
         this.bankBalance = bankBalance;
     }
