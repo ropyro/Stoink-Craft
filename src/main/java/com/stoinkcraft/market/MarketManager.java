@@ -8,7 +8,7 @@ import java.util.Map;
 
 public class MarketManager {
 
-    private static final Map<String, Double> values = new HashMap<>();
+    public static final Map<String, Double> values = new HashMap<>();
 
     public static void loadMarketPrices(File file) {
         YamlConfiguration config = YamlConfiguration.loadConfiguration(file);

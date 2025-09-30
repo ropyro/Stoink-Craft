@@ -1,5 +1,6 @@
 package com.stoinkcraft;
 
+import com.stoinkcraft.commands.MarketCMD;
 import com.stoinkcraft.commands.enterprisecmd.EnterpriseCMD;
 import com.stoinkcraft.commands.enterprisecmd.EnterpriseTabCompleter;
 import com.stoinkcraft.earnings.EarningListener;
@@ -65,6 +66,7 @@ public class StoinkCore extends JavaPlugin {
             EnterpriseCMD enterpriseCMD = new EnterpriseCMD(this);
             getCommand("enterprise").setExecutor(enterpriseCMD);
             getCommand("enterprise").setTabCompleter(new EnterpriseTabCompleter(enterpriseCMD.getSubcommands()));
+            getCommand("market").setExecutor(new MarketCMD());
         });
 
         //Register Earning listeners

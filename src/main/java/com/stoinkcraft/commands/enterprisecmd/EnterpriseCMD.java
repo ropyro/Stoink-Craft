@@ -3,10 +3,6 @@ package com.stoinkcraft.commands.enterprisecmd;
 import com.stoinkcraft.StoinkCore;
 import com.stoinkcraft.commands.SubCommand;
 import com.stoinkcraft.commands.enterprisecmd.subcommands.*;
-import com.stoinkcraft.enterprise.Enterprise;
-import com.stoinkcraft.enterprise.EnterpriseManager;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -14,9 +10,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 public class EnterpriseCMD implements CommandExecutor {
 
@@ -30,7 +24,7 @@ public class EnterpriseCMD implements CommandExecutor {
         registerSubcommand(new InfoSubCommand());
         registerSubcommand(new InviteSubCommand());
         registerSubcommand(new JoinSubCommand());
-        registerSubcommand(new ListSubCommand());
+        registerSubcommand(new TopSubCommand());
         registerSubcommand(new PromoteSubCommand());
         registerSubcommand(new ResignSubCommand());
         registerSubcommand(new ReloadSubCMD(plugin));

@@ -9,7 +9,7 @@ commands:
     description: Enterprise commands
     usage: /enterprise <create/join/info>
     aliases: ['ep','biz','business','corp','llc']
-#  market:
-#    description: View item market prices
-#    usage: /market
-#    aliases: ['mv','marketvalue','m']
+  market:
+    description: View item market prices
+    usage: /market
+    aliases: ['mv','marketvalue','m']

@@ -47,16 +47,35 @@ public class StoinkExpansion extends PlaceholderExpansion {
         if (player == null) return "";
 
         Enterprise e = EnterpriseManager.getEnterpriseManager().getEnterpriseByMember(player.getUniqueId());
-        if (e == null) return "";
+        if (e == null){
+            if(identifier.toLowerCase().equalsIgnoreCase("role")){
+                return "§7Unemployed";
+            }else{
+                return "";
+            }
+        }
 
         switch (identifier.toLowerCase()) {
             case "enterprise":
                 return e.getName();
             case "role":
-                if(e.getMemberRole(player.getUniqueId()) == null) return "";
-                return e.getMemberRole(player.getUniqueId()).roleName();
+                if(e.getMemberRole(player.getUniqueId()) == null) return "&7Unemployed";
+                String rolename = e.getMemberRole(player.getUniqueId()).roleName();
+                switch(rolename.toLowerCase()){
+                    case "ceo":
+                        return "§c§lCEO";
+                    case "cfo":
+                        return "§b§lCFO";
+                    case "coo":
+                        return "§aCOO";
+                    case "employee":
+                        return "§eEmployee";
+                }
+                return rolename;
             case "networth":
                 return String.format("$%.2f", e.getNetWorth());
+            case "ent-balance":
+                return String.format("$%.2f", e.getBankBalance());
             default:
                 return null;
         }
