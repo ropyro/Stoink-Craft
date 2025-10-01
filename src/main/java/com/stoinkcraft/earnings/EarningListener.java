@@ -12,14 +12,66 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.player.PlayerFishEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.scheduler.BukkitRunnable;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 public class EarningListener implements Listener {
 
     private final StoinkCore plugin;
 
+    private final Map<UUID, Double> pendingEarnings = new HashMap<>();
+    private final Map<UUID, BukkitRunnable> scheduledMessages = new HashMap<>();
+
     public EarningListener(StoinkCore plugin) {
         this.plugin = plugin;
     }
+
+    private void addEarnings(Player player, Enterprise enterprise, double value) {
+        UUID uuid = player.getUniqueId();
+
+        // Update pending earnings
+        pendingEarnings.put(uuid, pendingEarnings.getOrDefault(uuid, 0.0) + value);
+
+        // Deposit to enterprise
+        enterprise.increaseBankBalance(value * 0.5);
+
+        // Reset or schedule payout message
+        if (scheduledMessages.containsKey(uuid)) {
+            return;
+        }
+
+        BukkitRunnable task = new BukkitRunnable() {
+            @Override
+            public void run() {
+                double total = pendingEarnings.remove(uuid);
+                if (total > 0) {
+                    StoinkCore.getEconomy().depositPlayer(player, total);
+                    player.sendMessage("§a==== Earnings ====");
+                    player.sendMessage("§aYou earned §e$" + String.format("%.2f", total) + " §afrom your recent work.");
+                }
+                scheduledMessages.remove(uuid);
+            }
+        };
+
+        int delayTicks = 200; // 15 to 30 seconds
+        task.runTaskLater(plugin, delayTicks);
+        scheduledMessages.put(uuid, task);
+    }
+
+    @EventHandler
+    public void onQuit(PlayerQuitEvent event) {
+        UUID uuid = event.getPlayer().getUniqueId();
+        if (scheduledMessages.containsKey(uuid)) {
+            scheduledMessages.get(uuid).cancel();
+            scheduledMessages.remove(uuid);
+        }
+        pendingEarnings.remove(uuid);
+    }
+
 
     @EventHandler
     public void onBlockBreak(BlockBreakEvent event) {
@@ -29,15 +81,8 @@ public class EarningListener implements Listener {
             Enterprise e = em.getEnterpriseByMember(player.getUniqueId());
             Material blockType = event.getBlock().getType();
             double value = MarketManager.getValue(blockType.name());
-            player.sendMessage("§aBroke block: §e" + blockType.name() + " §7(Value: $" + value + ")");
             if (value > 0) {
-                e.increaseBankBalance(value*0.5);
-                if (StoinkCore.getEconomy() == null) {
-                    player.sendMessage("§cVault economy not loaded!");
-                } else {
-                    StoinkCore.getEconomy().depositPlayer(player, value * 0.5);
-                    player.sendMessage("§aYou earned $" + (value * 0.5));
-                }
+                addEarnings(player, e, value*0.5);
             }
     }
 
@@ -54,15 +99,8 @@ public class EarningListener implements Listener {
             Enterprise e = em.getEnterpriseByMember(killer.getUniqueId());
             String mobType = entity.getType().name();
             double value = MarketManager.getValue(mobType);
-            killer.sendMessage("§Killed entity: §e" + mobType + " §7(Value: $" + value + ")");
             if (value > 0) {
-                e.increaseBankBalance(value*0.5);
-                if (StoinkCore.getEconomy() == null) {
-                    killer.sendMessage("§cVault economy not loaded!");
-                } else {
-                    StoinkCore.getEconomy().depositPlayer(killer, value * 0.5);
-                    killer.sendMessage("§aYou earned $" + (value * 0.5));
-                }
+                addEarnings(killer, e, value*0.5);
             }
     }
 
@@ -77,15 +115,8 @@ public class EarningListener implements Listener {
         if(em.getEnterpriseByMember(player.getUniqueId()) == null) return;
         Enterprise e = em.getEnterpriseByMember(player.getUniqueId());
 
-        player.sendMessage("§aFish caught! §7(Value: $" + value + ")");
         if (value > 0) {
-            e.increaseBankBalance(value*0.5);
-            if (StoinkCore.getEconomy() == null) {
-                player.sendMessage("§cVault economy not loaded!");
-            } else {
-                StoinkCore.getEconomy().depositPlayer(player, value * 0.5);
-                player.sendMessage("§aYou earned $" + (value * 0.5));
-            }
+            addEarnings(player, e, value*0.5);
         }
     }
 }

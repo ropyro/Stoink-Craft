@@ -4,6 +4,7 @@ import com.stoinkcraft.StoinkCore;
 import com.stoinkcraft.enterprise.Enterprise;
 import com.stoinkcraft.enterprise.EnterpriseManager;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
+import net.milkbowl.vault.chat.Chat;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -73,9 +74,9 @@ public class StoinkExpansion extends PlaceholderExpansion {
                 }
                 return rolename;
             case "networth":
-                return String.format("$%.2f", e.getNetWorth());
+                return ChatUtils.formatMoney(e.getNetWorth());
             case "ent-balance":
-                return String.format("$%.2f", e.getBankBalance());
+                return ChatUtils.formatMoney(e.getBankBalance());
             default:
                 return null;
         }
