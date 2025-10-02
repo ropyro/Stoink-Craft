@@ -12,6 +12,7 @@ import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
+import xyz.xenondevs.invui.InvUI;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,6 +20,7 @@ import java.io.IOException;
 public class StoinkCore extends JavaPlugin {
 
     private static Economy econ = null;
+
 
     @Override
     public void onDisable() {
@@ -30,6 +32,9 @@ public class StoinkCore extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        //GUI util hook
+        InvUI.getInstance().setPlugin(this);
+
         //Vault hook
         if (!setupEconomy()) {
             getLogger().severe(String.format("[%s] - Disabled due to no Vault dependency found!", getDescription().getName()));
@@ -90,4 +95,5 @@ public class StoinkCore extends JavaPlugin {
     public static Economy getEconomy() {
         return econ;
     }
+
 }
