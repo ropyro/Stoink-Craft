@@ -1,4 +1,4 @@
-package com.stoinkcraft.commands.enterprisecmd.subcommands;
+package com.stoinkcraft.commands.enterprisecmd.subcommands.management;
 
 import com.stoinkcraft.commands.SubCommand;
 import com.stoinkcraft.enterprise.Enterprise;
