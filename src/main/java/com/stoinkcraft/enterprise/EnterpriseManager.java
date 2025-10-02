@@ -59,6 +59,39 @@ public class EnterpriseManager {
         EnterpriseStorage.saveAllEnterprises(enterpriseFile);
     }
 
+    public boolean setEnterpriseWarp(Player player){
+        UUID uuid = player.getUniqueId();
+        if(isInEnterprise(uuid)){
+            Enterprise e = getEnterpriseByMember(uuid);
+            if(e.getMemberRole(uuid).equals(Role.CEO)){
+                e.setWarp(player.getLocation());
+                player.sendMessage(e.getName() + "'s warp has been set!");
+                File enterpriseFile = new File(plugin.getDataFolder(), "enterprises.yml");
+                EnterpriseStorage.saveAllEnterprises(enterpriseFile);
+                return true;
+            }
+        }
+        player.sendMessage("You must be the CEO of an enterprise to set a warp!");
+        return false;
+    }
+
+    public boolean deleteEnterpriseWarp(Player player){
+        UUID uuid = player.getUniqueId();
+        if(isInEnterprise(uuid)){
+            Enterprise e = getEnterpriseByMember(uuid);
+            if(e.getMemberRole(uuid).equals(Role.CEO)){
+                e.setWarp(null);
+                player.sendMessage(e.getName() + "'s warp has been deleted!");
+                File enterpriseFile = new File(plugin.getDataFolder(), "enterprises.yml");
+                EnterpriseStorage.saveAllEnterprises(enterpriseFile);
+                return true;
+            }
+        }
+        player.sendMessage("You must be the CEO of an enterprise to delete a warp!");
+        return false;
+    }
+
+
 
     public boolean createEnterprise(Enterprise enterprise){
         if(getEnterpriseByMember(enterprise.getCeo()) == null){

@@ -1,5 +1,8 @@
 package com.stoinkcraft.enterprise;
 
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+
 import java.util.*;
 
 public class Enterprise {
@@ -11,6 +14,8 @@ public class Enterprise {
     private final Map<UUID, Double> shares = new HashMap<>();
     private double bankBalance;
     private double netWorth;
+
+    private Location warp;
 
     public Enterprise(String name, UUID ceo) {
         this.name = name;
@@ -24,6 +29,8 @@ public class Enterprise {
     public void hireEmployee(UUID employee){
         if(getEmployees().size() < EnterpriseManager.getEnterpriseManager().getMaximumEmployees())
             members.put(employee, Role.EMPLOYEE);
+        else
+            Bukkit.getOfflinePlayer(employee).getPlayer().sendMessage("This enterprise is full!");
     }
 
     public boolean isMember(UUID member){
@@ -141,6 +148,14 @@ public class Enterprise {
             }
         }
         return uuids;
+    }
+
+    public Location getWarp() {
+        return warp;
+    }
+
+    public void setWarp(Location warp) {
+        this.warp = warp;
     }
 
     public Map<UUID, Double> getShares() {

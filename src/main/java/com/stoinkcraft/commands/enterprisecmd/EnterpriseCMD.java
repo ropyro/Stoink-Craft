@@ -3,6 +3,8 @@ package com.stoinkcraft.commands.enterprisecmd;
 import com.stoinkcraft.StoinkCore;
 import com.stoinkcraft.commands.SubCommand;
 import com.stoinkcraft.commands.enterprisecmd.subcommands.*;
+import com.stoinkcraft.commands.enterprisecmd.subcommands.admin.ReloadSubCMD;
+import com.stoinkcraft.commands.enterprisecmd.subcommands.management.*;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -29,6 +31,9 @@ public class EnterpriseCMD implements CommandExecutor {
         registerSubcommand(new ResignSubCommand());
         registerSubcommand(new ReloadSubCMD(plugin));
         registerSubcommand(new DisbandSubCommand());
+        registerSubcommand(new DelwarpSubCommand());
+        registerSubcommand(new SetwarpSubCommand());
+        registerSubcommand(new WarpSubCommand());
     }
 
     private void registerSubcommand(SubCommand sub) {

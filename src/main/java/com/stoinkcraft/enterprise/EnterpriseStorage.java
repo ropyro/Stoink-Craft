@@ -1,5 +1,6 @@
 package com.stoinkcraft.enterprise;
 
+import com.stoinkcraft.StoinkCore;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
@@ -11,7 +12,8 @@ import java.util.UUID;
 
 public class EnterpriseStorage {
 
-    public static void saveAllEnterprises(File file) {
+
+        public static void saveAllEnterprises(File file) {
         YamlConfiguration config = new YamlConfiguration();
         List<Enterprise> enterprises = EnterpriseManager.getEnterpriseManager().getEnterpriseList();
 
@@ -36,6 +38,8 @@ public class EnterpriseStorage {
                 shareMap.put(uuid.toString(), e.getShares().get(uuid));
             }
             config.set(path + ".shares", shareMap);
+
+            if(e.getWarp() != null) config.set(path + ".warp", e.getWarp());
         }
 
         try {
@@ -75,6 +79,9 @@ public class EnterpriseStorage {
                 double share = (Double) sharesRaw.get(uuidStr);
                 e.getShares().put(UUID.fromString(uuidStr), share);
             }
+
+            String warpStr = config.getString(path + ".warp");
+            if(warpStr != null) e.setWarp(config.getLocation(path + ".warp"));
 
             EnterpriseManager.getEnterpriseManager().createEnterprise(e);
         }
