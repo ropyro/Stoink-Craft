@@ -22,11 +22,6 @@ public class MarketCMD implements CommandExecutor {
         if(!(commandSender instanceof Player)) return true;
         Player player = (Player)commandSender;
 
-        player.sendMessage("Market Values:");
-        for (String product : MarketManager.values.keySet()){
-            player.sendMessage(product + ": " + MarketManager.getValue(product));
-        }
-
         Gui gui = Gui.normal()
                 .setStructure(
                         "# # # # ? # # # #",
@@ -42,17 +37,38 @@ public class MarketCMD implements CommandExecutor {
                 ))
                 .build();
 
-        for (String product : MarketManager.values.keySet()){
-            if(Material.getMaterial(product) == null) {
-                ItemBuilder nonmaterialgood = new ItemBuilder(Material.DIRT)
+        for (String product : MarketManager.values.keySet()) {
+            Material mat = Material.getMaterial(product);
+
+            // Default to contextual item if material is null or too generic
+            if (mat == null || mat == Material.DIRT) {
+                Material contextualMaterial = Material.DIRT;
+
+                // Try to infer more appropriate material
+                String lower = product.toLowerCase();
+
+                if (lower.contains("bone") || lower.contains("mob") || lower.contains("flesh") || lower.contains("string") || lower.contains("gunpowder")) {
+                    contextualMaterial = Material.SKELETON_SKULL; // Generic mob skull
+                } else if (lower.contains("spider")) {
+                    contextualMaterial = Material.SPIDER_EYE;
+                } else if (lower.contains("zombie")) {
+                    contextualMaterial = Material.ZOMBIE_HEAD;
+                } else if (lower.contains("creeper")) {
+                    contextualMaterial = Material.CREEPER_HEAD;
+                } else if (lower.contains("fishing") || lower.contains("fish") || lower.contains("salmon") || lower.contains("cod") || lower.contains("tuna")) {
+                    contextualMaterial = Material.COD; // Generic fish
+                }
+
+                ItemBuilder contextualItem = new ItemBuilder(contextualMaterial)
                         .setDisplayName(product)
                         .addLoreLines(" ")
                         .addLoreLines(" §a• §fValue: §a$" + MarketManager.getValue(product));
-                gui.addItems(new SimpleItem(nonmaterialgood));
+                gui.addItems(new SimpleItem(contextualItem));
                 continue;
             }
-            ItemBuilder item = new ItemBuilder(Material.getMaterial(product))
-                    .setDisplayName(Material.getMaterial(product).name())
+
+            ItemBuilder item = new ItemBuilder(mat)
+                    .setDisplayName(mat.name())
                     .addLoreLines(" ")
                     .addLoreLines(" §a• §fValue: §a$" + MarketManager.getValue(product));
             gui.addItems(new SimpleItem(item));
@@ -60,7 +76,7 @@ public class MarketCMD implements CommandExecutor {
 
         Window window = Window.single()
                 .setViewer(player)
-                .setTitle("§a§lTop Enterprises")
+                .setTitle("§7Market Prices")
                 .setGui(gui)
                 .build();
         window.open();
