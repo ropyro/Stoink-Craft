@@ -5,6 +5,9 @@ import com.stoinkcraft.commands.SubCommand;
 import com.stoinkcraft.commands.enterprisecmd.subcommands.*;
 import com.stoinkcraft.commands.enterprisecmd.subcommands.admin.ReloadSubCMD;
 import com.stoinkcraft.commands.enterprisecmd.subcommands.management.*;
+import com.stoinkcraft.enterprise.Enterprise;
+import com.stoinkcraft.enterprise.EnterpriseManager;
+import com.stoinkcraft.guis.EnterpriseGUI;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -45,7 +48,15 @@ public class EnterpriseCMD implements CommandExecutor {
         if (!(sender instanceof Player)) return false;
 
         Player player = (Player) sender;
-        if (args.length == 0 || args[0].equalsIgnoreCase("help")) {
+        if(args.length == 0 && EnterpriseManager.getEnterpriseManager().isInEnterprise(player.getUniqueId())){
+            Enterprise enterprise = EnterpriseManager.getEnterpriseManager().getEnterpriseByMember(player.getUniqueId());
+            new EnterpriseGUI(player, enterprise).openWindow();
+            return true;
+        }else if(args.length == 0){
+            player.sendMessage("§cYou are not in an enterprise. Try /enterprise help");
+            return true;
+        }
+        if (args[0].equalsIgnoreCase("help")) {
             sender.sendMessage("§eEnterprise Commands:");
             for (SubCommand sub : subcommands.values()) {
                 sender.sendMessage("§7 - " + sub.getUsage());
