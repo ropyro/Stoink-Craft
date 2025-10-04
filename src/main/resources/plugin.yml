@@ -9,7 +9,21 @@ commands:
     description: Enterprise commands
     usage: /enterprise <create/join/info>
     aliases: ['ep','biz','business','corp','llc']
+  serverenterprise:
+    description: serverenterprise commands
+    usage: /serverenterprise
+    aliases: [ 'se','serverent','sent' ]
   market:
     description: View item market prices
     usage: /market
     aliases: ['mv','marketvalue','m']
+
+permissions:
+  stoinkcore.admin.*:
+    description: Allow the use of vein miner for all tool categories
+    default: op
+    children:
+      stoinkcore.admin.reload: true
+  stoinkcore.admin.reload:
+    description: Allow the use of the reload sub command
+    default: op

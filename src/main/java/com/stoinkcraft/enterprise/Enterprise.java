@@ -26,7 +26,8 @@ public class Enterprise {
         shares.put(ceo, 40.0);
     }
 
-    public void hireEmployee(UUID employee){
+
+        public void hireEmployee(UUID employee){
         if(getEmployees().size() < EnterpriseManager.getEnterpriseManager().getMaximumEmployees())
             members.put(employee, Role.EMPLOYEE);
         else

@@ -3,6 +3,7 @@ package com.stoinkcraft.commands.enterprisecmd.subcommands;
 import com.stoinkcraft.commands.SubCommand;
 import com.stoinkcraft.enterprise.Enterprise;
 import com.stoinkcraft.enterprise.EnterpriseManager;
+import com.stoinkcraft.enterprise.ServerEnterprise;
 import com.stoinkcraft.guis.TopEnterprisesGUI;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -40,9 +41,11 @@ public class TopSubCommand implements SubCommand {
 
         List<Enterprise> enterprises = EnterpriseManager.getEnterpriseManager()
                 .getEnterpriseList().stream()
+               // .filter(e -> !(e instanceof ServerEnterprise))
                 .sorted(Comparator.comparingDouble(Enterprise::getNetWorth).reversed())
                 .limit(10)
                 .toList();
+
 
         if (enterprises.isEmpty()) {
             player.sendMessage("§7There are currently no enterprises.");

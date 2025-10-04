@@ -3,8 +3,11 @@ package com.stoinkcraft;
 import com.stoinkcraft.commands.MarketCMD;
 import com.stoinkcraft.commands.enterprisecmd.EnterpriseCMD;
 import com.stoinkcraft.commands.enterprisecmd.EnterpriseTabCompleter;
+import com.stoinkcraft.commands.serverenterprisecmd.ServerEntCMD;
+import com.stoinkcraft.commands.serverenterprisecmd.ServerEntTabCompleter;
 import com.stoinkcraft.earnings.EarningListener;
 import com.stoinkcraft.enterprise.EnterpriseStorage;
+import com.stoinkcraft.enterprise.ServerEnterprise;
 import com.stoinkcraft.market.MarketManager;
 import com.stoinkcraft.enterprise.EnterpriseManager;
 import com.stoinkcraft.utils.StoinkExpansion;
@@ -66,12 +69,24 @@ public class StoinkCore extends JavaPlugin {
 
         EnterpriseStorage.loadAllEnterprises(enterpriseFile);
 
+        if(EnterpriseManager.getEnterpriseManager().getEnterpriseList()
+                .stream()
+                .filter(e -> e instanceof ServerEnterprise)
+                .toList().size() == 0){
+            EnterpriseManager.getEnterpriseManager().createEnterprise(new ServerEnterprise("FarmerLLC"));
+            EnterpriseManager.getEnterpriseManager().createEnterprise(new ServerEnterprise("MinerCorp"));
+            EnterpriseManager.getEnterpriseManager().createEnterprise(new ServerEnterprise("HunterInc"));
+            EnterpriseStorage.saveAllEnterprises(enterpriseFile);
+        }
+
         //Register /enterprise command + tap completer
         Bukkit.getScheduler().runTask(this, () -> {
             EnterpriseCMD enterpriseCMD = new EnterpriseCMD(this);
             getCommand("enterprise").setExecutor(enterpriseCMD);
             getCommand("enterprise").setTabCompleter(new EnterpriseTabCompleter(enterpriseCMD.getSubcommands()));
             getCommand("market").setExecutor(new MarketCMD());
+            getCommand("serverenterprise").setExecutor(new ServerEntCMD());
+            getCommand("serverenterprise").setTabCompleter(new ServerEntTabCompleter());
         });
 
         //Register Earning listeners

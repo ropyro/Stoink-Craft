@@ -40,6 +40,12 @@ public class EnterpriseStorage {
             config.set(path + ".shares", shareMap);
 
             if(e.getWarp() != null) config.set(path + ".warp", e.getWarp());
+
+            if(e instanceof ServerEnterprise){
+                config.set(path + ".serverowned", true);
+            }else{
+                config.set(path + ".serverowned", false);
+            }
         }
 
         try {
@@ -52,13 +58,19 @@ public class EnterpriseStorage {
     public static void loadAllEnterprises(File file) {
         YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 
-        if (!config.contains("enterprises")) return;
+        if (!config.contains("enterprises") && !config.contains("serverent")) return;
 
         for (String name : config.getConfigurationSection("enterprises").getKeys(false)) {
             String path = "enterprises." + name;
 
             UUID ceo = UUID.fromString(config.getString(path + ".ceo"));
-            Enterprise e = new Enterprise(name, ceo);
+            Enterprise e;
+
+            if(config.getBoolean(path + ".serverowned")){
+                e = new ServerEnterprise(name);
+            }else{
+                e = new Enterprise(name, ceo);
+            }
 
             String cfoStr = config.getString(path + ".cfo");
             String cooStr = config.getString(path + ".coo");
@@ -82,6 +94,7 @@ public class EnterpriseStorage {
 
             String warpStr = config.getString(path + ".warp");
             if(warpStr != null) e.setWarp(config.getLocation(path + ".warp"));
+
 
             EnterpriseManager.getEnterpriseManager().createEnterprise(e);
         }

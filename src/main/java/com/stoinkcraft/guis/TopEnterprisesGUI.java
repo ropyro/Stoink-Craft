@@ -2,9 +2,11 @@ package com.stoinkcraft.guis;
 
 import com.stoinkcraft.enterprise.Enterprise;
 import com.stoinkcraft.enterprise.EnterpriseManager;
+import com.stoinkcraft.enterprise.ServerEnterprise;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.Server;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -76,19 +78,30 @@ public class TopEnterprisesGUI {
             skull.setItemMeta(meta);
 
             ItemBuilder item = new ItemBuilder(skull)
-                    .setDisplayName(displayName)
-                    .addLoreLines(" ")
-                    .addLoreLines(" §a• §fBalance: §a$" + balance)
-                    .addLoreLines(" §a• §fNet Worth: §a$" + netWorth)
-                    .addLoreLines(" ")
-                    .addLoreLines(" §a• §fCEO: §a" + Bukkit.getOfflinePlayer(e.getCeo()).getName())
-                    .addLoreLines(" §a• §fEmployees §a" + e.getMembers().keySet().size() + "/" + EnterpriseManager.getEnterpriseManager().getMaximumEmployees() + "§f:");
+                    .setDisplayName(displayName);
 
-            for(UUID member : e.getMembers().keySet()){
-                if(member.equals(e.getCeo())) continue;
-                String name = Bukkit.getOfflinePlayer(member).getPlayer().getName();
-                item.addLoreLines(" §a• §f" + name);
-            }
+
+                    if(e instanceof ServerEnterprise){
+                        item.addLoreLines(" ")
+                                .addLoreLines(" §a• §fEmployees §a" + (e.getMembers().keySet().size() - 1))
+                                .addLoreLines(" ")
+                                .addLoreLines("§c(!) THIS IS A SERVER OWNED ENTERPRISE (!)");
+                    }else{
+                        item.addLoreLines(" ")
+                                .addLoreLines(" §a• §fBalance: §a$" + balance)
+                                .addLoreLines(" §a• §fNet Worth: §a$" + netWorth)
+                                .addLoreLines(" ")
+                                .addLoreLines(" §a• §fCEO: §a" + Bukkit.getOfflinePlayer(e.getCeo()).getName())
+                                .addLoreLines(" §a• §fEmployees §a" + e.getMembers().keySet().size() + "/" + EnterpriseManager.getEnterpriseManager().getMaximumEmployees() + "§f:");
+                        for(UUID member : e.getMembers().keySet()){
+                            if(member.equals(e.getCeo())) continue;
+                            String name = Bukkit.getOfflinePlayer(member).getPlayer().getName();
+                            item.addLoreLines(" §a• §f" + name);
+                        }
+
+                        item.addLoreLines(" ")
+                                .addLoreLines("§a(!) Click to warp to this enterprise (!)");
+                    }
 
             return item;
         }

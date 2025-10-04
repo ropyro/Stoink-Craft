@@ -101,7 +101,12 @@ public class EnterpriseManager {
         return false;
     }
 
-    public void sendInvite(UUID target, UUID inviter) {
+    public void createEnterprise(ServerEnterprise enterprise){
+        enterpriseList.add(enterprise);
+    }
+
+
+        public void sendInvite(UUID target, UUID inviter) {
         invites.computeIfAbsent(target, k -> new ArrayList<>()).add(inviter);
     }
 
@@ -130,6 +135,7 @@ public class EnterpriseManager {
     public boolean hasInvite(UUID target) {
         return invites.containsKey(target);
     }
+
 
 
     public Enterprise getEnterpriseByMember(UUID uuid){
