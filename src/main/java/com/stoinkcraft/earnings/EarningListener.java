@@ -4,6 +4,7 @@ import com.stoinkcraft.StoinkCore;
 import com.stoinkcraft.enterprise.Enterprise;
 import com.stoinkcraft.enterprise.EnterpriseManager;
 import com.stoinkcraft.market.MarketManager;
+import com.stoinkcraft.utils.SCConstants;
 import org.bukkit.Material;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -31,13 +32,16 @@ public class EarningListener implements Listener {
     }
 
     private void addEarnings(Player player, Enterprise enterprise, double value) {
+        double playerEarning = value* SCConstants.PLAYER_PAY_SPLIT_PERCENTAGE;
+        double enterpriseEarning = value - playerEarning;
+
         UUID uuid = player.getUniqueId();
 
         // Update pending earnings
-        pendingEarnings.put(uuid, pendingEarnings.getOrDefault(uuid, 0.0) + value);
+        pendingEarnings.put(uuid, pendingEarnings.getOrDefault(uuid, 0.0) + playerEarning);
 
         // Deposit to enterprise
-        enterprise.increaseBankBalance(value * 0.5);
+        enterprise.increaseBankBalance(enterpriseEarning);
 
         // Reset or schedule payout message
         if (scheduledMessages.containsKey(uuid)) {
@@ -82,7 +86,7 @@ public class EarningListener implements Listener {
             Material blockType = event.getBlock().getType();
             double value = MarketManager.getValue(blockType.name());
             if (value > 0) {
-                addEarnings(player, e, value*0.5);
+                addEarnings(player, e, value);
             }
     }
 
@@ -100,7 +104,7 @@ public class EarningListener implements Listener {
             String mobType = entity.getType().name();
             double value = MarketManager.getValue(mobType);
             if (value > 0) {
-                addEarnings(killer, e, value*0.5);
+                addEarnings(killer, e, value);
             }
     }
 
@@ -116,7 +120,7 @@ public class EarningListener implements Listener {
         Enterprise e = em.getEnterpriseByMember(player.getUniqueId());
 
         if (value > 0) {
-            addEarnings(player, e, value*0.5);
+            addEarnings(player, e, value);
         }
     }
 }
