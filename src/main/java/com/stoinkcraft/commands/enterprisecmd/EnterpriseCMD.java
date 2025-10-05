@@ -8,6 +8,7 @@ import com.stoinkcraft.commands.enterprisecmd.subcommands.management.*;
 import com.stoinkcraft.enterprise.Enterprise;
 import com.stoinkcraft.enterprise.EnterpriseManager;
 import com.stoinkcraft.guis.EnterpriseGUI;
+import com.stoinkcraft.guis.UnemployedGUI;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -48,12 +49,13 @@ public class EnterpriseCMD implements CommandExecutor {
         if (!(sender instanceof Player)) return false;
 
         Player player = (Player) sender;
-        if(args.length == 0 && EnterpriseManager.getEnterpriseManager().isInEnterprise(player.getUniqueId())){
-            Enterprise enterprise = EnterpriseManager.getEnterpriseManager().getEnterpriseByMember(player.getUniqueId());
-            new EnterpriseGUI(player, enterprise).openWindow();
-            return true;
-        }else if(args.length == 0){
-            player.sendMessage("§cYou are not in an enterprise. Try /enterprise help");
+        if(args.length == 0){
+            if(EnterpriseManager.getEnterpriseManager().isInEnterprise(player.getUniqueId())){
+                Enterprise enterprise = EnterpriseManager.getEnterpriseManager().getEnterpriseByMember(player.getUniqueId());
+                new EnterpriseGUI(player, enterprise).openWindow();
+            }else{
+                new UnemployedGUI(player).openWindow();
+            }
             return true;
         }
         if (args[0].equalsIgnoreCase("help")) {

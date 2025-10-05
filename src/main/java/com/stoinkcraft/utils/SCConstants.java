@@ -11,4 +11,5 @@ public class SCConstants {
     public static final String SERVER_ENT_COMMAND_SETWARP = "stoinkcore.admin.serverenterprise.setwarp";
 
     public static double PLAYER_PAY_SPLIT_PERCENTAGE = 0.25;
+    public static double ENTERPRISE_FOUNDING_COST = 10000;
 }
