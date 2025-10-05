@@ -169,20 +169,18 @@ public class Enterprise {
     public void increaseBankBalance(double value){
         this.bankBalance += value;
     }
-
+    public void decreaseBankBalance(double value) {
+        this.bankBalance -= value;
+    }
     public void increaseNetworth(double value){
         this.netWorth += value;
     }
-
-
-        public void setBankBalance(double bankBalance) {
+    public void setBankBalance(double bankBalance) {
         this.bankBalance = bankBalance;
     }
-
     public double getNetWorth() {
         return netWorth;
     }
-
     public void setNetWorth(double netWorth) {
         this.netWorth = netWorth;
     }

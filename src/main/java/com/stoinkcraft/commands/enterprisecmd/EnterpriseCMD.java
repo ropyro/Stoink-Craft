@@ -38,6 +38,7 @@ public class EnterpriseCMD implements CommandExecutor {
         registerSubcommand(new DelwarpSubCommand());
         registerSubcommand(new SetwarpSubCommand());
         registerSubcommand(new WarpSubCommand());
+        registerSubcommand(new InvestSubCommand());
     }
 
     private void registerSubcommand(SubCommand sub) {
