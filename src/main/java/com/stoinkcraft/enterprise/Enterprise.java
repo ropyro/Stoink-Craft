@@ -170,7 +170,12 @@ public class Enterprise {
         this.bankBalance += value;
     }
 
-    public void setBankBalance(double bankBalance) {
+    public void increaseNetworth(double value){
+        this.netWorth += value;
+    }
+
+
+        public void setBankBalance(double bankBalance) {
         this.bankBalance = bankBalance;
     }
 

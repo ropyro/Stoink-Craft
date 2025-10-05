@@ -185,7 +185,7 @@ public class EnterpriseManager {
         this.enterpriseList.stream()
                 .filter(e -> (e instanceof ServerEnterprise))
                 .forEach(serverEnterprise -> {
-                    serverEnterprise.setNetWorth(serverEnterprise.getBankBalance());
+                    serverEnterprise.increaseNetworth(serverEnterprise.getBankBalance());
                     serverEnterprise.setBankBalance(0);
                 });
 
