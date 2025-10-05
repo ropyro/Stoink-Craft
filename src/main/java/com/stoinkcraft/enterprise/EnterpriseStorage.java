@@ -66,7 +66,9 @@ public class EnterpriseStorage {
             UUID ceo = UUID.fromString(config.getString(path + ".ceo"));
             Enterprise e;
 
-            if(config.getBoolean(path + ".serverowned")){
+            boolean serverowned = config.getBoolean(path + ".serverowned");
+
+            if(serverowned){
                 e = new ServerEnterprise(name);
             }else{
                 e = new Enterprise(name, ceo);
@@ -95,8 +97,11 @@ public class EnterpriseStorage {
             String warpStr = config.getString(path + ".warp");
             if(warpStr != null) e.setWarp(config.getLocation(path + ".warp"));
 
-
-            EnterpriseManager.getEnterpriseManager().createEnterprise(e);
+            if(serverowned){
+                EnterpriseManager.getEnterpriseManager().createEnterprise((ServerEnterprise)e);
+            }else{
+                EnterpriseManager.getEnterpriseManager().createEnterprise(e);
+            }
         }
     }
 }
