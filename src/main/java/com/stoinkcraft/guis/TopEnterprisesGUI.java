@@ -3,6 +3,7 @@ package com.stoinkcraft.guis;
 import com.stoinkcraft.enterprise.Enterprise;
 import com.stoinkcraft.enterprise.EnterpriseManager;
 import com.stoinkcraft.enterprise.ServerEnterprise;
+import com.stoinkcraft.utils.ChatUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
@@ -49,7 +50,7 @@ public class TopEnterprisesGUI {
 
         Window window = Window.single()
                 .setViewer(player)
-                .setTitle("§a§lTop Enterprises")
+                .setTitle("§8Top Enterprises")
                 .setGui(gui)
                 .build();
         window.open();
@@ -67,7 +68,7 @@ public class TopEnterprisesGUI {
 
         @Override
         public ItemProvider getItemProvider() {
-            String displayName = "§e#" + rank + " §a" + e.getName();
+            String displayName = "§e#" + rank + " §a" + e.getName() + " §f(§a" + ChatUtils.formatMoney(e.getNetWorth()) + "§f)";
             String netWorth = String.format("%.2f", e.getNetWorth());
             String balance = String.format("%.2f", e.getBankBalance());
 

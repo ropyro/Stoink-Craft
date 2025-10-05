@@ -48,6 +48,9 @@ public class ServerEntCMD implements CommandExecutor {
                    player.sendMessage("Invalid usage: /serverenterprise setwarp <enterprise>");
                }
            }
+           if(args[0].equalsIgnoreCase("updateeco")){
+                EnterpriseManager.getEnterpriseManager().updateBankBalances();
+           }
        }
         return true;
     }

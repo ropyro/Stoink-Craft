@@ -1,6 +1,7 @@
 package com.stoinkcraft.enterprise;
 
 import com.stoinkcraft.StoinkCore;
+import com.stoinkcraft.utils.SCConstants;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -177,5 +178,22 @@ public class EnterpriseManager {
 
     public int getMaximumEmployees() {
         return maximumEmployees;
+    }
+
+    public void updateBankBalances(){
+        //Move server ent funds from balance to networth
+        this.enterpriseList.stream()
+                .filter(e -> (e instanceof ServerEnterprise))
+                .forEach(serverEnterprise -> {
+                    serverEnterprise.setNetWorth(serverEnterprise.getBankBalance());
+                    serverEnterprise.setBankBalance(0);
+                });
+
+        //Tax privately owned enterprise bank balances
+        this.enterpriseList.stream()
+                .filter(e -> !(e instanceof ServerEnterprise))
+                .forEach(serverEnterprise ->
+                    serverEnterprise.setBankBalance(serverEnterprise.getBankBalance()*(1 - SCConstants.ENTERPRISE_DAILY_TAX)));
+
     }
 }

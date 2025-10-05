@@ -109,7 +109,6 @@ public class Enterprise {
         return members.getOrDefault(member, null);
     }
 
-
     /*
     Getters & Setters
      */

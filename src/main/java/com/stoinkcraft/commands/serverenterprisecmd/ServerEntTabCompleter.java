@@ -34,7 +34,7 @@ public class ServerEntTabCompleter implements TabCompleter {
         }
 
         if (args.length == 1) {
-            return List.of("setwarp");
+            return List.of("setwarp", "updateeco");
         }
 
         return List.of();
