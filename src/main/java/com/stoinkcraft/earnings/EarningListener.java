@@ -6,16 +6,24 @@ import com.stoinkcraft.enterprise.EnterpriseManager;
 import com.stoinkcraft.market.MarketManager;
 import com.stoinkcraft.utils.SCConstants;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
+import org.bukkit.block.data.Ageable;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockDropItemEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.player.PlayerFishEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -76,18 +84,45 @@ public class EarningListener implements Listener {
         pendingEarnings.remove(uuid);
     }
 
-
     @EventHandler
-    public void onBlockBreak(BlockBreakEvent event) {
+    public void onBlockDrop(BlockDropItemEvent event) {
         Player player = event.getPlayer();
-        EnterpriseManager em = EnterpriseManager.getEnterpriseManager();
-        if(em.getEnterpriseByMember(player.getUniqueId()) == null) return;
-            Enterprise e = em.getEnterpriseByMember(player.getUniqueId());
-            Material blockType = event.getBlock().getType();
-            double value = MarketManager.getPrice(blockType.name(), MarketManager.JobType.RESOURCE_COLLECTION);
-            if (value > 0) {
-                addEarnings(player, e, value);
-            }
+        if (player == null) return;
+
+        Enterprise e = EnterpriseManager.getEnterpriseManager()
+                .getEnterpriseByMember(player.getUniqueId());
+        if (e == null) return;
+
+        double totalEarnings = 0.0;
+
+        for (Item item : event.getItems()) {
+            if(isCrop(item.getItemStack().getType()) && !isFullyGrown(event.getBlock())) continue;
+
+            ItemStack stack = item.getItemStack();
+            String itemName = stack.getType().name();
+            int amount = stack.getAmount();
+            player.sendMessage("Droped amount: " + amount);
+            double baseValue = MarketManager.getPrice(itemName, MarketManager.JobType.RESOURCE_COLLECTION);
+
+            totalEarnings += baseValue * amount;
+        }
+
+        if (totalEarnings > 0) {
+            addEarnings(player, e, totalEarnings);
+        }
+    }
+
+    private boolean isCrop(Material material) {
+        return switch (material) {
+            case WHEAT, CARROTS, POTATOES, BEETROOTS, NETHER_WART -> true;
+            default -> false;
+        };
+    }
+
+    private boolean isFullyGrown(Block block) {
+        BlockState state = block.getState();
+        if (!(state instanceof Ageable ageable)) return false;
+        return ageable.getAge() >= ageable.getMaximumAge();
     }
 
     @EventHandler
@@ -113,14 +148,24 @@ public class EarningListener implements Listener {
         if (event.getState() != PlayerFishEvent.State.CAUGHT_FISH) return;
 
         Player player = event.getPlayer();
-        double value = MarketManager.getPrice(Material.COD.name(), MarketManager.JobType.FISHING);
-
         EnterpriseManager em = EnterpriseManager.getEnterpriseManager();
-        if(em.getEnterpriseByMember(player.getUniqueId()) == null) return;
         Enterprise e = em.getEnterpriseByMember(player.getUniqueId());
+        if (e == null) return;
 
-        if (value > 0) {
-            addEarnings(player, e, value);
+        Entity caughtEntity = event.getCaught();
+        if (!(caughtEntity instanceof Item caughtItem)) return;
+
+        ItemStack stack = caughtItem.getItemStack();
+        Material type = stack.getType();
+        int amount = stack.getAmount();
+        player.sendMessage("Caught amount: " + amount);
+        double baseValue = MarketManager.getPrice(type.name(), MarketManager.JobType.FISHING);
+
+        double totalValue = baseValue * amount;
+
+        if (totalValue > 0) {
+            addEarnings(player, e, totalValue);
         }
     }
+
 }
