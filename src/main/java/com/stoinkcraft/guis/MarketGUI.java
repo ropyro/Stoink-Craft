@@ -3,19 +3,25 @@ package com.stoinkcraft.guis;
 import com.stoinkcraft.market.MarketManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 import xyz.xenondevs.invui.gui.Gui;
+import xyz.xenondevs.invui.item.Item;
 import xyz.xenondevs.invui.item.ItemProvider;
 import xyz.xenondevs.invui.item.builder.ItemBuilder;
 import xyz.xenondevs.invui.item.impl.AbstractItem;
+import xyz.xenondevs.invui.item.impl.AutoUpdateItem;
 import xyz.xenondevs.invui.item.impl.SimpleItem;
 import xyz.xenondevs.invui.window.Window;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import static com.stoinkcraft.market.MarketManager.JobType.*;
 
@@ -43,10 +49,11 @@ public class MarketGUI {
                         .addLoreLines("The four items below are currently")
                         .addLoreLines("boosted in value! To see all other")
                         .addLoreLines("available jobs select a category below.")))
+                .addIngredient('?', getAutoUpdateItem())
                 .addIngredient('F', new AbstractItem() {
                     @Override
                     public ItemProvider getItemProvider() {
-                        return new ItemBuilder(Material.COD)
+                        return new ItemBuilder(Material.SALMON)
                                 .setDisplayName(" §aFishing Jobs ")
                                 .addLoreLines(" ")
                                 .addLoreLines("§a(!) Click here to view values (!)");
@@ -83,6 +90,26 @@ public class MarketGUI {
                     }
                 })
                 .build();
+        try{
+            MarketManager.getBoostedPrices().stream()
+                    .limit(4)
+                    .forEach(item -> {
+
+                        ItemStack boostedItemStack = new ItemStack(Material.valueOf(item));
+                        ItemMeta meta = boostedItemStack.getItemMeta();
+                        meta.addEnchant(Enchantment.UNBREAKING, 1, true);
+                        meta.addItemFlags(org.bukkit.inventory.ItemFlag.HIDE_ENCHANTS);
+                        boostedItemStack.setItemMeta(meta);
+
+                        ItemBuilder boostedItem = new ItemBuilder(boostedItemStack)
+                                .setDisplayName(item)
+                                .addLoreLines(" ")
+                                .addLoreLines("Value: " + MarketManager.getPrice(item));
+
+                        gui.addItems(new SimpleItem(boostedItem));
+                    });
+        }catch(NullPointerException e){}
+
 
         Window window = Window.single()
                 .setViewer(opener)
@@ -90,6 +117,23 @@ public class MarketGUI {
                 .setGui(gui)
                 .build();
         window.open();
+    }
+
+    @NotNull
+    private AutoUpdateItem getAutoUpdateItem() {
+        AutoUpdateItem clockItem = new AutoUpdateItem(20, new Supplier<ItemProvider>() {
+            @Override
+            public ItemProvider get() {
+                return new ItemBuilder(Material.CLOCK)
+                        .setDisplayName(" * Next Product Rotation: " + MarketManager.getTimeUntilNextRotation() + " *")
+                        .addLoreLines(" ")
+                        .addLoreLines("The four items below are currently")
+                        .addLoreLines("boosted in value! To see all other")
+                        .addLoreLines("available jobs select a category below.");
+            }
+        });
+        clockItem.start();
+        return clockItem;
     }
 
     private void openJobValues(MarketManager.JobType jobType){

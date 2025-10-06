@@ -58,6 +58,7 @@ public class StoinkCore extends JavaPlugin {
             saveResource("market.yml", false);
         }
         MarketManager.loadMarketPrices(marketFile);
+        MarketManager.startRotatingBoosts(this);
 
         File enterpriseFile = new File(getDataFolder(), "enterprises.yml");
         if (!enterpriseFile.exists()) {
