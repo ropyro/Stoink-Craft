@@ -1,6 +1,7 @@
 package com.stoinkcraft.commands;
 
 import com.stoinkcraft.enterprise.EnterpriseManager;
+import com.stoinkcraft.guis.MarketGUI;
 import com.stoinkcraft.market.MarketManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -22,64 +23,11 @@ public class MarketCMD implements CommandExecutor {
         if(!(commandSender instanceof Player)) return true;
         Player player = (Player)commandSender;
 
-        Gui gui = Gui.normal()
-                .setStructure(
-                        "# # # # ? # # # #",
-                        "# . . . . . . . #",
-                        "# . . . . . . . #",
-                        "# # # # # # # # #")
-                .addIngredient('#', new SimpleItem(new ItemBuilder(Material.BLACK_STAINED_GLASS_PANE)
-                        .setDisplayName(" "))) // Filler
-                .addIngredient('?', new SimpleItem(new ItemBuilder(Material.PAPER)
-                        .setDisplayName("Market Info:")
-                        .addLoreLines("§7Current offers available")
-                        .addLoreLines("§7for employees to grind!")
-                ))
-                .build();
-
-        for (String product : MarketManager.values.keySet()) {
-            Material mat = Material.getMaterial(product);
-
-            // Default to contextual item if material is null or too generic
-            if (mat == null || mat == Material.DIRT) {
-                Material contextualMaterial = Material.DIRT;
-
-                // Try to infer more appropriate material
-                String lower = product.toLowerCase();
-
-                if (lower.contains("bone") || lower.contains("mob") || lower.contains("flesh") || lower.contains("string") || lower.contains("gunpowder")) {
-                    contextualMaterial = Material.SKELETON_SKULL; // Generic mob skull
-                } else if (lower.contains("spider")) {
-                    contextualMaterial = Material.SPIDER_EYE;
-                } else if (lower.contains("zombie")) {
-                    contextualMaterial = Material.ZOMBIE_HEAD;
-                } else if (lower.contains("creeper")) {
-                    contextualMaterial = Material.CREEPER_HEAD;
-                } else if (lower.contains("fishing") || lower.contains("fish") || lower.contains("salmon") || lower.contains("cod") || lower.contains("tuna")) {
-                    contextualMaterial = Material.COD; // Generic fish
-                }
-
-                ItemBuilder contextualItem = new ItemBuilder(contextualMaterial)
-                        .setDisplayName(product)
-                        .addLoreLines(" ")
-                        .addLoreLines(" §a• §fValue: §a$" + MarketManager.getValue(product));
-                gui.addItems(new SimpleItem(contextualItem));
-                continue;
-            }
-
-            ItemBuilder item = new ItemBuilder(mat)
-                    .setDisplayName(mat.name())
-                    .addLoreLines(" ")
-                    .addLoreLines(" §a• §fValue: §a$" + MarketManager.getValue(product));
-            gui.addItems(new SimpleItem(item));
+        if(EnterpriseManager.getEnterpriseManager().isInEnterprise(player.getUniqueId())){
+            new MarketGUI(player).openWindow();
+        }else{
+            player.sendMessage("You must join an enterprise to use this command! /enterprise");
         }
-
-        Window window = Window.single()
-                .setViewer(player)
-                .setTitle("§7Market Prices")
-                .setGui(gui)
-                .build();
-        window.open();
         return true;
     }
 }

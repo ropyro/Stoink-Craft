@@ -84,7 +84,7 @@ public class EarningListener implements Listener {
         if(em.getEnterpriseByMember(player.getUniqueId()) == null) return;
             Enterprise e = em.getEnterpriseByMember(player.getUniqueId());
             Material blockType = event.getBlock().getType();
-            double value = MarketManager.getValue(blockType.name());
+            double value = MarketManager.getPrice(blockType.name(), MarketManager.JobType.RESOURCE_COLLECTION);
             if (value > 0) {
                 addEarnings(player, e, value);
             }
@@ -102,7 +102,7 @@ public class EarningListener implements Listener {
 
             Enterprise e = em.getEnterpriseByMember(killer.getUniqueId());
             String mobType = entity.getType().name();
-            double value = MarketManager.getValue(mobType);
+            double value = MarketManager.getPrice(mobType, MarketManager.JobType.HUNTING);
             if (value > 0) {
                 addEarnings(killer, e, value);
             }
@@ -113,7 +113,7 @@ public class EarningListener implements Listener {
         if (event.getState() != PlayerFishEvent.State.CAUGHT_FISH) return;
 
         Player player = event.getPlayer();
-        double value = MarketManager.getValue("FISH");
+        double value = MarketManager.getPrice(Material.COD.name(), MarketManager.JobType.FISHING);
 
         EnterpriseManager em = EnterpriseManager.getEnterpriseManager();
         if(em.getEnterpriseByMember(player.getUniqueId()) == null) return;

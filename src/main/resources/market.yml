@@ -1,5 +1,15 @@
-WHEAT: 2.5
-CARROT: 1.75
-POTATO: 1.9
-ZOMBIE: 5.0
-IRON_ORE: 3.2
+# New market.yml
+resource-collection:
+  raw_iron: 2.0
+  cobblestone: 0.1
+  carrot: 0.3
+
+monster-hunting:
+  rotten_flesh: 0.4
+  bone: 0.5
+  string: 0.6
+
+fishing:
+  cod: 1.0
+  salmon: 1.2
+  nautilus_shell: 5.0
