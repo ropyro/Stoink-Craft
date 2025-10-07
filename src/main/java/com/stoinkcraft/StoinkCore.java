@@ -13,6 +13,7 @@ import com.stoinkcraft.listeners.ChatWithdrawListener;
 import com.stoinkcraft.listeners.PlayerJoinListener;
 import com.stoinkcraft.market.MarketManager;
 import com.stoinkcraft.enterprise.EnterpriseManager;
+import com.stoinkcraft.utils.PhantomSpawnDisabler;
 import com.stoinkcraft.utils.StoinkExpansion;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
@@ -98,6 +99,7 @@ public class StoinkCore extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new PlayerJoinListener(this), this);
         getServer().getPluginManager().registerEvents(new ChatWithdrawListener(this), this);
         getServer().getPluginManager().registerEvents(new ChatInvestListener(this), this);
+        getServer().getPluginManager().registerEvents(new PhantomSpawnDisabler(), this);
 
         getLogger().info("StoinkCore loaded.");
     }
