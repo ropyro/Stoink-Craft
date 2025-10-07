@@ -82,23 +82,36 @@ public class MarketManager {
         fishingPrices.clear();
 
         for (String key : config.getConfigurationSection("resource-collection").getKeys(false)) {
-            String materialName = key.toUpperCase();
-            if(Material.valueOf(materialName) != null)
-                resourcePrices.add(new ItemValue(Material.valueOf(materialName), config.getDouble("resource-collection." + key)));
+            try {
+                Material material = Material.valueOf(key.toUpperCase());
+                double price = config.getDouble("resource-collection." + key);
+                resourcePrices.add(new ItemValue(material, price));
+            } catch (IllegalArgumentException ignored) {
+                Bukkit.getLogger().warning("Invalid material in resource-collection: " + key);
+            }
         }
 
         for (String key : config.getConfigurationSection("monster-hunting").getKeys(false)) {
-            String entityName = key.toUpperCase();
-            if(EntityType.valueOf(entityName) != null)
-                huntingPrices.add(new EntityValue(EntityType.valueOf(entityName), config.getDouble("monster-hunting." + key)));
+            try {
+                EntityType entityType = EntityType.valueOf(key.toUpperCase());
+                double price = config.getDouble("monster-hunting." + key);
+                huntingPrices.add(new EntityValue(entityType, price));
+            } catch (IllegalArgumentException ignored) {
+                Bukkit.getLogger().warning("Invalid entity type in monster-hunting: " + key);
+            }
         }
 
         for (String key : config.getConfigurationSection("fishing").getKeys(false)) {
-            String materialName = key.toUpperCase();
-            if(Material.valueOf(materialName) != null)
-                fishingPrices.add(new ItemValue(Material.valueOf(materialName), config.getDouble("fishing." + key)));
+            try {
+                Material material = Material.valueOf(key.toUpperCase());
+                double price = config.getDouble("fishing." + key);
+                fishingPrices.add(new ItemValue(material, price));
+            } catch (IllegalArgumentException ignored) {
+                Bukkit.getLogger().warning("Invalid material in fishing: " + key);
+            }
         }
     }
+
 
     public static List<TaskValue> getBoostedPrices(){
         return boostedPrices;

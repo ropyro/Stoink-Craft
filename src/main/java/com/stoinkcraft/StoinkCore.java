@@ -8,6 +8,7 @@ import com.stoinkcraft.commands.serverenterprisecmd.ServerEntTabCompleter;
 import com.stoinkcraft.earnings.EarningListener;
 import com.stoinkcraft.enterprise.EnterpriseStorage;
 import com.stoinkcraft.enterprise.ServerEnterprise;
+import com.stoinkcraft.listeners.ChatWithdrawListener;
 import com.stoinkcraft.listeners.PlayerJoinListener;
 import com.stoinkcraft.market.MarketManager;
 import com.stoinkcraft.enterprise.EnterpriseManager;
@@ -94,6 +95,7 @@ public class StoinkCore extends JavaPlugin {
         //Register Earning listeners
         getServer().getPluginManager().registerEvents(new EarningListener(this), this);
         getServer().getPluginManager().registerEvents(new PlayerJoinListener(this), this);
+        getServer().getPluginManager().registerEvents(new ChatWithdrawListener(this), this);
 
         getLogger().info("StoinkCore loaded.");
     }

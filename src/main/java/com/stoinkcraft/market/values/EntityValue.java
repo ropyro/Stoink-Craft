@@ -15,9 +15,4 @@ public class EntityValue extends TaskValue{
     public EntityType getEntityType() {
         return entityType;
     }
-
-    @Override
-    public String getDisplayName(){
-        return entityType.name();
-    }
 }

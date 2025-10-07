@@ -2,6 +2,9 @@ package com.stoinkcraft.market.values;
 
 import org.bukkit.Material;
 
+import java.util.Arrays;
+import java.util.stream.Collectors;
+
 public class TaskValue {
 
     private String key;
@@ -15,8 +18,10 @@ public class TaskValue {
         this.materialValue = materialValue;
     }
 
-    public String getDisplayName(){
-        return materialValue.name();
+    public String getDisplayName() {
+        return Arrays.stream(key.toLowerCase().split("_"))
+                .map(word -> word.substring(0, 1).toUpperCase() + word.substring(1))
+                .collect(Collectors.joining(" "));
     }
 
     public Double getValue() {

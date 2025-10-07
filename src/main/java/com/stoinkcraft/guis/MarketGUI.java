@@ -2,6 +2,7 @@ package com.stoinkcraft.guis;
 
 import com.stoinkcraft.market.values.EntityValue;
 import com.stoinkcraft.market.MarketManager;
+import com.stoinkcraft.utils.ChatUtils;
 import com.stoinkcraft.utils.SCConstants;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -117,8 +118,8 @@ public class MarketGUI {
                             value = MarketManager.getItemPrice(item.getMaterialValue());
                         }
 
-                        boostedItem.addLoreLines("Regular Value: " + (value/SCConstants.PRICE_BOOST));
-                        boostedItem.addLoreLines("Boosted Value: " + value);
+                        boostedItem.addLoreLines("Regular Value: $" + ChatUtils.formatMoney(value / SCConstants.PRICE_BOOST));
+                        boostedItem.addLoreLines("Boosted Value: $" + ChatUtils.formatMoney(value));
 
                         gui.addItems(new SimpleItem(boostedItem));
                     });
@@ -177,7 +178,7 @@ public class MarketGUI {
                         .forEach(entity -> gui.addItems(new SimpleItem(new ItemBuilder(getItemFromEntity(entity.getEntityType()))
                                 .setDisplayName(entity.getDisplayName())
                                 .addLoreLines(" ")
-                                .addLoreLines(" Value: " + MarketManager.getPrice(entity)))));
+                                .addLoreLines(" Value: $" + ChatUtils.formatMoney(MarketManager.getPrice(entity))))));
                 break;
 
             case FISHING:
@@ -185,7 +186,7 @@ public class MarketGUI {
                         .forEach(item -> gui.addItems(new SimpleItem(new ItemBuilder(item.getMaterial())
                                 .setDisplayName(item.getDisplayName())
                                 .addLoreLines(" ")
-                                .addLoreLines(" Value: " + MarketManager.getPrice(item)))));
+                                .addLoreLines(" Value: $" + ChatUtils.formatMoney(MarketManager.getPrice(item))))));
                 break;
 
             case RESOURCE_COLLECTION:
@@ -193,7 +194,7 @@ public class MarketGUI {
                         .forEach(item -> gui.addItems(new SimpleItem(new ItemBuilder(item.getMaterial())
                                 .setDisplayName(item.getDisplayName())
                                 .addLoreLines(" ")
-                                .addLoreLines(" Value: " + MarketManager.getPrice(item)))));
+                                .addLoreLines(" Value: $" + ChatUtils.formatMoney(MarketManager.getPrice(item))))));
                 break;
         }
 
@@ -211,20 +212,12 @@ public class MarketGUI {
         return isEntity;
     }
 
-    public static Material getItemFromEntity(EntityType entityType){
-        switch (entityType){
-            case ZOMBIE: return Material.ZOMBIE_SPAWN_EGG;
-            case SKELETON: return Material.SKELETON_SPAWN_EGG;
-            case WITHER_SKELETON: return Material.WITHER_SKELETON_SPAWN_EGG;
-            case BLAZE: return Material.BLAZE_SPAWN_EGG;
-            case WITCH: return Material.WITCH_SPAWN_EGG;
-            case DROWNED: return Material.DROWNED_SPAWN_EGG;
-            case SPIDER: return Material.SPIDER_SPAWN_EGG;
-            case CAVE_SPIDER: return Material.CAVE_SPIDER_SPAWN_EGG;
-            case CREEPER: return Material.CREEPER_SPAWN_EGG;
-            case EVOKER: return Material.EVOKER_SPAWN_EGG;
-            case ENDERMAN: return Material.ENDERMAN_SPAWN_EGG;
-            default: return Material.AIR;
+    public static Material getItemFromEntity(EntityType entityType) {
+        try {
+            return Material.valueOf(entityType.name() + "_SPAWN_EGG");
+        } catch (IllegalArgumentException e) {
+            return Material.AIR; // Fallback for entities without a spawn egg
         }
     }
+
 }
