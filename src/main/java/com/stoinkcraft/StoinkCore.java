@@ -74,7 +74,7 @@ public class StoinkCore extends JavaPlugin {
         if(EnterpriseManager.getEnterpriseManager().getEnterpriseList()
                 .stream()
                 .filter(e -> e instanceof ServerEnterprise)
-                .toList().size() == 0){
+                .toList().isEmpty()){
             EnterpriseManager.getEnterpriseManager().createEnterprise(new ServerEnterprise("FarmerLLC"));
             EnterpriseManager.getEnterpriseManager().createEnterprise(new ServerEnterprise("MinerCorp"));
             EnterpriseManager.getEnterpriseManager().createEnterprise(new ServerEnterprise("HunterInc"));

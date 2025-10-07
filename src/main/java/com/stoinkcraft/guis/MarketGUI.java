@@ -1,9 +1,11 @@
 package com.stoinkcraft.guis;
 
+import com.stoinkcraft.market.values.EntityValue;
 import com.stoinkcraft.market.MarketManager;
-import org.bukkit.Bukkit;
+import com.stoinkcraft.utils.SCConstants;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -11,7 +13,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 import xyz.xenondevs.invui.gui.Gui;
-import xyz.xenondevs.invui.item.Item;
 import xyz.xenondevs.invui.item.ItemProvider;
 import xyz.xenondevs.invui.item.builder.ItemBuilder;
 import xyz.xenondevs.invui.item.impl.AbstractItem;
@@ -19,9 +20,7 @@ import xyz.xenondevs.invui.item.impl.AutoUpdateItem;
 import xyz.xenondevs.invui.item.impl.SimpleItem;
 import xyz.xenondevs.invui.window.Window;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Supplier;
+import java.util.Arrays;
 
 import static com.stoinkcraft.market.MarketManager.JobType.*;
 
@@ -94,17 +93,32 @@ public class MarketGUI {
             MarketManager.getBoostedPrices().stream()
                     .limit(4)
                     .forEach(item -> {
+                        ItemStack boostedItemStack;
+                        if (item instanceof EntityValue) {
+                            boostedItemStack = new ItemStack(getItemFromEntity(((EntityValue) item).getEntityType()));
+                        }else{
+                            boostedItemStack = new ItemStack(item.getMaterialValue());
+                        }
 
-                        ItemStack boostedItemStack = new ItemStack(Material.valueOf(item));
                         ItemMeta meta = boostedItemStack.getItemMeta();
                         meta.addEnchant(Enchantment.UNBREAKING, 1, true);
                         meta.addItemFlags(org.bukkit.inventory.ItemFlag.HIDE_ENCHANTS);
                         boostedItemStack.setItemMeta(meta);
 
                         ItemBuilder boostedItem = new ItemBuilder(boostedItemStack)
-                                .setDisplayName(item)
-                                .addLoreLines(" ")
-                                .addLoreLines("Value: " + MarketManager.getPrice(item));
+                                .setDisplayName(item.getDisplayName())
+                                .addLoreLines(" ");
+
+                        double value = 0.0;
+
+                        if (item instanceof EntityValue) {
+                            value = MarketManager.getEntityPrice(((EntityValue) item).getEntityType());
+                        }else{
+                            value = MarketManager.getItemPrice(item.getMaterialValue());
+                        }
+
+                        boostedItem.addLoreLines("Regular Value: " + (value/SCConstants.PRICE_BOOST));
+                        boostedItem.addLoreLines("Boosted Value: " + value);
 
                         gui.addItems(new SimpleItem(boostedItem));
                     });
@@ -121,17 +135,12 @@ public class MarketGUI {
 
     @NotNull
     private AutoUpdateItem getAutoUpdateItem() {
-        AutoUpdateItem clockItem = new AutoUpdateItem(20, new Supplier<ItemProvider>() {
-            @Override
-            public ItemProvider get() {
-                return new ItemBuilder(Material.CLOCK)
-                        .setDisplayName(" * Next Product Rotation: " + MarketManager.getTimeUntilNextRotation() + " *")
-                        .addLoreLines(" ")
-                        .addLoreLines("The four items below are currently")
-                        .addLoreLines("boosted in value! To see all other")
-                        .addLoreLines("available jobs select a category below.");
-            }
-        });
+        AutoUpdateItem clockItem = new AutoUpdateItem(20, () -> new ItemBuilder(Material.CLOCK)
+                .setDisplayName(" * Next Product Rotation: " + MarketManager.getTimeUntilNextRotation() + " *")
+                .addLoreLines(" ")
+                .addLoreLines("The four items below are currently")
+                .addLoreLines("boosted in value! To see all other")
+                .addLoreLines("available jobs select a category below."));
         clockItem.start();
         return clockItem;
     }
@@ -155,7 +164,6 @@ public class MarketGUI {
                                 .addLoreLines(" ")
                                 .addLoreLines("(!) Click to return to main menu (!)");
                     }
-
                     @Override
                     public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull InventoryClickEvent inventoryClickEvent) {
                         new MarketGUI(player).openWindow();
@@ -163,36 +171,31 @@ public class MarketGUI {
                 })
                 .build();
 
-        HashMap<Material, Double> materialItemValues = new HashMap<>();
-        Map<String, Double> stringItemValues;
         switch(jobType) {
             case HUNTING:
-                stringItemValues = MarketManager.getPrices(HUNTING);
+                MarketManager.getHuntingPrices().stream()
+                        .forEach(entity -> gui.addItems(new SimpleItem(new ItemBuilder(getItemFromEntity(entity.getEntityType()))
+                                .setDisplayName(entity.getDisplayName())
+                                .addLoreLines(" ")
+                                .addLoreLines(" Value: " + MarketManager.getPrice(entity)))));
                 break;
 
             case FISHING:
-                stringItemValues = MarketManager.getPrices(FISHING);
+                MarketManager.getFishingPrices().stream()
+                        .forEach(item -> gui.addItems(new SimpleItem(new ItemBuilder(item.getMaterial())
+                                .setDisplayName(item.getDisplayName())
+                                .addLoreLines(" ")
+                                .addLoreLines(" Value: " + MarketManager.getPrice(item)))));
                 break;
 
             case RESOURCE_COLLECTION:
-                stringItemValues = MarketManager.getPrices(RESOURCE_COLLECTION);
+                MarketManager.getResourcePrices().stream()
+                        .forEach(item -> gui.addItems(new SimpleItem(new ItemBuilder(item.getMaterial())
+                                .setDisplayName(item.getDisplayName())
+                                .addLoreLines(" ")
+                                .addLoreLines(" Value: " + MarketManager.getPrice(item)))));
                 break;
-            default:
-                stringItemValues = null;
         }
-        try{
-            stringItemValues.keySet()
-                    .stream()
-                    .forEach(item -> materialItemValues.put(Material.valueOf(item), stringItemValues.get(item)));
-        }catch(NullPointerException e){}
-
-        materialItemValues.keySet().stream()
-                .forEach(item -> {
-                    gui.addItems(new SimpleItem(new ItemBuilder(item)
-                            .setDisplayName(item.name())
-                            .addLoreLines(" ")
-                            .addLoreLines(" Value: " + materialItemValues.get(item))));
-                } );
 
         Window window = Window.single()
                 .setViewer(opener)
@@ -200,5 +203,28 @@ public class MarketGUI {
                 .setGui(gui)
                 .build();
         window.open();
+    }
+
+    public boolean isEntity(String entityName){
+        boolean isEntity = false;
+        if(Arrays.stream(EntityType.values()).toList().stream().map(e -> e.name()).toList().contains(entityName)) isEntity = true;
+        return isEntity;
+    }
+
+    public static Material getItemFromEntity(EntityType entityType){
+        switch (entityType){
+            case ZOMBIE: return Material.ZOMBIE_SPAWN_EGG;
+            case SKELETON: return Material.SKELETON_SPAWN_EGG;
+            case WITHER_SKELETON: return Material.WITHER_SKELETON_SPAWN_EGG;
+            case BLAZE: return Material.BLAZE_SPAWN_EGG;
+            case WITCH: return Material.WITCH_SPAWN_EGG;
+            case DROWNED: return Material.DROWNED_SPAWN_EGG;
+            case SPIDER: return Material.SPIDER_SPAWN_EGG;
+            case CAVE_SPIDER: return Material.CAVE_SPIDER_SPAWN_EGG;
+            case CREEPER: return Material.CREEPER_SPAWN_EGG;
+            case EVOKER: return Material.EVOKER_SPAWN_EGG;
+            case ENDERMAN: return Material.ENDERMAN_SPAWN_EGG;
+            default: return Material.AIR;
+        }
     }
 }

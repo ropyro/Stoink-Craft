@@ -9,10 +9,7 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.data.Ageable;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Item;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -99,10 +96,10 @@ public class EarningListener implements Listener {
             if(isCrop(item.getItemStack().getType()) && !isFullyGrown(event.getBlock())) continue;
 
             ItemStack stack = item.getItemStack();
-            String itemName = stack.getType().name();
+            Material itemMaterial = stack.getType();
             int amount = stack.getAmount();
             player.sendMessage("Droped amount: " + amount);
-            double baseValue = MarketManager.getPrice(itemName, MarketManager.JobType.RESOURCE_COLLECTION);
+            double baseValue = MarketManager.getItemPrice(itemMaterial);
 
             totalEarnings += baseValue * amount;
         }
@@ -136,8 +133,8 @@ public class EarningListener implements Listener {
         if(em.getEnterpriseByMember(killer.getUniqueId()) == null) return;
 
             Enterprise e = em.getEnterpriseByMember(killer.getUniqueId());
-            String mobType = entity.getType().name();
-            double value = MarketManager.getPrice(mobType, MarketManager.JobType.HUNTING);
+            EntityType mobType = entity.getType();
+            double value = MarketManager.getEntityPrice(mobType);
             if (value > 0) {
                 addEarnings(killer, e, value);
             }
@@ -159,7 +156,7 @@ public class EarningListener implements Listener {
         Material type = stack.getType();
         int amount = stack.getAmount();
         player.sendMessage("Caught amount: " + amount);
-        double baseValue = MarketManager.getPrice(type.name(), MarketManager.JobType.FISHING);
+        double baseValue = MarketManager.getItemPrice(type);
 
         double totalValue = baseValue * amount;
 

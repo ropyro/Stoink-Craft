@@ -5,9 +5,17 @@ resource-collection:
   carrot: 0.3
 
 monster-hunting:
-  rotten_flesh: 0.4
-  bone: 0.5
-  string: 0.6
+  ZOMBIE: 0.4
+  SKELETON: 0.5
+  WITHER_SKELETON: 0.8
+  BLAZE: 0.7
+  WITCH: 1.0
+  DROWNED: 0.6
+  SPIDER: 0.5
+  CAVE_SPIDER: 0.6
+  CREEPER: 0.6
+  EVOKER: 1.5
+  ENDERMAN: 1.2
 
 fishing:
   cod: 1.0

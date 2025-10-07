@@ -1,9 +1,13 @@
 package com.stoinkcraft.market;
 
+import com.stoinkcraft.market.values.EntityValue;
+import com.stoinkcraft.market.values.ItemValue;
+import com.stoinkcraft.market.values.TaskValue;
 import com.stoinkcraft.utils.SCConstants;
 import org.bukkit.Bukkit;
-import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.Material;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.EntityType;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -14,10 +18,10 @@ import java.util.*;
 
 public class MarketManager {
 
-    private static final List<String> boostedPrices = new ArrayList<>();
-    private static final Map<String, Double> resourcePrices = new HashMap<>();
-    private static final Map<String, Double> huntingPrices = new HashMap<>();
-    private static final Map<String, Double> fishingPrices = new HashMap<>();
+    private static final List<TaskValue> boostedPrices = new ArrayList<>();
+    private static final List<ItemValue> resourcePrices = new ArrayList<>();
+    private static final List<EntityValue> huntingPrices = new ArrayList<>();
+    private static final List<ItemValue> fishingPrices = new ArrayList<>();
 
     private static Instant lastRotationTime;
     private static final Duration ROTATION_INTERVAL = Duration.ofDays(1);
@@ -34,20 +38,20 @@ public class MarketManager {
     public static void rotateBoostedItems() {
         boostedPrices.clear();
 
-        Set<String> allItems = new HashSet<>();
-        allItems.addAll(resourcePrices.keySet());
-        allItems.addAll(huntingPrices.keySet());
-        allItems.addAll(fishingPrices.keySet());
+        List<TaskValue> allItems = new ArrayList<>();
+        allItems.addAll(resourcePrices);
+        allItems.addAll(huntingPrices);
+        allItems.addAll(fishingPrices);
 
-        List<String> itemPool = new ArrayList<>(allItems);
-        Collections.shuffle(itemPool);
+        Collections.shuffle(allItems);
 
-        int boostCount = Math.min(4, itemPool.size());
+        int boostCount = Math.min(4, allItems.size());
         for (int i = 0; i < boostCount; i++) {
-            boostedPrices.add(itemPool.get(i));
+            boostedPrices.add(allItems.get(i));
         }
 
         Bukkit.broadcastMessage("§6Today's boosted items have reset check them out in §e/market");
+        boostedPrices.stream().forEach(i -> Bukkit.broadcastMessage(i.getDisplayName()));
     }
 
     public static String getTimeUntilNextRotation() {
@@ -78,57 +82,83 @@ public class MarketManager {
         fishingPrices.clear();
 
         for (String key : config.getConfigurationSection("resource-collection").getKeys(false)) {
-            resourcePrices.put(key.toUpperCase(), config.getDouble("resource-collection." + key));
+            String materialName = key.toUpperCase();
+            if(Material.valueOf(materialName) != null)
+                resourcePrices.add(new ItemValue(Material.valueOf(materialName), config.getDouble("resource-collection." + key)));
         }
 
         for (String key : config.getConfigurationSection("monster-hunting").getKeys(false)) {
-            huntingPrices.put(key.toUpperCase(), config.getDouble("monster-hunting." + key));
+            String entityName = key.toUpperCase();
+            if(EntityType.valueOf(entityName) != null)
+                huntingPrices.add(new EntityValue(EntityType.valueOf(entityName), config.getDouble("monster-hunting." + key)));
         }
 
         for (String key : config.getConfigurationSection("fishing").getKeys(false)) {
-            fishingPrices.put(key.toUpperCase(), config.getDouble("fishing." + key));
+            String materialName = key.toUpperCase();
+            if(Material.valueOf(materialName) != null)
+                fishingPrices.add(new ItemValue(Material.valueOf(materialName), config.getDouble("fishing." + key)));
         }
     }
 
-    public static List<String> getBoostedPrices(){
+    public static List<TaskValue> getBoostedPrices(){
         return boostedPrices;
     }
 
-    public static double getPrice(String material) {
-        String key = material.toUpperCase();
+
+    public static double getItemPrice(Material material) {
         double value = 0.0;
-        if (resourcePrices.containsKey(key)) value = resourcePrices.getOrDefault(key, 0.0);
-        if (huntingPrices.containsKey(key)) value = huntingPrices.getOrDefault(key, 0.0);
-        if (fishingPrices.containsKey(key)) value = fishingPrices.getOrDefault(key, 0.0);
-        if(boostedPrices.contains(material)) {
+
+        value += resourcePrices.stream()
+                .filter(e -> e.getMaterial().equals(material))
+                .mapToDouble(v -> v.getValue())
+                .findFirst()
+                .orElse(0.0);
+
+        value += fishingPrices.stream()
+                .filter(e -> e.getMaterial().equals(material))
+                .mapToDouble(v -> v.getValue())
+                .findFirst()
+                .orElse(0.0);
+
+        boolean isBoosted = boostedPrices.stream()
+                .anyMatch(e -> e.getMaterialValue().equals(material));
+
+        if (isBoosted) {
+            value *= SCConstants.PRICE_BOOST;
+        }
+
+        return value;
+    }
+
+
+    public static double getPrice(TaskValue taskValue){
+        List<TaskValue> allItems = new ArrayList<>();
+        allItems.addAll(resourcePrices);
+        allItems.addAll(huntingPrices);
+        allItems.addAll(fishingPrices);
+
+        return allItems.get(allItems.indexOf(taskValue)).getValue();
+    }
+
+    public static double getEntityPrice(EntityType entityType){
+        double value = huntingPrices.stream().filter(e -> e.getEntityType().equals(entityType)).findFirst().get().getValue();
+        if(boostedPrices.stream().filter(e -> e instanceof EntityValue).map(e -> (EntityValue)e).toList().stream().filter(entityValue -> entityValue.getEntityType().equals(entityType)).toList().size() > 0){
             value *= SCConstants.PRICE_BOOST;
         }
         return value;
     }
 
-
-    public static double getPrice(String material, JobType jobType) {
-        double value = 0.0;
-         switch (jobType) {
-             case RESOURCE_COLLECTION -> value = resourcePrices.getOrDefault(material.toUpperCase(), 0.0);
-             case HUNTING -> value = huntingPrices.getOrDefault(material.toUpperCase(), 0.0);
-             case FISHING -> value = fishingPrices.getOrDefault(material.toUpperCase(), 0.0);
-         }
-        if(boostedPrices.contains(material)){
-            value *= SCConstants.PRICE_BOOST;
-        }
-        return value;
+    public static List<ItemValue> getResourcePrices(){
+        return resourcePrices;
+    }
+    public static List<ItemValue> getFishingPrices(){
+        return fishingPrices;
+    }
+    public static List<EntityValue> getHuntingPrices(){
+        return huntingPrices;
     }
 
-    public static Map<String, Double> getPrices(JobType jobType){
-        return switch (jobType) {
-            case RESOURCE_COLLECTION -> resourcePrices;
-            case HUNTING -> huntingPrices;
-            case FISHING -> fishingPrices;
-        };
-    }
-
-    public enum JobType {
+        public enum JobType {
         RESOURCE_COLLECTION, HUNTING, FISHING
     }
 }
