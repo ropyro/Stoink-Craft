@@ -2,7 +2,11 @@ package com.stoinkcraft.guis;
 
 import com.stoinkcraft.enterprise.Enterprise;
 import com.stoinkcraft.enterprise.EnterpriseManager;
+import com.stoinkcraft.enterprise.Role;
 import com.stoinkcraft.enterprise.ServerEnterprise;
+import com.stoinkcraft.listeners.ChatInvestListener;
+import com.stoinkcraft.listeners.ChatWithdrawListener;
+import com.stoinkcraft.utils.SCConstants;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
@@ -50,10 +54,28 @@ public class EnterpriseGUI {
                         .setDisplayName(" §cThis member slot is locked ")))
                 .addIngredient('A', new SimpleItem(new ItemBuilder(Material.BOOK)
                         .setDisplayName(" §aHiring coming soon... ")))
-                .addIngredient('B', new SimpleItem(new ItemBuilder(Material.CHEST)
-                        .setDisplayName(" §aBank withdrawal coming soon. ")
-                        .addLoreLines(" ")
-                        .addLoreLines(" §a• §fBalance: " + balance)))
+                .addIngredient('B', new AbstractItem() {
+
+                    @Override
+                    public ItemProvider getItemProvider() {
+                        return new ItemBuilder(Material.CHEST)
+                                .setDisplayName(" §aBank Balance: §f(§a$" + balance + "§f)")
+                                .addLoreLines(" ")
+                                .addLoreLines(" §a(!) §fClick here to withdraw bank funds §a(!)");
+                    }
+
+                    @Override
+                    public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull InventoryClickEvent inventoryClickEvent) {
+                        player.closeInventory();
+                        if(enterprise.getMemberRole(player.getUniqueId()).equals(Role.CEO)){
+                            player.sendMessage("§7Your enterprise bank currently has: §a" + balance);
+                            player.sendMessage("§7Please enter the amount you would like to withdraw");
+                            ChatWithdrawListener.awaitingWithdrawal.add(player.getUniqueId());
+                        }else{
+                            player.sendMessage("§cYou must be the CEO to withdraw enterprise funds.");
+                        }
+                    }
+                })
                 .addIngredient('C', new SimpleItem(new ItemBuilder(Material.OAK_SIGN)
                         .setDisplayName(" §aEnterprise Help ")
                         .addLoreLines(" ")
@@ -65,11 +87,27 @@ public class EnterpriseGUI {
                         .addLoreLines(" §a• §f/enterprise warp [name] - teleports to an enterprise")
                         .addLoreLines(" §a• §f/enterprise invite <player> - invite new members")
                 ))
-                .addIngredient('D', new SimpleItem(new ItemBuilder(Material.GOLD_INGOT)
-                        .setDisplayName(" §aNetworth ")
-                        .addLoreLines(" ")
-                        .addLoreLines(" §a• §fNetworth: " + netWorth)
-                ))
+                .addIngredient('D', new AbstractItem() {
+                    @Override
+                    public ItemProvider getItemProvider() {
+                        return new ItemBuilder(Material.GOLD_INGOT)
+                                .setDisplayName(" §aNetworth §f(§a" + netWorth + "§f)")
+                                .addLoreLines(" ")
+                                .addLoreLines(" §a(!) §fClick here to invest bank funds into networth §a(!)");
+                    }
+
+                    @Override
+                    public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull InventoryClickEvent inventoryClickEvent) {
+                        player.closeInventory();
+                        if(enterprise.getMemberRole(player.getUniqueId()).equals(Role.CEO)){
+                            player.sendMessage("§7Your enterprise bank currently has: §a" + balance);
+                            player.sendMessage("§7Please enter the amount you would like to invest");
+                            ChatInvestListener.awaitingInvestment.add(player.getUniqueId());
+                        }else{
+                            player.sendMessage("§cYou must be the CEO to invest enterprise funds.");
+                        }
+                    }
+                })
                 .addIngredient('E', new SimpleItem(new ItemBuilder(Material.GRASS_BLOCK)
                         .setDisplayName(" §aClaiming coming soon... ")
                 ))
@@ -90,7 +128,7 @@ public class EnterpriseGUI {
 
         // Add top enterprises to slots 1–6
         for (UUID uuid : enterprise.getMembers().keySet()) {
-            if(uuid.equals(opener.getUniqueId())) continue;
+            if(uuid.equals(opener.getUniqueId()) || uuid.equals(SCConstants.serverCEO)) continue;
             OfflinePlayer member = Bukkit.getOfflinePlayer(uuid);
 
             ItemStack memberSkull = new ItemStack(Material.PLAYER_HEAD);
