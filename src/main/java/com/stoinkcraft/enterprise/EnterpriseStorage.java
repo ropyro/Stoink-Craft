@@ -72,9 +72,6 @@ public class EnterpriseStorage {
                 e = new Enterprise(name, ceo);
             }
 
-            String cfoStr = config.getString(path + ".cfo");
-            String cooStr = config.getString(path + ".coo");
-
             e.setBankBalance(config.getDouble(path + ".bankBalance"));
             e.setNetWorth(config.getDouble(path + ".netWorth"));
 

@@ -51,7 +51,6 @@ public class MarketManager {
         }
 
         Bukkit.broadcastMessage("§6Today's boosted items have reset check them out in §e/market");
-        boostedPrices.stream().forEach(i -> Bukkit.broadcastMessage(i.getDisplayName()));
     }
 
     public static String getTimeUntilNextRotation() {
