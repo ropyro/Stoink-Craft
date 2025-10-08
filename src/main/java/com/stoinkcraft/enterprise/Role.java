@@ -1,7 +1,7 @@
 package com.stoinkcraft.enterprise;
 
 public enum Role {
-    CEO("CEO"), CFO("CFO"), COO("CFO"), EMPLOYEE("Employee");
+    CEO("CEO"), EMPLOYEE("Employee");
 
     String name;
 

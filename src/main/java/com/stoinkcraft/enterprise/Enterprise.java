@@ -8,8 +8,8 @@ import java.util.*;
 public class Enterprise {
     private final String name;
     private final UUID ceo;
-    private UUID cfo;
-    private UUID coo;
+//    private UUID cfo;
+//    private UUID coo;
     private final Map<UUID, Role> members = new HashMap<UUID, Role>();
     private final Map<UUID, Double> shares = new HashMap<>();
     private double bankBalance;
@@ -27,8 +27,8 @@ public class Enterprise {
     }
 
 
-        public void hireEmployee(UUID employee){
-        if(getEmployees().size() < EnterpriseManager.getEnterpriseManager().getMaximumEmployees())
+    public void hireEmployee(UUID employee){
+        if(getEmployees().size() < EnterpriseManager.getEnterpriseManager().getMaximumEmployees() + 1)
             members.put(employee, Role.EMPLOYEE);
         else
             Bukkit.getOfflinePlayer(employee).getPlayer().sendMessage("This enterprise is full!");
@@ -38,56 +38,56 @@ public class Enterprise {
         return members.containsKey(member);
     }
 
-    /**
-     * A true return means sucessful promotion; false means no promotion available
-     * @param member
-     * @return
-     */
-    public boolean promoteMember(UUID member){
-        if(isMember(member)){
-            Role memberRole = getMemberRole(member);
-            if(memberRole.equals(Role.EMPLOYEE)){
-                if(coo == null){
-                    members.replace(member, memberRole, Role.COO);
-                    this.coo = member;
-                    return true;
-                }
-                return false;
-            }else if(memberRole.equals(Role.COO)){
-                if(cfo == null){
-                    members.replace(member, memberRole, Role.CFO);
-                    this.cfo = member;
-                    this.coo = null;
-                    return true;
-                }
-                return false;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * a true return means sucessful demotion; a false return means player is already lowest level
-     * @param member
-     * @return
-     */
-    public boolean demoteMember(UUID member){
-        if(isMember(member)) {
-            Role memberRole = getMemberRole(member);
-            if(memberRole.equals(Role.CFO)){
-                if(coo == null){
-                    members.replace(member, memberRole, Role.COO);
-                    return true;
-                }
-                return false;
-            }else if(memberRole.equals(Role.COO)){
-                members.replace(member, memberRole, Role.EMPLOYEE);
-                return true;
-            }
-            return false;
-        }
-        return false;
-    }
+//    /**
+//     * A true return means sucessful promotion; false means no promotion available
+//     * @param member
+//     * @return
+//     */
+//    public boolean promoteMember(UUID member){
+//        if(isMember(member)){
+//            Role memberRole = getMemberRole(member);
+//            if(memberRole.equals(Role.EMPLOYEE)){
+//                if(coo == null){
+//                    members.replace(member, memberRole, Role.COO);
+//                    this.coo = member;
+//                    return true;
+//                }
+//                return false;
+//            }else if(memberRole.equals(Role.COO)){
+//                if(cfo == null){
+//                    members.replace(member, memberRole, Role.CFO);
+//                    this.cfo = member;
+//                    this.coo = null;
+//                    return true;
+//                }
+//                return false;
+//            }
+//        }
+//        return false;
+//    }
+//
+//    /**
+//     * a true return means sucessful demotion; a false return means player is already lowest level
+//     * @param member
+//     * @return
+//     */
+//    public boolean demoteMember(UUID member){
+//        if(isMember(member)) {
+//            Role memberRole = getMemberRole(member);
+//            if(memberRole.equals(Role.CFO)){
+//                if(coo == null){
+//                    members.replace(member, memberRole, Role.COO);
+//                    return true;
+//                }
+//                return false;
+//            }else if(memberRole.equals(Role.COO)){
+//                members.replace(member, memberRole, Role.EMPLOYEE);
+//                return true;
+//            }
+//            return false;
+//        }
+//        return false;
+//    }
 
     public boolean fireMember(UUID member){
         if(isMember(member)){
@@ -124,21 +124,21 @@ public class Enterprise {
         return ceo;
     }
 
-    public UUID getCfo() {
-        return cfo;
-    }
-
-    public void setCfo(UUID cfo) {
-        this.cfo = cfo;
-    }
-
-    public UUID getCOO() {
-        return coo;
-    }
-
-    public void setCOO(UUID manager) {
-        this.coo = manager;
-    }
+//    public UUID getCfo() {
+//        return cfo;
+//    }
+//
+//    public void setCfo(UUID cfo) {
+//        this.cfo = cfo;
+//    }
+//
+//    public UUID getCOO() {
+//        return coo;
+//    }
+//
+//    public void setCOO(UUID manager) {
+//        this.coo = manager;
+//    }
 
     public List<UUID> getEmployees(){
         List<UUID> uuids = new ArrayList<UUID>();

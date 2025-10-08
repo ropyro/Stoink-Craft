@@ -16,8 +16,4 @@ public class ServerEnterprise extends Enterprise{
         super.getMembers().put(employee, Role.EMPLOYEE);
     }
 
-    @Override
-    public boolean promoteMember(UUID member){
-        return false;
-    }
 }

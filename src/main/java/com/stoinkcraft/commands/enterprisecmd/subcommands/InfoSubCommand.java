@@ -42,10 +42,6 @@ public class InfoSubCommand implements SubCommand {
 
         player.sendMessage("§a== Enterprise Info: §e" + e.getName() + "§a ==");
         player.sendMessage("§7CEO: " + getNameFromUUID(e.getCeo()));
-        if (e.getCfo() != null)
-            player.sendMessage("§7CFO: " + getNameFromUUID(e.getCfo()));
-        if (e.getCOO() != null)
-            player.sendMessage("§7COO: " + getNameFromUUID(e.getCOO()));
 
         List<UUID> employees = e.getEmployees();
         if (!employees.isEmpty()) {

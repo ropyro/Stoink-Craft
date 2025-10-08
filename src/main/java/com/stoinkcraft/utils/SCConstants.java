@@ -13,7 +13,7 @@ public class SCConstants {
 
     public static double PLAYER_PAY_SPLIT_PERCENTAGE = 0.25;
     public static double ENTERPRISE_FOUNDING_COST = 10000;
-    public static double ENTERPRISE_DAILY_TAX = 0.15;
+    public static double ENTERPRISE_DAILY_TAX = 0.35;
 
     public static double PRICE_BOOST = 2.25;
 }

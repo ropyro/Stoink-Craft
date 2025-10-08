@@ -3,14 +3,12 @@ package com.stoinkcraft.guis;
 import com.stoinkcraft.enterprise.Enterprise;
 import com.stoinkcraft.enterprise.EnterpriseManager;
 import com.stoinkcraft.enterprise.Role;
-import com.stoinkcraft.enterprise.ServerEnterprise;
 import com.stoinkcraft.listeners.ChatDepositListener;
 import com.stoinkcraft.listeners.ChatInvestListener;
 import com.stoinkcraft.listeners.ChatWithdrawListener;
 import com.stoinkcraft.utils.ChatUtils;
 import com.stoinkcraft.utils.SCConstants;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
@@ -23,16 +21,16 @@ import xyz.xenondevs.invui.gui.Gui;
 import xyz.xenondevs.invui.item.ItemProvider;
 import xyz.xenondevs.invui.item.builder.ItemBuilder;
 import xyz.xenondevs.invui.item.impl.AbstractItem;
+import xyz.xenondevs.invui.item.impl.AutoUpdateItem;
 import xyz.xenondevs.invui.item.impl.SimpleItem;
 import xyz.xenondevs.invui.window.Window;
 
-import java.util.List;
 import java.util.UUID;
 
 public class EnterpriseGUI {
 
-    private Player opener;
-    private Enterprise enterprise;
+    private final Player opener;
+    private final Enterprise enterprise;
 
     public EnterpriseGUI(Player opener, Enterprise enterprise){
         this.opener = opener;
@@ -40,8 +38,8 @@ public class EnterpriseGUI {
     }
 
     public void openWindow(){
-        String netWorth = String.format("%.2f", enterprise.getNetWorth());
-        String balance = String.format("%.2f", enterprise.getBankBalance());
+        String netWorth = ChatUtils.formatMoney(enterprise.getNetWorth());
+        String balance = ChatUtils.formatMoney(enterprise.getBankBalance());
 
         Gui gui = Gui.normal()
                 .setStructure(
@@ -65,39 +63,7 @@ public class EnterpriseGUI {
                 ))
                 .addIngredient('A', new SimpleItem(new ItemBuilder(Material.BOOK)
                         .setDisplayName(" §aHiring coming soon... ")))
-                .addIngredient('B', new AbstractItem() {
-
-                    @Override
-                    public ItemProvider getItemProvider() {
-                        return new ItemBuilder(Material.CHEST)
-                                .setDisplayName(" §aBank Balance: §f(§a$" + balance + "§f)")
-                                .addLoreLines(" ")
-                                .addLoreLines(" §a• §fBank balance will be taxed daily at, %" + (SCConstants.ENTERPRISE_DAILY_TAX*100))
-                                .addLoreLines("   §fTime until next taxation: " + EnterpriseManager.getTimeUntilNextTaxation())
-                                .addLoreLines(" §a• §fBank balance after daily tax: §c$" + ChatUtils.formatMoney(enterprise.getBankBalance()*(1-SCConstants.ENTERPRISE_DAILY_TAX)))
-                                .addLoreLines(" ")
-                                .addLoreLines(" §a(!) §bLeft §fclick here to §bwithdraw §fbank funds §a(!)")
-                                .addLoreLines(" §a(!) §bRight §fclick here to §bdeposit §fbank funds §a(!)");
-                    }
-
-                    @Override
-                    public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull InventoryClickEvent inventoryClickEvent) {
-                        player.closeInventory();
-                        if(clickType.equals(ClickType.RIGHT)){
-                            player.sendMessage("§7Your enterprise bank currently has: §a" + balance);
-                            player.sendMessage("§7Please enter the amount you would like to deposit");
-                            ChatDepositListener.awaitingDeposit.add(player.getUniqueId());
-                        }else if(clickType.equals(ClickType.LEFT)){
-                            if(enterprise.getMemberRole(player.getUniqueId()).equals(Role.CEO)){
-                                player.sendMessage("§7Your enterprise bank currently has: §a" + balance);
-                                player.sendMessage("§7Please enter the amount you would like to withdraw");
-                                ChatWithdrawListener.awaitingWithdrawal.add(player.getUniqueId());
-                            }else{
-                                player.sendMessage("§cYou must be the CEO to withdraw enterprise funds.");
-                            }
-                        }
-                    }
-                })
+                .addIngredient('B', getBankBalanceItem())
                 .addIngredient('C', new AbstractItem() {
 
                     @Override
@@ -185,6 +151,45 @@ public class EnterpriseGUI {
                 .setGui(gui)
                 .build();
         window.open();
+    }
+
+    @NotNull
+    private AutoUpdateItem getBankBalanceItem() {
+        String balance = ChatUtils.formatMoney(enterprise.getBankBalance());
+        AutoUpdateItem chestItem = new AutoUpdateItem(20, () -> new ItemBuilder(Material.CHEST)) {
+            @Override
+            public ItemProvider getItemProvider() {
+                return new ItemBuilder(Material.CHEST)
+                        .setDisplayName(" §aBank Balance: §f(§a$" + balance + "§f)")
+                        .addLoreLines(" ")
+                        .addLoreLines(" §a• §fBank balance will be taxed daily at, %" + (SCConstants.ENTERPRISE_DAILY_TAX*100))
+                        .addLoreLines("   §fTime until next taxation: " + EnterpriseManager.getTimeUntilNextTaxation())
+                        .addLoreLines(" §a• §fBank balance after daily tax: §c$" + ChatUtils.formatMoney(enterprise.getBankBalance()*(1-SCConstants.ENTERPRISE_DAILY_TAX)))
+                        .addLoreLines(" ")
+                        .addLoreLines(" §a(!) §bLeft §fclick here to §bwithdraw §fbank funds §a(!)")
+                        .addLoreLines(" §a(!) §bRight §fclick here to §bdeposit §fbank funds §a(!)");
+            }
+
+            @Override
+            public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull InventoryClickEvent event) {
+                player.closeInventory();
+                if(clickType.equals(ClickType.RIGHT)){
+                    player.sendMessage("§7Your enterprise bank currently has: §a" + balance);
+                    player.sendMessage("§7Please enter the amount you would like to deposit");
+                    ChatDepositListener.awaitingDeposit.add(player.getUniqueId());
+                }else if(clickType.equals(ClickType.LEFT)){
+                    if(enterprise.getMemberRole(player.getUniqueId()).equals(Role.CEO)){
+                        player.sendMessage("§7Your enterprise bank currently has: §a" + balance);
+                        player.sendMessage("§7Please enter the amount you would like to withdraw");
+                        ChatWithdrawListener.awaitingWithdrawal.add(player.getUniqueId());
+                    }else{
+                        player.sendMessage("§cYou must be the CEO to withdraw enterprise funds.");
+                    }
+                }
+            }
+        };
+        chestItem.start();
+        return chestItem;
     }
 
     public void openMembersList(){

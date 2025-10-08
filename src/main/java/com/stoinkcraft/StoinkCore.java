@@ -51,7 +51,7 @@ public class StoinkCore extends JavaPlugin {
         }
 
         //Inititalize the enterprise manager class TODO: pull enterprise list from saved data
-        EnterpriseManager em = new EnterpriseManager(this, econ, 5);
+        EnterpriseManager em = new EnterpriseManager(this, econ, 2);
 
         if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) { //
             new StoinkExpansion(this).register(); //

@@ -21,8 +21,6 @@ public class EnterpriseStorage {
             String path = "enterprises." + e.getName();
 
             config.set(path + ".ceo", e.getCeo().toString());
-            if (e.getCfo() != null) config.set(path + ".cfo", e.getCfo().toString());
-            if (e.getCOO() != null) config.set(path + ".coo", e.getCOO().toString());
 
             config.set(path + ".bankBalance", e.getBankBalance());
             config.set(path + ".netWorth", e.getNetWorth());
@@ -76,8 +74,6 @@ public class EnterpriseStorage {
 
             String cfoStr = config.getString(path + ".cfo");
             String cooStr = config.getString(path + ".coo");
-            if (cfoStr != null) e.setCfo(UUID.fromString(cfoStr));
-            if (cooStr != null) e.setCOO(UUID.fromString(cooStr));
 
             e.setBankBalance(config.getDouble(path + ".bankBalance"));
             e.setNetWorth(config.getDouble(path + ".netWorth"));

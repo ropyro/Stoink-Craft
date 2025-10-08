@@ -98,7 +98,6 @@ public class EarningListener implements Listener {
             ItemStack stack = item.getItemStack();
             Material itemMaterial = stack.getType();
             int amount = stack.getAmount();
-            player.sendMessage("Droped amount: " + amount);
             double baseValue = MarketManager.getItemPrice(itemMaterial);
 
             totalEarnings += baseValue * amount;
