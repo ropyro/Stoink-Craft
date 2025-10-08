@@ -74,6 +74,7 @@ public class StoinkCore extends JavaPlugin {
         }
 
         EnterpriseStorage.loadAllEnterprises(enterpriseFile);
+        EnterpriseManager.startDailyTaxes(this);
 
         if(EnterpriseManager.getEnterpriseManager().getEnterpriseList()
                 .stream()

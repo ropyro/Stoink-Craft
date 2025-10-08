@@ -7,8 +7,10 @@ import com.stoinkcraft.enterprise.ServerEnterprise;
 import com.stoinkcraft.listeners.ChatDepositListener;
 import com.stoinkcraft.listeners.ChatInvestListener;
 import com.stoinkcraft.listeners.ChatWithdrawListener;
+import com.stoinkcraft.utils.ChatUtils;
 import com.stoinkcraft.utils.SCConstants;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
@@ -69,6 +71,10 @@ public class EnterpriseGUI {
                     public ItemProvider getItemProvider() {
                         return new ItemBuilder(Material.CHEST)
                                 .setDisplayName(" §aBank Balance: §f(§a$" + balance + "§f)")
+                                .addLoreLines(" ")
+                                .addLoreLines(" §a• §fBank balance will be taxed daily at, %" + (SCConstants.ENTERPRISE_DAILY_TAX*100))
+                                .addLoreLines("   §fTime until next taxation: " + EnterpriseManager.getTimeUntilNextTaxation())
+                                .addLoreLines(" §a• §fBank balance after daily tax: §c$" + ChatUtils.formatMoney(enterprise.getBankBalance()*(1-SCConstants.ENTERPRISE_DAILY_TAX)))
                                 .addLoreLines(" ")
                                 .addLoreLines(" §a(!) §bLeft §fclick here to §bwithdraw §fbank funds §a(!)")
                                 .addLoreLines(" §a(!) §bRight §fclick here to §bdeposit §fbank funds §a(!)");
