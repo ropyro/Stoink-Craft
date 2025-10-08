@@ -43,15 +43,23 @@ public class EnterpriseGUI {
         Gui gui = Gui.normal()
                 .setStructure(
                         "# # # # # # # # #",
-                        "# # A B C D E # #",
+                        "# # # # ? # # # #",
                         "# # # # # # # # #",
-                        "# . . . X X X X #",
-                        "# X X X X X X X #",
+                        "# # A B C D E # #",
                         "# # # # # # # # #")
                 .addIngredient('#', new SimpleItem(new ItemBuilder(Material.BLACK_STAINED_GLASS_PANE)
                         .setDisplayName(" ")))
-                .addIngredient('X', new SimpleItem(new ItemBuilder(Material.RED_STAINED_GLASS_PANE)
-                        .setDisplayName(" §cThis member slot is locked ")))
+                .addIngredient('?', new SimpleItem(new ItemBuilder(Material.OAK_SIGN)
+                        .setDisplayName(" §aEnterprise Help ")
+                        .addLoreLines(" ")
+                        .addLoreLines(" §a• §f/enterprise - opens this menu")
+                        .addLoreLines(" §a• §f/enterprise setwarp - sets the public warp for the enterprise")
+                        .addLoreLines(" §a• §f/enterprise info - sets the public warp for the enterprise")
+                        .addLoreLines(" §a• §f/enterprise resign - sets the public warp for the enterprise")
+                        .addLoreLines(" §a• §f/enterprise disband - sets the public warp for the enterprise")
+                        .addLoreLines(" §a• §f/enterprise warp [name] - teleports to an enterprise")
+                        .addLoreLines(" §a• §f/enterprise invite <player> - invite new members")
+                ))
                 .addIngredient('A', new SimpleItem(new ItemBuilder(Material.BOOK)
                         .setDisplayName(" §aHiring coming soon... ")))
                 .addIngredient('B', new AbstractItem() {
@@ -76,17 +84,29 @@ public class EnterpriseGUI {
                         }
                     }
                 })
-                .addIngredient('C', new SimpleItem(new ItemBuilder(Material.OAK_SIGN)
-                        .setDisplayName(" §aEnterprise Help ")
-                        .addLoreLines(" ")
-                        .addLoreLines(" §a• §f/enterprise - opens this menu")
-                        .addLoreLines(" §a• §f/enterprise setwarp - sets the public warp for the enterprise")
-                        .addLoreLines(" §a• §f/enterprise info - sets the public warp for the enterprise")
-                        .addLoreLines(" §a• §f/enterprise resign - sets the public warp for the enterprise")
-                        .addLoreLines(" §a• §f/enterprise disband - sets the public warp for the enterprise")
-                        .addLoreLines(" §a• §f/enterprise warp [name] - teleports to an enterprise")
-                        .addLoreLines(" §a• §f/enterprise invite <player> - invite new members")
-                ))
+                .addIngredient('C', new AbstractItem() {
+
+                    @Override
+                    public ItemProvider getItemProvider() {
+                        ItemStack openerskull = new ItemStack(Material.PLAYER_HEAD);
+                        SkullMeta meta = (SkullMeta) openerskull.getItemMeta();
+                        meta.setOwningPlayer(opener);
+                        openerskull.setItemMeta(meta);
+
+                        ItemBuilder openerhead = new ItemBuilder(openerskull)
+                                .setDisplayName(" §aMembers List")
+                                .addLoreLines(" ")
+                                .addLoreLines(" §a(!) §fClick here to view the members list §a(!)");
+
+                        return openerhead;
+                    }
+
+                    @Override
+                    public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull InventoryClickEvent inventoryClickEvent) {
+                        openMembersList();
+                    }
+                })
+
                 .addIngredient('D', new AbstractItem() {
                     @Override
                     public ItemProvider getItemProvider() {
@@ -148,6 +168,71 @@ public class EnterpriseGUI {
         Window window = Window.single()
                 .setViewer(opener)
                 .setTitle("§8" + enterprise.getName())
+                .setGui(gui)
+                .build();
+        window.open();
+    }
+
+    public void openMembersList(){
+        Gui gui = Gui.normal()
+                .setStructure(
+                        "# # # # # # # # #",
+                        "# . . . X X X X #",
+                        "# X X X X X X X #",
+                        "# # # # < # # # #")
+                .addIngredient('#', new SimpleItem(new ItemBuilder(Material.BLACK_STAINED_GLASS_PANE)
+                        .setDisplayName(" ")))
+                .addIngredient('X', new SimpleItem(new ItemBuilder(Material.RED_STAINED_GLASS_PANE)
+                        .setDisplayName(" §cThis member slot is locked ")))
+                .addIngredient('<', new AbstractItem() {
+                    @Override
+                    public ItemProvider getItemProvider() {
+                        return new ItemBuilder(Material.BARRIER)
+                                .setDisplayName(" §cReturn to Enterprise Menu ");
+                    }
+
+                    @Override
+                    public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull InventoryClickEvent inventoryClickEvent) {
+                        openWindow();
+                    }
+                })
+                .build();
+
+        ItemStack openerskull = new ItemStack(Material.PLAYER_HEAD);
+        SkullMeta meta = (SkullMeta) openerskull.getItemMeta();
+        meta.setOwningPlayer(opener);
+        openerskull.setItemMeta(meta);
+
+        ItemBuilder openerhead = new ItemBuilder(openerskull)
+                .setDisplayName(" §aYOU ")
+                .addLoreLines(" ")
+                .addLoreLines(" §a• §fRole: " + enterprise.getMemberRole(opener.getUniqueId()))
+                .addLoreLines(" ");
+
+        gui.addItems(new SimpleItem(openerhead));
+
+        // Add top enterprises to slots 1–6
+        for (UUID uuid : enterprise.getMembers().keySet()) {
+            if(uuid.equals(opener.getUniqueId()) || uuid.equals(SCConstants.serverCEO)) continue;
+            OfflinePlayer member = Bukkit.getOfflinePlayer(uuid);
+
+            ItemStack memberSkull = new ItemStack(Material.PLAYER_HEAD);
+            SkullMeta memberSkullMeta = (SkullMeta) memberSkull.getItemMeta();
+            memberSkullMeta.setOwningPlayer(member);
+            memberSkull.setItemMeta(memberSkullMeta);
+
+            ItemBuilder memberHead = new ItemBuilder(memberSkull)
+                    .setDisplayName(" §a" + member.getName())
+                    .addLoreLines(" ")
+                    .addLoreLines(" §a• §fRole: " + enterprise.getMemberRole(uuid))
+                    .addLoreLines(" ");
+
+            gui.addItems(new SimpleItem(memberHead));
+        }
+
+        Window window = Window.single()
+                .setViewer(opener)
+                .setTitle("§8" + enterprise.getName() + " Members")
                 .setGui(gui)
                 .build();
         window.open();
