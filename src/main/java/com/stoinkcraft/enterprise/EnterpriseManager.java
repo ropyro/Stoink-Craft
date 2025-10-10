@@ -2,6 +2,7 @@ package com.stoinkcraft.enterprise;
 
 import com.stoinkcraft.StoinkCore;
 import com.stoinkcraft.utils.SCConstants;
+import net.citizensnpcs.api.npc.NPC;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -28,6 +29,8 @@ public class EnterpriseManager {
     private ArrayList<Enterprise> enterpriseList;
 
     private int maximumEmployees;
+
+    private List<NPC> topCeoNpcs = new ArrayList<>();
 
     public EnterpriseManager(StoinkCore plugin, Economy econ, int maximumEmployees){
         this.plugin = plugin;

@@ -1,11 +1,13 @@
 package com.stoinkcraft;
 
 import com.stoinkcraft.commands.MarketCMD;
+import com.stoinkcraft.commands.TopCeoCMD;
 import com.stoinkcraft.commands.enterprisecmd.EnterpriseCMD;
 import com.stoinkcraft.commands.enterprisecmd.EnterpriseTabCompleter;
 import com.stoinkcraft.commands.serverenterprisecmd.ServerEntCMD;
 import com.stoinkcraft.commands.serverenterprisecmd.ServerEntTabCompleter;
 import com.stoinkcraft.earnings.EarningListener;
+import com.stoinkcraft.enterprise.Enterprise;
 import com.stoinkcraft.enterprise.EnterpriseStorage;
 import com.stoinkcraft.enterprise.ServerEnterprise;
 import com.stoinkcraft.listeners.ChatDepositListener;
@@ -16,14 +18,22 @@ import com.stoinkcraft.market.MarketManager;
 import com.stoinkcraft.enterprise.EnterpriseManager;
 import com.stoinkcraft.utils.PhantomSpawnDisabler;
 import com.stoinkcraft.utils.StoinkExpansion;
+import net.citizensnpcs.api.CitizensAPI;
+import net.citizensnpcs.api.npc.NPC;
+import net.citizensnpcs.trait.SkinTrait;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import xyz.xenondevs.invui.InvUI;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class StoinkCore extends JavaPlugin {
 
@@ -94,6 +104,7 @@ public class StoinkCore extends JavaPlugin {
             getCommand("market").setExecutor(new MarketCMD());
             getCommand("serverenterprise").setExecutor(new ServerEntCMD());
             getCommand("serverenterprise").setTabCompleter(new ServerEntTabCompleter());
+            getCommand("topceo").setExecutor(new TopCeoCMD());
         });
 
         //Register Earning listeners
@@ -104,8 +115,48 @@ public class StoinkCore extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new ChatDepositListener(this), this);
         getServer().getPluginManager().registerEvents(new PhantomSpawnDisabler(), this);
 
+        Bukkit.getScheduler().runTaskTimer(this, () -> StoinkCore.updateTopCeoNpcs(), 20L, 20L * 60 * 10); // every 10 min
+
         getLogger().info("StoinkCore loaded.");
     }
+
+    public static void updateTopCeoNpcs() {
+        List<Enterprise> sortedEnterprises = EnterpriseManager
+                .getEnterpriseManager()
+                .getEnterpriseList()
+                .stream()
+                .sorted(Comparator.comparingDouble(Enterprise::getNetWorth).reversed())
+                .collect(Collectors.toList());
+
+        for (int i = 1; i <= 3; i++) {
+            NPC npc = getNpcByPosition(i);
+            if (npc == null) continue;
+            if (sortedEnterprises.size() < i) continue;
+
+            Enterprise ent = sortedEnterprises.get(i - 1);
+            OfflinePlayer ceo = Bukkit.getOfflinePlayer(ent.getCeo());
+            String ceoName = ceo.getName() != null ? ceo.getName() : "CEO";
+            String displayName = "#" + i + " " + ChatColor.GREEN + ChatColor.BOLD + ent.getName();
+
+            // Set skin
+            SkinTrait skin = npc.getOrAddTrait(SkinTrait.class);
+            skin.setSkinName(ceoName);
+            skin.run();
+
+            // Set name
+            npc.setName(displayName);
+        }
+    }
+
+    public static NPC getNpcByPosition(int position) {
+        for (NPC npc : CitizensAPI.getNPCRegistry()) {
+            if (!npc.data().has("top_ceo_position")) continue;
+            if (npc.data().get("top_ceo_position").equals(position)) return npc;
+        }
+        return null;
+    }
+
+
 
     private boolean setupEconomy() {
         if (getServer().getPluginManager().getPlugin("Vault") == null) {

@@ -3,7 +3,7 @@ main: com.stoinkcraft.StoinkCore
 version: 0.1
 api-version: 1.21.8
 depend: [Vault]
-softdepend: [PlaceholderAPI]
+softdepend: [PlaceholderAPI, Citizens]
 commands:
   enterprise:
     description: Enterprise commands
@@ -17,6 +17,9 @@ commands:
     description: View item market prices
     usage: /market
     aliases: ['mv','marketvalue','m']
+  topceo:
+    usage: /topceo spawn <1-3>
+    description: Spawn top enterprise CEO NPC
 
 permissions:
   stoinkcore.admin.*:
