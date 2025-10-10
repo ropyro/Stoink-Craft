@@ -37,6 +37,10 @@ public class EarningListener implements Listener {
     }
 
     private void addEarnings(Player player, Enterprise enterprise, double value) {
+        if(enterprise.isBoosted()){
+            value*=enterprise.getActiveBooster().getMultiplier();
+        }
+
         double playerEarning = value* SCConstants.PLAYER_PAY_SPLIT_PERCENTAGE;
         double enterpriseEarning = value - playerEarning;
 

@@ -1,7 +1,9 @@
 package com.stoinkcraft.enterprise;
 
+import com.stoinkcraft.boosters.Booster;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.*;
 
@@ -17,6 +19,8 @@ public class Enterprise {
 
     private Location warp;
 
+    private Booster activeBooster;
+
     public Enterprise(String name, UUID ceo) {
         this.name = name;
         this.ceo = ceo;
@@ -24,6 +28,19 @@ public class Enterprise {
         this.netWorth = 0;
         members.put(ceo, Role.CEO);
         shares.put(ceo, 40.0);
+        activeBooster = null;
+    }
+
+    public boolean isBoosted(){
+        return activeBooster != null;
+    }
+
+    public Booster getActiveBooster(){
+        return this.activeBooster;
+    }
+
+    public void setActiveBooster(Booster booster){
+        this.activeBooster = booster;
     }
 
 

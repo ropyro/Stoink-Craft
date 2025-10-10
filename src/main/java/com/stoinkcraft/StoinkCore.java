@@ -1,5 +1,6 @@
 package com.stoinkcraft;
 
+import com.stoinkcraft.boosters.BoostNoteInteractionListener;
 import com.stoinkcraft.commands.MarketCMD;
 import com.stoinkcraft.commands.TopCeoCMD;
 import com.stoinkcraft.commands.enterprisecmd.EnterpriseCMD;
@@ -39,6 +40,7 @@ public class StoinkCore extends JavaPlugin {
 
     private static Economy econ = null;
 
+    private static StoinkCore INSTANCE;
 
     @Override
     public void onDisable() {
@@ -50,6 +52,8 @@ public class StoinkCore extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        INSTANCE = this;
+
         //GUI util hook
         InvUI.getInstance().setPlugin(this);
 
@@ -114,10 +118,15 @@ public class StoinkCore extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new ChatInvestListener(this), this);
         getServer().getPluginManager().registerEvents(new ChatDepositListener(this), this);
         getServer().getPluginManager().registerEvents(new PhantomSpawnDisabler(), this);
+        getServer().getPluginManager().registerEvents(new BoostNoteInteractionListener(), this);
 
         Bukkit.getScheduler().runTaskTimer(this, () -> StoinkCore.updateTopCeoNpcs(), 20L, 20L * 60 * 10); // every 10 min
 
         getLogger().info("StoinkCore loaded.");
+    }
+
+    public static StoinkCore getInstance() {
+        return INSTANCE;
     }
 
     public static void updateTopCeoNpcs() {

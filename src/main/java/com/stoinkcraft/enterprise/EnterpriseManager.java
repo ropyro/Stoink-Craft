@@ -1,6 +1,7 @@
 package com.stoinkcraft.enterprise;
 
 import com.stoinkcraft.StoinkCore;
+import com.stoinkcraft.boosters.Booster;
 import com.stoinkcraft.utils.SCConstants;
 import net.citizensnpcs.api.npc.NPC;
 import net.milkbowl.vault.economy.Economy;
@@ -39,6 +40,22 @@ public class EnterpriseManager {
         enterpriseList = new ArrayList<Enterprise>();
         enterpriseManager = this;
         this.maximumEmployees = maximumEmployees;
+    }
+
+    public void setBooster(Enterprise enterprise, Booster booster){
+        enterprise.setActiveBooster(booster);
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                enterprise.setActiveBooster(null);
+                enterprise.getMembers().keySet().forEach(uuid -> {
+                    Player online = Bukkit.getPlayer(uuid);
+                    if (online != null && online.isOnline()) {
+                        online.sendMessage(ChatColor.GOLD + "" + booster.getMultiplier() + "x booster has expired!");
+                    }
+                });
+            }
+        }.runTaskLater(plugin, booster.getDuration());
     }
 
     public void disband(Enterprise enterprise) {

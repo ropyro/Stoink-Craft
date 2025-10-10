@@ -145,6 +145,14 @@ public class EnterpriseGUI {
             gui.addItems(new SimpleItem(memberHead));
         }
 
+        if(enterprise.isBoosted()){
+            gui.setItem(1, 1, new SimpleItem(new ItemBuilder(Material.FIRE_CHARGE)
+                    .setDisplayName(" §6§l" + enterprise.getActiveBooster().getMultiplier() + "x booster active!")
+                    .addLoreLines(" ")
+                    .addLoreLines(" §7• Time Left: ")
+                    .addLoreLines(" ")));
+        }
+
         Window window = Window.single()
                 .setViewer(opener)
                 .setTitle("§8" + enterprise.getName())
