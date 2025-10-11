@@ -149,21 +149,19 @@ public class MarketGUI {
     private void openJobValues(MarketManager.JobType jobType){
         Gui gui = Gui.normal()
                 .setStructure(
-                        "# # # # ? # # # #",
+                        "# # # # # # # # #",
                         "# . . . . . . . #",
                         "# . . . . . . . #",
                         "# . . . . . . . #",
                         "# . . . . . . . #",
-                        "# # # # # # # # #")
+                        "# # # # X # # # #")
                 .addIngredient('#', new SimpleItem(new ItemBuilder(Material.BLACK_STAINED_GLASS_PANE)
                         .setDisplayName(" ")))
-                .addIngredient('?', new AbstractItem() {
+                .addIngredient('X', new AbstractItem() {
                     @Override
                     public ItemProvider getItemProvider() {
-                        return new ItemBuilder(Material.CLOCK)
-                                .setDisplayName(" * Task Availability *")
-                                .addLoreLines(" ")
-                                .addLoreLines("(!) Click to return to main menu (!)");
+                        return new ItemBuilder(Material.BARRIER)
+                                .setDisplayName(" §c§lExit To Main Menu ");
                     }
                     @Override
                     public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull InventoryClickEvent inventoryClickEvent) {
