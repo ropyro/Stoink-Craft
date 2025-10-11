@@ -4,6 +4,7 @@ import com.stoinkcraft.commands.SubCommand;
 import com.stoinkcraft.enterprise.Enterprise;
 import com.stoinkcraft.enterprise.EnterpriseManager;
 import com.stoinkcraft.enterprise.ServerEnterprise;
+import org.bukkit.Bukkit;
 import org.bukkit.Server;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -33,8 +34,12 @@ public class ServerEntTabCompleter implements TabCompleter {
                     .toList();
         }
 
+        if (args.length == 2 && args[0].equalsIgnoreCase("givebooster")) {
+            return Bukkit.getOnlinePlayers().stream().map(p -> p.getName()).toList();
+        }
+
         if (args.length == 1) {
-            return List.of("setwarp", "updateeco");
+            return List.of("setwarp", "updateeco", "givebooster");
         }
 
         return List.of();
