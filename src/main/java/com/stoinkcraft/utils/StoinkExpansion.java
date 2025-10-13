@@ -48,19 +48,15 @@ public class StoinkExpansion extends PlaceholderExpansion {
         if (player == null) return "";
 
         Enterprise e = EnterpriseManager.getEnterpriseManager().getEnterpriseByMember(player.getUniqueId());
-        if (e == null){
-            if(identifier.toLowerCase().equalsIgnoreCase("role")){
-                return "§7Unemployed";
-            }else{
-                return "";
-            }
-        }
 
         switch (identifier.toLowerCase()) {
             case "enterprise":
+                if(e == null){
+                    return "&a&lDo /enterprise to get started!    ";
+                }
                 return e.getName();
             case "role":
-                if(e.getMemberRole(player.getUniqueId()) == null) return "&7Unemployed";
+                if(e == null) return "§7Unemployed";
                 String rolename = e.getMemberRole(player.getUniqueId()).roleName();
                 switch(rolename.toLowerCase()){
                     case "ceo":
@@ -69,12 +65,18 @@ public class StoinkExpansion extends PlaceholderExpansion {
                         return "§eEmployee";
                 }
                 return rolename;
-            case "networth":
-                return ChatUtils.formatMoney(e.getNetWorth());
-            case "player_networth":
-                return ChatUtils.formatMoney(PlayerUtils.getPlayerNetworth(player));
             case "ent_balance":
-                return ChatUtils.formatMoney(e.getBankBalance());
+                if(e == null){
+                    return " ";
+                }
+                return "$" + ChatUtils.formatMoney(e.getBankBalance());
+            case "networth":
+                if(e == null){
+                    return " ";
+                }
+                return "$" + ChatUtils.formatMoney(e.getNetWorth());
+            case "player_networth":
+                return "$" + ChatUtils.formatMoney(PlayerUtils.getPlayerNetworth(player));
             default:
                 return null;
         }
