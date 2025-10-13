@@ -3,10 +3,13 @@ package com.stoinkcraft.shares;
 import com.stoinkcraft.StoinkCore;
 import com.stoinkcraft.enterprise.Enterprise;
 import com.stoinkcraft.enterprise.EnterpriseManager;
+import com.stoinkcraft.utils.ChatUtils;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
+import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -44,7 +47,7 @@ public class ShareManager {
                 .collect(Collectors.toList());
     }
 
-        public void buyShare(Player player, Enterprise enterprise, int amount) {
+    public void buyShare(Player player, Enterprise enterprise, int amount) {
         double shareValue = enterprise.getShareValue();
         double totalCost = shareValue * amount;
 
@@ -63,7 +66,7 @@ public class ShareManager {
         enterprise.addOutstandingShares(amount);
 
         for (int i = 0; i < amount; i++) {
-            allShares.add(new Share(player.getUniqueId(), enterprise.getID(), shareValue));
+            allShares.add(new Share(player.getUniqueId(), enterprise.getID(), shareValue, Date.from(Instant.now())));
         }
 
         player.sendMessage("§aPurchased " + amount + " shares of " + enterprise.getName() + " for $" + totalCost);
@@ -90,6 +93,19 @@ public class ShareManager {
         }
 
         player.sendMessage("§aSold " + amount + " shares for $" + totalPayout);
+    }
+
+    public void sellShare(Player player, Share share){
+        Enterprise enterprise = EnterpriseManager.getEnterpriseManager().getEnterpriseByID(share.getEnterpriseID());
+        double currentPrice = enterprise.getShareValue();
+
+        enterprise.decreaseNetworth(currentPrice);
+        StoinkCore.getEconomy().depositPlayer(player, currentPrice);
+        enterprise.removeOutstandingShares(1);
+
+        allShares.remove(share);
+
+        player.sendMessage("§aSold share of, " + enterprise.getName() + " for $" + ChatUtils.formatMoney(currentPrice));
     }
 
     public void sellSharesOffline(OfflinePlayer player, Enterprise enterprise, int amount) {

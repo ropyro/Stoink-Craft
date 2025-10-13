@@ -17,6 +17,7 @@ import com.stoinkcraft.enterprise.listeners.ChatWithdrawListener;
 import com.stoinkcraft.enterprise.listeners.PlayerJoinListener;
 import com.stoinkcraft.market.MarketManager;
 import com.stoinkcraft.enterprise.EnterpriseManager;
+import com.stoinkcraft.shares.SharesCMD;
 import com.stoinkcraft.shares.ShareManager;
 import com.stoinkcraft.shares.ShareStorage;
 import com.stoinkcraft.utils.PhantomSpawnDisabler;
@@ -34,7 +35,6 @@ import org.bukkit.scheduler.BukkitRunnable;
 import xyz.xenondevs.invui.InvUI;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -107,6 +107,7 @@ public class StoinkCore extends JavaPlugin {
             getCommand("serverenterprise").setExecutor(new ServerEntCMD());
             getCommand("serverenterprise").setTabCompleter(new ServerEntTabCompleter());
             getCommand("topceo").setExecutor(new TopCeoCMD());
+            getCommand("shares").setExecutor(new SharesCMD());
         });
 
         //Register Earning listeners

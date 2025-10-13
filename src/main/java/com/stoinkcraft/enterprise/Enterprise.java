@@ -166,6 +166,9 @@ public class Enterprise {
     public void increaseNetworth(double value){
         this.netWorth += value;
     }
+    public void decreaseNetworth(double value){
+        this.netWorth -= value;
+    }
     public void setBankBalance(double bankBalance) {
         this.bankBalance = bankBalance;
     }

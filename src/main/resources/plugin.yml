@@ -20,6 +20,10 @@ commands:
   topceo:
     usage: /topceo spawn <1-3>
     description: Spawn top enterprise CEO NPC
+  shares:
+    usage: /shares
+    description: Opens your share portfolio
+    aliases: ['share', 'stonk', 'stonks']
 
 permissions:
   stoinkcore.admin.*:
