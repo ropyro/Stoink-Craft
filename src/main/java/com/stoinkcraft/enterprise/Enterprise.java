@@ -1,9 +1,8 @@
 package com.stoinkcraft.enterprise;
 
-import com.stoinkcraft.boosters.Booster;
+import com.stoinkcraft.market.boosters.Booster;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.*;
 

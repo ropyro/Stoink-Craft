@@ -1,7 +1,7 @@
 package com.stoinkcraft.enterprise;
 
 import com.stoinkcraft.StoinkCore;
-import com.stoinkcraft.boosters.Booster;
+import com.stoinkcraft.market.boosters.Booster;
 import com.stoinkcraft.utils.SCConstants;
 import net.citizensnpcs.api.npc.NPC;
 import net.milkbowl.vault.economy.Economy;
