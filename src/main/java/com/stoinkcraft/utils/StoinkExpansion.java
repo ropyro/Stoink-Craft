@@ -65,17 +65,15 @@ public class StoinkExpansion extends PlaceholderExpansion {
                 switch(rolename.toLowerCase()){
                     case "ceo":
                         return "§c§lCEO";
-                    case "cfo":
-                        return "§b§lCFO";
-                    case "coo":
-                        return "§aCOO";
                     case "employee":
                         return "§eEmployee";
                 }
                 return rolename;
             case "networth":
                 return ChatUtils.formatMoney(e.getNetWorth());
-            case "ent-balance":
+            case "player_networth":
+                return ChatUtils.formatMoney(PlayerUtils.getPlayerNetworth(player));
+            case "ent_balance":
                 return ChatUtils.formatMoney(e.getBankBalance());
             default:
                 return null;
