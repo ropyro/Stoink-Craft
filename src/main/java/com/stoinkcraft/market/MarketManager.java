@@ -22,48 +22,50 @@ public class MarketManager {
     private static final List<ItemValue> resourcePrices = new ArrayList<>();
     private static final List<EntityValue> huntingPrices = new ArrayList<>();
     private static final List<ItemValue> fishingPrices = new ArrayList<>();
-
     private static Instant lastRotationTime;
     private static final Duration ROTATION_INTERVAL = Duration.ofDays(1);
+
     public static void startRotatingBoosts(JavaPlugin plugin) {
         new BukkitRunnable() {
             @Override
             public void run() {
-                rotateBoostedItems();
+                rotateBoostedItemsAsync(plugin);
                 lastRotationTime = Instant.now();
             }
-        }.runTaskTimer(plugin, 0L, 1728000L); // 24 hours
+        }.runTaskTimerAsynchronously(plugin, 0L, 1728000L); // 24 hours async
     }
 
-    public static void rotateBoostedItems() {
-        boostedPrices.clear();
+    public static void rotateBoostedItemsAsync(JavaPlugin plugin) {
+        // Run the heavy logic async
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            boostedPrices.clear();
 
-        List<TaskValue> allItems = new ArrayList<>();
-        allItems.addAll(resourcePrices);
-        allItems.addAll(huntingPrices);
-        allItems.addAll(fishingPrices);
+            List<TaskValue> allItems = new ArrayList<>();
+            allItems.addAll(resourcePrices);
+            allItems.addAll(huntingPrices);
+            allItems.addAll(fishingPrices);
 
-        Collections.shuffle(allItems);
+            Collections.shuffle(allItems);
 
-        int boostCount = Math.min(4, allItems.size());
-        for (int i = 0; i < boostCount; i++) {
-            boostedPrices.add(allItems.get(i));
-        }
+            int boostCount = Math.min(4, allItems.size());
+            for (int i = 0; i < boostCount; i++) {
+                boostedPrices.add(allItems.get(i));
+            }
 
-        Bukkit.broadcastMessage("§6Today's boosted items have reset check them out in §e/market");
+            // Schedule the broadcast back on the main thread
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                Bukkit.broadcastMessage("§6Today's boosted items have reset! Check them out in §e/market");
+            });
+        });
     }
 
     public static String getTimeUntilNextRotation() {
-        if (lastRotationTime == null) {
-            return "Unknown";
-        }
+        if (lastRotationTime == null) return "Unknown";
 
         Instant nextRotation = lastRotationTime.plus(ROTATION_INTERVAL);
         Duration remaining = Duration.between(Instant.now(), nextRotation);
 
-        if (remaining.isNegative()) {
-            return "00h 00m 00s";
-        }
+        if (remaining.isNegative()) return "00h 00m 00s";
 
         long hours = remaining.toHours();
         long minutes = remaining.toMinutesPart();
@@ -71,6 +73,7 @@ public class MarketManager {
 
         return String.format("%02dh %02dm %02ds", hours, minutes, seconds);
     }
+
 
 
     public static void loadMarketPrices(File file) {

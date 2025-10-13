@@ -1,9 +1,11 @@
 package com.stoinkcraft.enterprise.commands.serverenterprisecmd;
 
+import com.stoinkcraft.StoinkCore;
 import com.stoinkcraft.market.boosters.BoosterItemHelper;
 import com.stoinkcraft.enterprise.Enterprise;
 import com.stoinkcraft.enterprise.EnterpriseManager;
 import com.stoinkcraft.enterprise.ServerEnterprise;
+import com.stoinkcraft.shares.ShareManager;
 import com.stoinkcraft.utils.SCConstants;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -22,7 +24,9 @@ public class ServerEntCMD implements CommandExecutor {
         if(sender instanceof Player && !sender.hasPermission(SCConstants.SERVER_ENT_COMMAND)){
             sender.sendMessage("Error you do not have permission for this command.");
         }
-            if(args.length >= 1 && args[0].equalsIgnoreCase("givebooster")){
+
+        //Allows console use of the command
+        if(args.length >= 1 && args[0].equalsIgnoreCase("givebooster")){
                if(args.length >= 4){
                    double multiplier = Double.parseDouble(args[2]);
                    long duration = Long.parseLong(args[3]);
@@ -68,6 +72,11 @@ public class ServerEntCMD implements CommandExecutor {
            }
            if(args[0].equalsIgnoreCase("updateeco")){
                 EnterpriseManager.getEnterpriseManager().updateBankBalances();
+
+               return true;
+           }
+           if(args[0].equalsIgnoreCase("pricesnapshot")){
+               EnterpriseManager.getEnterpriseManager().recordPriceSnapshots();
                return true;
            }
        }

@@ -2,16 +2,17 @@ package com.stoinkcraft.enterprise;
 
 import com.stoinkcraft.StoinkCore;
 import com.stoinkcraft.market.boosters.Booster;
+import com.stoinkcraft.shares.ShareManager;
 import com.stoinkcraft.utils.SCConstants;
 import net.citizensnpcs.api.npc.NPC;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.io.File;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
@@ -40,6 +41,10 @@ public class EnterpriseManager {
         enterpriseList = new ArrayList<Enterprise>();
         enterpriseManager = this;
         this.maximumEmployees = maximumEmployees;
+    }
+
+    public Enterprise getEnterpriseByID(UUID enterpriseID){
+        return enterpriseList.stream().filter(e -> e.getID().equals(enterpriseID)).findFirst().orElse(null);
     }
 
     public void setBooster(Enterprise enterprise, Booster booster){
@@ -71,7 +76,12 @@ public class EnterpriseManager {
 
         // Optional: clear member maps (clean up references)
         enterprise.getMembers().clear();
-        enterprise.getShares().clear();
+
+
+        ShareManager.getInstance().getEnterpriseShares(enterprise).forEach(share -> {
+            OfflinePlayer player = Bukkit.getOfflinePlayer(share.getOwner());
+            ShareManager.getInstance().sellSharesOffline(player, enterprise, 1);
+        });
 
         // Remove from enterprise list
         enterpriseList.remove(enterprise);
@@ -80,8 +90,7 @@ public class EnterpriseManager {
         Bukkit.getLogger().info("[StoinkCore] Disbanded enterprise: " + enterprise.getName());
 
         // Optional: trigger save
-        File enterpriseFile = new File(plugin.getDataFolder(), "enterprises.yml");
-        EnterpriseStorage.saveAllEnterprises(enterpriseFile);
+        EnterpriseStorage.disband(enterprise);
     }
 
     public boolean setEnterpriseWarp(Player player){
@@ -91,8 +100,7 @@ public class EnterpriseManager {
             if(e.getMemberRole(uuid).equals(Role.CEO)){
                 e.setWarp(player.getLocation());
                 player.sendMessage(e.getName() + "'s warp has been set!");
-                File enterpriseFile = new File(plugin.getDataFolder(), "enterprises.yml");
-                EnterpriseStorage.saveAllEnterprises(enterpriseFile);
+                EnterpriseStorage.saveAllEnterprises();
                 return true;
             }
         }
@@ -107,8 +115,7 @@ public class EnterpriseManager {
             if(e.getMemberRole(uuid).equals(Role.CEO)){
                 e.setWarp(null);
                 player.sendMessage(e.getName() + "'s warp has been deleted!");
-                File enterpriseFile = new File(plugin.getDataFolder(), "enterprises.yml");
-                EnterpriseStorage.saveAllEnterprises(enterpriseFile);
+                EnterpriseStorage.saveAllEnterprises();
                 return true;
             }
         }
@@ -124,6 +131,10 @@ public class EnterpriseManager {
             return true;
         }
         return false;
+    }
+
+    public void loadEnterprise(Enterprise enterprise){
+        enterpriseList.add(enterprise);
     }
 
     public void createEnterprise(ServerEnterprise enterprise){
@@ -160,7 +171,6 @@ public class EnterpriseManager {
     public boolean hasInvite(UUID target) {
         return invites.containsKey(target);
     }
-
 
 
     public Enterprise getEnterpriseByMember(UUID uuid){
@@ -200,38 +210,65 @@ public class EnterpriseManager {
         return enterpriseManager;
     }
 
+    public void recordPriceSnapshots(){
+        try {
+            for (Enterprise e : EnterpriseManager.getEnterpriseManager().getEnterpriseList()) {
+                e.recordPriceSnapshot();
+            }
+        } catch (Exception e) {
+            StoinkCore.getInstance().getLogger().severe("Error recording enterprise price snapshots: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+
     public int getMaximumEmployees() {
         return maximumEmployees;
     }
 
-    public static void updateBankBalances(){
-        //Move server ent funds from balance to networth
-        EnterpriseManager.getEnterpriseManager().enterpriseList.stream()
-                .filter(e -> (e instanceof ServerEnterprise))
-                .forEach(serverEnterprise -> {
-                    serverEnterprise.increaseNetworth(serverEnterprise.getBankBalance());
-                    serverEnterprise.setBankBalance(0);
+    public static void updateBankBalances() {
+        List<Enterprise> enterprises = EnterpriseManager.getEnterpriseManager().getEnterpriseList();
+
+        // Move funds from ServerEnterprises' balances into their net worth
+        enterprises.stream()
+                .filter(e -> e instanceof ServerEnterprise)
+                .forEach(e -> {
+                    double bankBalance = e.getBankBalance();
+                    if (bankBalance > 0) {
+                        e.increaseNetworth(bankBalance);
+                        e.setBankBalance(0);
+                    }
                 });
 
-        //Tax privately owned enterprise bank balances
-        EnterpriseManager.getEnterpriseManager().enterpriseList.stream()
+        // Apply tax to private enterprises
+        enterprises.stream()
                 .filter(e -> !(e instanceof ServerEnterprise))
-                .forEach(serverEnterprise ->
-                    serverEnterprise.setBankBalance(serverEnterprise.getBankBalance()*(1 - SCConstants.ENTERPRISE_DAILY_TAX)));
-
+                .forEach(e -> {
+                    double taxRate = SCConstants.ENTERPRISE_DAILY_TAX;
+                    double before = e.getBankBalance();
+                    e.setBankBalance(before * (1 - taxRate));
+                });
     }
+
+
+
 
     private static Instant lastRotationTime;
     private static final Duration ROTATION_INTERVAL = Duration.ofDays(1);
+
     public static void startDailyTaxes(JavaPlugin plugin) {
         new BukkitRunnable() {
             @Override
             public void run() {
-                updateBankBalances();
-                lastRotationTime = Instant.now();
+                // Run heavy economy and file I/O async
+                Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+                    updateBankBalances(); // your method that handles tax logic
+                    lastRotationTime = Instant.now();
+                });
             }
-        }.runTaskTimer(plugin, 0L, 1728000L); // 24 hours
+        }.runTaskTimer(plugin, 0L, 20L * 60 * 60 * 24); // 24 hours
     }
+
 
     public static String getTimeUntilNextTaxation() {
         if (lastRotationTime == null) {

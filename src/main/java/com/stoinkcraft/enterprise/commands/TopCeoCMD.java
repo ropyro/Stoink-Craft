@@ -32,7 +32,7 @@ public class TopCeoCMD implements CommandExecutor {
 
         // /topceo update
         if (args.length == 1 && args[0].equalsIgnoreCase("update")) {
-            StoinkCore.updateTopCeoNpcs();
+            StoinkCore.getInstance().updateTopCeoNpcs();
             sender.sendMessage(ChatColor.GREEN + "Top CEO NPCs updated.");
             return true;
         }

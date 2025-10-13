@@ -3,24 +3,26 @@ package com.stoinkcraft.shares;
 import com.stoinkcraft.enterprise.Enterprise;
 import org.bukkit.entity.Player;
 
+import java.util.UUID;
+
 public class Share {
 
-    private Player owner;
-    private Enterprise enterprise;
+    private UUID owner;
+    private UUID enterpriseID;
     private double purchasePrice;
 
-    public Share(Player owner, Enterprise enterprise, double purchasePrice){
+    public Share(UUID owner, UUID enterpriseID, double purchasePrice){
         this.owner = owner;
-        this.enterprise = enterprise;
+        this.enterpriseID = enterpriseID;
         this.purchasePrice = purchasePrice;
     }
 
-    public Player getOwner() {
+    public UUID getOwner() {
         return owner;
     }
 
-    public Enterprise getEnterprise() {
-        return enterprise;
+    public UUID getEnterpriseID(){
+        return enterpriseID;
     }
 
     public double getPurchasePrice() {

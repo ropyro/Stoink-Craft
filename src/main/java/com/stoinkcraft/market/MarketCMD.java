@@ -1,5 +1,6 @@
 package com.stoinkcraft.market;
 
+import com.stoinkcraft.StoinkCore;
 import com.stoinkcraft.enterprise.EnterpriseManager;
 import com.stoinkcraft.market.MarketGUI;
 import com.stoinkcraft.market.MarketManager;
@@ -19,7 +20,7 @@ public class MarketCMD implements CommandExecutor {
 
         if(args.length >= 1 && player.hasPermission(SCConstants.ROTATE_MARKET_COMMAND)){
             if(args[0].equalsIgnoreCase("rotate")){
-                MarketManager.rotateBoostedItems();
+                MarketManager.rotateBoostedItemsAsync(StoinkCore.getInstance());
                 return true;
             }
         }

@@ -1,6 +1,7 @@
 package com.stoinkcraft.enterprise;
 
 import com.stoinkcraft.StoinkCore;
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
@@ -10,40 +11,77 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import com.stoinkcraft.StoinkCore;
+import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.Location;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
+
 public class EnterpriseStorage {
 
+    private static final File ENTERPRISES_DIR = new File(StoinkCore.getInstance().getDataFolder(), "Enterprises");
 
-        public static void saveAllEnterprises(File file) {
+    // ======= SAVE =======
+    public static void saveAllEnterprises() {
+        if (!ENTERPRISES_DIR.exists()) ENTERPRISES_DIR.mkdirs();
+
+        for (Enterprise e : EnterpriseManager.getEnterpriseManager().getEnterpriseList()) {
+            File entDir = new File(ENTERPRISES_DIR, e.getID().toString());
+            if (!entDir.exists()) entDir.mkdirs();
+
+            saveEnterpriseData(e, new File(entDir, "enterprise.yml"));
+            savePriceHistory(e, new File(entDir, "pricehistory.yml"));
+        }
+    }
+
+    public static void disband(Enterprise e){
+        File entDir = new File(ENTERPRISES_DIR, e.getID().toString());
+        if (deleteDirectory(entDir)) {
+            Bukkit.getLogger().info("Deleted enterprise folder: " + e.getName());
+        } else {
+            Bukkit.getLogger().warning("Failed to delete enterprise folder: " + e.getName());
+        }
+    }
+
+
+    public static boolean deleteDirectory(File dir) {
+        if (!dir.exists()) return true;
+
+        File[] files = dir.listFiles();
+        if (files != null) {
+            for (File file : files) {
+                if (file.isDirectory()) {
+                    deleteDirectory(file);
+                } else {
+                    file.delete();
+                }
+            }
+        }
+        return dir.delete();
+    }
+
+
+    private static void saveEnterpriseData(Enterprise e, File file) {
         YamlConfiguration config = new YamlConfiguration();
-        List<Enterprise> enterprises = EnterpriseManager.getEnterpriseManager().getEnterpriseList();
 
-        for (Enterprise e : enterprises) {
-            String path = "enterprises." + e.getName();
+        config.set("name", e.getName());
+        config.set("ceo", e.getCeo().toString());
+        config.set("bankBalance", e.getBankBalance());
+        config.set("netWorth", e.getNetWorth());
+        config.set("outstandingShares", e.getOutstandingShares());
+        config.set("serverOwned", e instanceof ServerEnterprise);
 
-            config.set(path + ".ceo", e.getCeo().toString());
+        // Members
+        Map<String, String> memberMap = new HashMap<>();
+        e.getMembers().forEach((uuid, role) -> memberMap.put(uuid.toString(), role.name()));
+        config.set("members", memberMap);
 
-            config.set(path + ".bankBalance", e.getBankBalance());
-            config.set(path + ".netWorth", e.getNetWorth());
-
-            Map<String, String> memberMap = new HashMap<>();
-            for (UUID uuid : e.getMembers().keySet()) {
-                memberMap.put(uuid.toString(), e.getMembers().get(uuid).name());
-            }
-            config.set(path + ".members", memberMap);
-
-            Map<String, Double> shareMap = new HashMap<>();
-            for (UUID uuid : e.getShares().keySet()) {
-                shareMap.put(uuid.toString(), e.getShares().get(uuid));
-            }
-            config.set(path + ".shares", shareMap);
-
-            if(e.getWarp() != null) config.set(path + ".warp", e.getWarp());
-
-            if(e instanceof ServerEnterprise){
-                config.set(path + ".serverowned", true);
-            }else{
-                config.set(path + ".serverowned", false);
-            }
+        // Warp
+        if (e.getWarp() != null) {
+            Location loc = e.getWarp();
+            config.set("warp.", loc);
         }
 
         try {
@@ -53,47 +91,82 @@ public class EnterpriseStorage {
         }
     }
 
-    public static void loadAllEnterprises(File file) {
+    private static void savePriceHistory(Enterprise e, File file) {
+        YamlConfiguration config = new YamlConfiguration();
+        List<Map<String, Object>> list = new ArrayList<>();
+
+        for (PriceSnapshot snapshot : e.getPriceHistory()) {
+            Map<String, Object> entry = new HashMap<>();
+            entry.put("time", snapshot.getTimestamp());
+            entry.put("value", snapshot.getSharePrice());
+            list.add(entry);
+        }
+
+        config.set("priceHistory", list);
+
+        try {
+            config.save(file);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    // ======= LOAD =======
+    public static void loadAllEnterprises() {
+        if (!ENTERPRISES_DIR.exists()) return;
+
+        for (File folder : Objects.requireNonNull(ENTERPRISES_DIR.listFiles(File::isDirectory))) {
+            File mainFile = new File(folder, "enterprise.yml");
+            File historyFile = new File(folder, "pricehistory.yml");
+            if (!mainFile.exists()) continue;
+
+            Enterprise e = loadEnterprise(mainFile);
+            loadPriceHistory(e, historyFile);
+            EnterpriseManager.getEnterpriseManager().loadEnterprise(e);
+
+        }
+    }
+
+    private static Enterprise loadEnterprise(File file) {
         YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 
-        if (!config.contains("enterprises") && !config.contains("serverent")) return;
+        String name = config.getString("name");
+        UUID ceo = UUID.fromString(config.getString("ceo"));
+        boolean serverOwned = config.getBoolean("serverOwned");
+        UUID id = UUID.fromString(file.getParentFile().getName());
 
-        for (String name : config.getConfigurationSection("enterprises").getKeys(false)) {
-            String path = "enterprises." + name;
+        Enterprise e = serverOwned ? new ServerEnterprise(name) : new Enterprise(name, ceo);
+        e.setNetWorth(config.getDouble("netWorth"));
+        e.setBankBalance(config.getDouble("bankBalance"));
+        e.addOutstandingShares(config.getInt("outstandingShares"));
+        e.setEnterpriseID(id);
 
-            UUID ceo = UUID.fromString(config.getString(path + ".ceo"));
-            Enterprise e;
-
-            boolean serverowned = config.getBoolean(path + ".serverowned");
-
-            if(serverowned){
-                e = new ServerEnterprise(name);
-            }else{
-                e = new Enterprise(name, ceo);
-            }
-
-            e.setBankBalance(config.getDouble(path + ".bankBalance"));
-            e.setNetWorth(config.getDouble(path + ".netWorth"));
-
-            Map<String, Object> membersRaw = config.getConfigurationSection(path + ".members").getValues(false);
-            for (String uuidStr : membersRaw.keySet()) {
-                Role role = Role.valueOf((String) membersRaw.get(uuidStr));
+        // Members
+        if (config.isConfigurationSection("members")) {
+            for (String uuidStr : config.getConfigurationSection("members").getKeys(false)) {
+                Role role = Role.valueOf(config.getString("members." + uuidStr));
                 e.getMembers().put(UUID.fromString(uuidStr), role);
             }
+        }
 
-            Map<String, Object> sharesRaw = config.getConfigurationSection(path + ".shares").getValues(false);
-            for (String uuidStr : sharesRaw.keySet()) {
-                double share = (Double) sharesRaw.get(uuidStr);
-                e.getShares().put(UUID.fromString(uuidStr), share);
-            }
+        // Warp
+        if (config.isConfigurationSection("warp")) {
+            Location location = config.getLocation("warp.");
+            e.setWarp(location);
+        }
 
-            String warpStr = config.getString(path + ".warp");
-            if(warpStr != null) e.setWarp(config.getLocation(path + ".warp"));
+        return e;
+    }
 
-            if(serverowned){
-                EnterpriseManager.getEnterpriseManager().createEnterprise((ServerEnterprise)e);
-            }else{
-                EnterpriseManager.getEnterpriseManager().createEnterprise(e);
+    private static void loadPriceHistory(Enterprise e, File file) {
+        if (!file.exists()) return;
+        YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+
+        if (config.isList("priceHistory")) {
+            for (Map<?, ?> entry : config.getMapList("priceHistory")) {
+                long time = ((Number) entry.get("time")).longValue();
+                double value = ((Number) entry.get("value")).doubleValue();
+                e.getPriceHistory().add(new PriceSnapshot(time, value));
             }
         }
     }

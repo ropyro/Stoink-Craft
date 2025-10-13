@@ -17,6 +17,8 @@ import com.stoinkcraft.enterprise.listeners.ChatWithdrawListener;
 import com.stoinkcraft.enterprise.listeners.PlayerJoinListener;
 import com.stoinkcraft.market.MarketManager;
 import com.stoinkcraft.enterprise.EnterpriseManager;
+import com.stoinkcraft.shares.ShareManager;
+import com.stoinkcraft.shares.ShareStorage;
 import com.stoinkcraft.utils.PhantomSpawnDisabler;
 import com.stoinkcraft.utils.StoinkExpansion;
 import net.citizensnpcs.api.CitizensAPI;
@@ -28,10 +30,12 @@ import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitRunnable;
 import xyz.xenondevs.invui.InvUI;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -44,8 +48,8 @@ public class StoinkCore extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        File enterpriseFile = new File(getDataFolder(), "enterprises.yml");
-        EnterpriseStorage.saveAllEnterprises(enterpriseFile);
+        EnterpriseStorage.saveAllEnterprises();
+        ShareStorage.saveShares();
 
         getLogger().info(String.format("[%s] Disabled Version %s", getDescription().getName(), getDescription().getVersion()));
     }
@@ -66,6 +70,7 @@ public class StoinkCore extends JavaPlugin {
 
         //Inititalize the enterprise manager class TODO: pull enterprise list from saved data
         EnterpriseManager em = new EnterpriseManager(this, econ, 2);
+        ShareManager sm = new ShareManager();
 
         if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) { //
             new StoinkExpansion(this).register(); //
@@ -78,26 +83,19 @@ public class StoinkCore extends JavaPlugin {
         MarketManager.loadMarketPrices(marketFile);
         MarketManager.startRotatingBoosts(this);
 
-        File enterpriseFile = new File(getDataFolder(), "enterprises.yml");
-        if (!enterpriseFile.exists()) {
-            try {
-                enterpriseFile.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        EnterpriseStorage.loadAllEnterprises(enterpriseFile);
+        EnterpriseStorage.loadAllEnterprises();
         EnterpriseManager.startDailyTaxes(this);
+
+        ShareStorage.loadShares();
 
         if(EnterpriseManager.getEnterpriseManager().getEnterpriseList()
                 .stream()
-                .filter(e -> e instanceof ServerEnterprise)
-                .toList().isEmpty()){
+                .noneMatch(e -> e instanceof ServerEnterprise)){
+            getLogger().info("Adding server enterprises...");
             EnterpriseManager.getEnterpriseManager().createEnterprise(new ServerEnterprise("FarmerLLC"));
             EnterpriseManager.getEnterpriseManager().createEnterprise(new ServerEnterprise("MinerCorp"));
             EnterpriseManager.getEnterpriseManager().createEnterprise(new ServerEnterprise("HunterInc"));
-            EnterpriseStorage.saveAllEnterprises(enterpriseFile);
+            EnterpriseStorage.saveAllEnterprises();
         }
 
         //Register /enterprise command + tap completer
@@ -120,7 +118,9 @@ public class StoinkCore extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new PhantomSpawnDisabler(), this);
         getServer().getPluginManager().registerEvents(new BoostNoteInteractionListener(), this);
 
-        Bukkit.getScheduler().runTaskTimer(this, () -> StoinkCore.updateTopCeoNpcs(), 20L, 20L * 60 * 10); // every 10 min
+        startAutoSaveTask();
+        startPriceSnapshotRecording();
+        startAutoTopCEOUpdate();
 
         getLogger().info("StoinkCore loaded.");
     }
@@ -129,33 +129,73 @@ public class StoinkCore extends JavaPlugin {
         return INSTANCE;
     }
 
-    public static void updateTopCeoNpcs() {
-        List<Enterprise> sortedEnterprises = EnterpriseManager
-                .getEnterpriseManager()
-                .getEnterpriseList()
-                .stream()
-                .sorted(Comparator.comparingDouble(Enterprise::getNetWorth).reversed())
-                .collect(Collectors.toList());
-
-        for (int i = 1; i <= 3; i++) {
-            NPC npc = getNpcByPosition(i);
-            if (npc == null) continue;
-            if (sortedEnterprises.size() < i) continue;
-
-            Enterprise ent = sortedEnterprises.get(i - 1);
-            OfflinePlayer ceo = Bukkit.getOfflinePlayer(ent.getCeo());
-            String ceoName = ceo.getName() != null ? ceo.getName() : "CEO";
-            String displayName = "#" + i + " " + ChatColor.GREEN + ChatColor.BOLD + ent.getName();
-
-            // Set skin
-            SkinTrait skin = npc.getOrAddTrait(SkinTrait.class);
-            skin.setSkinName(ceoName);
-            skin.run();
-
-            // Set name
-            npc.setName(displayName);
-        }
+    private void startPriceSnapshotRecording(){
+        Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> {
+            EnterpriseManager.getEnterpriseManager().recordPriceSnapshots();
+        }, 0L, 20L * 60 * 5);
     }
+
+    private void startAutoSaveTask() {
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                try {
+                    EnterpriseStorage.saveAllEnterprises();
+                    ShareStorage.saveShares();
+                    getLogger().info("[AutoSave] Enterprises and shares saved successfully.");
+                } catch (Exception e) {
+                    getLogger().severe("[AutoSave] Failed to save enterprises/shares: " + e.getMessage());
+                    e.printStackTrace();
+                }
+            }
+        }.runTaskTimerAsynchronously(this, 20L * 60L * 5L, 20L * 60L * 5L); // every 5 minutes
+    }
+
+    public void updateTopCeoNpcs() {
+        // Run async for data sorting and lookups
+        Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
+            List<Enterprise> sorted = EnterpriseManager
+                    .getEnterpriseManager()
+                    .getEnterpriseList()
+                    .stream()
+                    .sorted(Comparator.comparingDouble(Enterprise::getNetWorth).reversed())
+                    .collect(Collectors.toList());
+
+            List<TopCeoData> top3 = new ArrayList<>();
+            for (int i = 1; i <= 3 && i <= sorted.size(); i++) {
+                Enterprise e = sorted.get(i - 1);
+                OfflinePlayer ceo = Bukkit.getOfflinePlayer(e.getCeo());
+                String ceoName = ceo.getName() != null ? ceo.getName() : "CEO";
+                String displayName = "#" + i + " " + ChatColor.GREEN + ChatColor.BOLD + e.getName();
+                top3.add(new TopCeoData(i, ceoName, displayName));
+            }
+
+            // Update NPCs safely on the main thread
+            Bukkit.getScheduler().runTask(this, () -> {
+                for (TopCeoData data : top3) {
+                    NPC npc = getNpcByPosition(data.position());
+                    if (npc == null) continue;
+
+                    SkinTrait skin = npc.getOrAddTrait(SkinTrait.class);
+                    skin.setSkinName(data.ceoName());
+                    skin.run();
+
+                    npc.setName(data.displayName());
+                }
+                Bukkit.getLogger().info("§aTop CEO NPCs updated.");
+            });
+        });
+    }
+
+    /**
+     * Starts automatic updates every 10 minutes.
+     */
+    public void startAutoTopCEOUpdate() {
+        Bukkit.getScheduler().runTaskTimerAsynchronously(this, this::updateTopCeoNpcs, 20L, 20L * 60 * 10);
+    }
+
+    private record TopCeoData(int position, String ceoName, String displayName) {}
+
 
     public static NPC getNpcByPosition(int position) {
         for (NPC npc : CitizensAPI.getNPCRegistry()) {
