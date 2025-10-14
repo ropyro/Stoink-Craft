@@ -1,5 +1,7 @@
 package com.stoinkcraft;
 
+import com.stoinkcraft.daily.DailyCMD;
+import com.stoinkcraft.daily.DailyManager;
 import com.stoinkcraft.market.boosters.BoostNoteInteractionListener;
 import com.stoinkcraft.market.MarketCMD;
 import com.stoinkcraft.enterprise.commands.TopCeoCMD;
@@ -68,6 +70,8 @@ public class StoinkCore extends JavaPlugin {
             return;
         }
 
+        DailyManager dm = new DailyManager();
+
         //Inititalize the enterprise manager class TODO: pull enterprise list from saved data
         EnterpriseManager em = new EnterpriseManager(this, econ, 2);
         ShareManager sm = new ShareManager();
@@ -108,6 +112,7 @@ public class StoinkCore extends JavaPlugin {
             getCommand("serverenterprise").setTabCompleter(new ServerEntTabCompleter());
             getCommand("topceo").setExecutor(new TopCeoCMD());
             getCommand("shares").setExecutor(new SharesCMD());
+            getCommand("daily").setExecutor(new DailyCMD());
         });
 
         //Register Earning listeners

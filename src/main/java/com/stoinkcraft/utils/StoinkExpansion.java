@@ -69,14 +69,14 @@ public class StoinkExpansion extends PlaceholderExpansion {
                 if(e == null){
                     return " ";
                 }
-                return "$" + ChatUtils.formatMoney(e.getBankBalance());
+                return "$" + ChatUtils.formatMoneyNoCents(e.getBankBalance());
             case "networth":
                 if(e == null){
                     return " ";
                 }
-                return "$" + ChatUtils.formatMoney(e.getNetWorth());
+                return "$" + ChatUtils.formatMoneyNoCents(e.getNetWorth());
             case "player_networth":
-                return "$" + ChatUtils.formatMoney(PlayerUtils.getPlayerNetworth(player));
+                return "$" + ChatUtils.formatMoneyNoCents(PlayerUtils.getPlayerNetworth(player));
             default:
                 return null;
         }

@@ -16,4 +16,6 @@ public class SCConstants {
     public static double ENTERPRISE_DAILY_TAX = 0.35;
     public static double PRICE_BOOST = 2.25;
     public static int MAX_SHARES = 100;
+    public static final long DAY_MILLIS = 24 * 60 * 60 * 1000; // 1 day in milliseconds
+
 }

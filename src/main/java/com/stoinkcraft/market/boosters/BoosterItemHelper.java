@@ -51,6 +51,7 @@ public class BoosterItemHelper {
                 ? (seconds / 60) + "m"
                 : seconds + "s";
 
+
         // Display name
         meta.setDisplayName(ChatColor.GOLD + "" + ChatColor.BOLD + multiplier + "x Booster (" + durationText + ")");
 

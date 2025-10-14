@@ -77,6 +77,12 @@ public class EnterpriseStorage {
         Map<String, String> memberMap = new HashMap<>();
         e.getMembers().forEach((uuid, role) -> memberMap.put(uuid.toString(), role.name()));
         config.set("members", memberMap);
+        
+//        long timeRemaining = e.getActiveBooster().getTimeRemaining();
+//        double multiplier = e.getActiveBooster().getMultiplier();
+//
+//        config.set("activebooster.timeRemaining", timeRemaining);
+//        config.set("activebooster.multiplier", multiplier);
 
         // Warp
         if (e.getWarp() != null) {
