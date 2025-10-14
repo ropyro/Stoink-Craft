@@ -24,6 +24,9 @@ commands:
     usage: /shares
     description: Opens your share portfolio
     aliases: ['share', 'stonk', 'stonks']
+  daily:
+    usage: /daily
+    description: Opens the daily reward menu
 
 permissions:
   stoinkcore.admin.*:
