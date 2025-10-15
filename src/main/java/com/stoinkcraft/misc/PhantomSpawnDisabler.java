@@ -1,4 +1,4 @@
-package com.stoinkcraft.utils;
+package com.stoinkcraft.misc;
 
 import org.bukkit.entity.EntityType;
 import org.bukkit.event.EventHandler;

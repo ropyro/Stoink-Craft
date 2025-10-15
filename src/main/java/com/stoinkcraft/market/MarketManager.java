@@ -18,7 +18,7 @@ import java.util.*;
 
 public class MarketManager {
 
-    private static final List<TaskValue> boostedPrices = new ArrayList<>();
+    private static final Map<TaskValue, JobType> boostedPrices = new HashMap<>();
     private static final List<ItemValue> resourcePrices = new ArrayList<>();
     private static final List<EntityValue> huntingPrices = new ArrayList<>();
     private static final List<ItemValue> fishingPrices = new ArrayList<>();
@@ -49,7 +49,13 @@ public class MarketManager {
 
             int boostCount = Math.min(4, allItems.size());
             for (int i = 0; i < boostCount; i++) {
-                boostedPrices.add(allItems.get(i));
+                if(resourcePrices.contains(allItems.get(i))){
+                    boostedPrices.put(allItems.get(i), JobType.RESOURCE_COLLECTION);
+                }else if(huntingPrices.contains(allItems.get(i))){
+                    boostedPrices.put(allItems.get(i), JobType.HUNTING);
+                }else if(fishingPrices.contains(allItems.get(i))){
+                    boostedPrices.put(allItems.get(i), JobType.FISHING);
+                }
             }
 
             // Schedule the broadcast back on the main thread
@@ -115,7 +121,7 @@ public class MarketManager {
     }
 
 
-    public static List<TaskValue> getBoostedPrices(){
+    public static Map<TaskValue, JobType> getBoostedPrices(){
         return boostedPrices;
     }
 
@@ -135,7 +141,7 @@ public class MarketManager {
                 .findFirst()
                 .orElse(0.0);
 
-        boolean isBoosted = boostedPrices.stream()
+        boolean isBoosted = boostedPrices.keySet().stream()
                 .anyMatch(e -> e.getMaterialValue().equals(material));
 
         if (isBoosted) {
@@ -157,7 +163,7 @@ public class MarketManager {
 
     public static double getEntityPrice(EntityType entityType){
         double value = huntingPrices.stream().filter(e -> e.getEntityType().equals(entityType)).findFirst().get().getValue();
-        if(boostedPrices.stream().filter(e -> e instanceof EntityValue).map(e -> (EntityValue)e).toList().stream().filter(entityValue -> entityValue.getEntityType().equals(entityType)).toList().size() > 0){
+        if(boostedPrices.keySet().stream().filter(e -> e instanceof EntityValue).map(e -> (EntityValue)e).toList().stream().filter(entityValue -> entityValue.getEntityType().equals(entityType)).toList().size() > 0){
             value *= SCConstants.PRICE_BOOST;
         }
         return value;

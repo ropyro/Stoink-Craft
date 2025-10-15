@@ -3,6 +3,7 @@ package com.stoinkcraft.enterprise.commands.enterprisecmd.subcommands;
 import com.stoinkcraft.enterprise.commands.SubCommand;
 import com.stoinkcraft.enterprise.Enterprise;
 import com.stoinkcraft.enterprise.EnterpriseManager;
+import com.stoinkcraft.utils.ChatUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
@@ -36,12 +37,12 @@ public class InfoSubCommand implements SubCommand {
         }
 
         if (e == null) {
-            player.sendMessage("§cEnterprise not found or you're not in one.");
+            ChatUtils.sendMessage(player,"§cEnterprise not found or you're not in one.");
             return;
         }
 
-        player.sendMessage("§a== Enterprise Info: §e" + e.getName() + "§a ==");
-        player.sendMessage("§7CEO: " + getNameFromUUID(e.getCeo()));
+        ChatUtils.sendMessage(player,"§a== Enterprise Info: §e" + e.getName() + "§a ==");
+        ChatUtils.sendMessage(player,"§7CEO: " + getNameFromUUID(e.getCeo()));
 
         List<UUID> employees = e.getEmployees();
         if (!employees.isEmpty()) {
@@ -49,11 +50,11 @@ public class InfoSubCommand implements SubCommand {
             for (UUID uuid : employees) {
                 builder.append(getNameFromUUID(uuid)).append(", ");
             }
-            player.sendMessage(builder.substring(0, builder.length() - 2)); // remove last comma
+            ChatUtils.sendMessage(player,builder.substring(0, builder.length() - 2)); // remove last comma
         }
 
-        player.sendMessage("§7Bank Balance: §a$" + e.getBankBalance());
-        player.sendMessage("§7Net Worth: §a$" + e.getNetWorth());
+        ChatUtils.sendMessage(player,"§7Bank Balance: §a$" + e.getBankBalance());
+        ChatUtils.sendMessage(player,"§7Net Worth: §a$" + e.getNetWorth());
     }
 
     private String getNameFromUUID(UUID uuid) {

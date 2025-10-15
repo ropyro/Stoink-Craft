@@ -3,6 +3,7 @@ package com.stoinkcraft.enterprise.commands.enterprisecmd.subcommands;
 import com.stoinkcraft.enterprise.commands.SubCommand;
 import com.stoinkcraft.enterprise.Enterprise;
 import com.stoinkcraft.enterprise.EnterpriseManager;
+import com.stoinkcraft.utils.ChatUtils;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -26,17 +27,17 @@ public class ResignSubCommand implements SubCommand {
         Enterprise e = EnterpriseManager.getEnterpriseManager().getEnterpriseByMember(player.getUniqueId());
 
         if (e == null) {
-            player.sendMessage("§cYou're not in an enterprise.");
+            ChatUtils.sendMessage(player,"§cYou're not in an enterprise.");
             return;
         }
 
         // Prevent CEO from resigning for now (later: require transfer of ownership)
         if (e.getCeo().equals(player.getUniqueId())) {
-            player.sendMessage("§cYou cannot resign as CEO. Transfer or disband the company first.");
+            ChatUtils.sendMessage(player,"§cYou cannot resign as CEO. Transfer or disband the company first.");
             return;
         }
 
         e.resignMember(player.getUniqueId());
-        player.sendMessage("§aYou have resigned from §e" + e.getName());
+        ChatUtils.sendMessage(player,"§aYou have resigned from §e" + e.getName());
     }
 }

@@ -29,17 +29,17 @@ public class CreateSubCommand implements SubCommand {
         Player player = (Player) sender;
 
         if (args.length < 2) {
-            player.sendMessage(ChatColor.YELLOW + "Usage: " + getUsage());
+            ChatUtils.sendMessage(player,ChatColor.YELLOW + "Usage: " + getUsage());
             return;
         }
 
         if (EnterpriseManager.getEnterpriseManager().isInEnterprise(player.getUniqueId())) {
-            player.sendMessage(ChatColor.RED + "You're already in an enterprise. Resign first.");
+            ChatUtils.sendMessage(player,ChatColor.RED + "You're already in an enterprise. Resign first.");
             return;
         }
 
         if(StoinkCore.getEconomy().getBalance(player) < SCConstants.ENTERPRISE_FOUNDING_COST){
-            player.sendMessage("Insufficient funds. Founding enterprise costs: " + ChatUtils.formatMoney(SCConstants.ENTERPRISE_FOUNDING_COST));
+            ChatUtils.sendMessage(player,"Insufficient funds. Founding enterprise costs: " + ChatUtils.formatMoney(SCConstants.ENTERPRISE_FOUNDING_COST));
             return;
         }
 
@@ -54,6 +54,6 @@ public class CreateSubCommand implements SubCommand {
 
         StoinkCore.getEconomy().withdrawPlayer(player, SCConstants.ENTERPRISE_FOUNDING_COST);
 
-        player.sendMessage(ChatColor.GREEN + "Enterprise '" + name + "' created.");
+        ChatUtils.sendMessage(player,ChatColor.GREEN + "Enterprise '" + name + "' created.");
     }
 }

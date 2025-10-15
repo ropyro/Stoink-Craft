@@ -19,10 +19,11 @@ import com.stoinkcraft.enterprise.listeners.ChatWithdrawListener;
 import com.stoinkcraft.enterprise.listeners.PlayerJoinListener;
 import com.stoinkcraft.market.MarketManager;
 import com.stoinkcraft.enterprise.EnterpriseManager;
+import com.stoinkcraft.misc.JoinMOTDListener;
 import com.stoinkcraft.shares.SharesCMD;
 import com.stoinkcraft.shares.ShareManager;
 import com.stoinkcraft.shares.ShareStorage;
-import com.stoinkcraft.utils.PhantomSpawnDisabler;
+import com.stoinkcraft.misc.PhantomSpawnDisabler;
 import com.stoinkcraft.utils.StoinkExpansion;
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.npc.NPC;
@@ -123,6 +124,7 @@ public class StoinkCore extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new ChatDepositListener(this), this);
         getServer().getPluginManager().registerEvents(new PhantomSpawnDisabler(), this);
         getServer().getPluginManager().registerEvents(new BoostNoteInteractionListener(), this);
+        getServer().getPluginManager().registerEvents(new JoinMOTDListener(), this);
 
         startAutoSaveTask();
         startPriceSnapshotRecording();

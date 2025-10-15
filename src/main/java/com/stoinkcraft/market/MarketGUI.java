@@ -43,17 +43,20 @@ public class MarketGUI {
                 .addIngredient('#', new SimpleItem(new ItemBuilder(Material.BLACK_STAINED_GLASS_PANE)
                         .setDisplayName(" ")))
                 .addIngredient('?', new SimpleItem(new ItemBuilder(Material.CLOCK)
-                        .setDisplayName(" * Next Product Rotation: 23h 22m 10s *")
+                        .setDisplayName(" §a* Next Product Rotation: 23h 22m 10s *")
                         .addLoreLines(" ")
-                        .addLoreLines("The four items below are currently")
-                        .addLoreLines("boosted in value! To see all other")
-                        .addLoreLines("available jobs select a category below.")))
+                        .addLoreLines("§7The four tasks below are currently")
+                        .addLoreLines("§7boosted in value! To see all other")
+                        .addLoreLines("§7available jobs select a category below.")))
                 .addIngredient('?', getAutoUpdateItem())
                 .addIngredient('F', new AbstractItem() {
                     @Override
                     public ItemProvider getItemProvider() {
                         return new ItemBuilder(Material.SALMON)
                                 .setDisplayName(" §aFishing Jobs ")
+                                .addLoreLines(" ")
+                                .addLoreLines("§7Fishing tasks require you,")
+                                .addLoreLines("§7to fish these items with a rod!")
                                 .addLoreLines(" ")
                                 .addLoreLines("§a(!) Click here to view values (!)");
                     }
@@ -68,6 +71,9 @@ public class MarketGUI {
                         return new ItemBuilder(Material.IRON_SWORD)
                                 .setDisplayName(" §aHunting Jobs ")
                                 .addLoreLines(" ")
+                                .addLoreLines("§7Hunting tasks require you,")
+                                .addLoreLines("§7to kill these entities!")
+                                .addLoreLines(" ")
                                 .addLoreLines("§a(!) Click here to view values (!)");
                     }
                     @Override
@@ -81,6 +87,10 @@ public class MarketGUI {
                         return new ItemBuilder(Material.GRASS_BLOCK)
                                 .setDisplayName(" §aResource Collection Jobs ")
                                 .addLoreLines(" ")
+                                .addLoreLines("§7Resource collection tasks require you,")
+                                .addLoreLines("§7to collect these items!")
+                                .addLoreLines("§7Mining/Farming/Wood Chopping")
+                                .addLoreLines(" ")
                                 .addLoreLines("§a(!) Click here to view values (!)");
                     }
                     @Override
@@ -90,7 +100,7 @@ public class MarketGUI {
                 })
                 .build();
         try{
-            MarketManager.getBoostedPrices().stream()
+            MarketManager.getBoostedPrices().keySet().stream()
                     .limit(4)
                     .forEach(item -> {
                         ItemStack boostedItemStack;
@@ -109,6 +119,12 @@ public class MarketGUI {
                                 .setDisplayName(item.getDisplayName())
                                 .addLoreLines(" ");
 
+                        switch(MarketManager.getBoostedPrices().get(item)){
+                            case FISHING -> boostedItem.addLoreLines("§7Fishing Job");
+                            case HUNTING -> boostedItem.addLoreLines("§7Hunting Job");
+                            case RESOURCE_COLLECTION -> boostedItem.addLoreLines("§7Resource Collection");
+                        }
+
                         double value = 0.0;
 
                         if (item instanceof EntityValue) {
@@ -117,8 +133,11 @@ public class MarketGUI {
                             value = MarketManager.getItemPrice(item.getMaterialValue());
                         }
 
-                        boostedItem.addLoreLines("Regular Value: $" + ChatUtils.formatMoney(value / SCConstants.PRICE_BOOST));
-                        boostedItem.addLoreLines("Boosted Value: $" + ChatUtils.formatMoney(value));
+                        boostedItem.addLoreLines(" ");
+                        boostedItem.addLoreLines("§7Boost Multiplier: §a" + SCConstants.PRICE_BOOST + "x");
+                        boostedItem.addLoreLines(" ");
+                        boostedItem.addLoreLines("§7Regular Value: §c§o$" + ChatUtils.formatMoney(value / SCConstants.PRICE_BOOST));
+                        boostedItem.addLoreLines("§7Boosted Value: §a$" + ChatUtils.formatMoney(value));
 
                         gui.addItems(new SimpleItem(boostedItem));
                     });
@@ -136,11 +155,11 @@ public class MarketGUI {
     @NotNull
     private AutoUpdateItem getAutoUpdateItem() {
         AutoUpdateItem clockItem = new AutoUpdateItem(20, () -> new ItemBuilder(Material.CLOCK)
-                .setDisplayName(" * Next Product Rotation: " + MarketManager.getTimeUntilNextRotation() + " *")
+                .setDisplayName(" §a* Next Product Rotation: " + MarketManager.getTimeUntilNextRotation() + " *")
                 .addLoreLines(" ")
-                .addLoreLines("The four items below are currently")
-                .addLoreLines("boosted in value! To see all other")
-                .addLoreLines("available jobs select a category below."));
+                .addLoreLines("§7The four tasks below are currently")
+                .addLoreLines("§7boosted in value! To see all other")
+                .addLoreLines("§7available jobs select a category below."));
         clockItem.start();
         return clockItem;
     }
@@ -175,15 +194,14 @@ public class MarketGUI {
                         .forEach(entity -> gui.addItems(new SimpleItem(new ItemBuilder(getItemFromEntity(entity.getEntityType()))
                                 .setDisplayName(entity.getDisplayName())
                                 .addLoreLines(" ")
-                                .addLoreLines(" Value: $" + ChatUtils.formatMoney(MarketManager.getPrice(entity))))));
+                                .addLoreLines(" §7Value: §a$" + ChatUtils.formatMoney(MarketManager.getPrice(entity))))));
                 break;
-
             case FISHING:
                 MarketManager.getFishingPrices().stream()
                         .forEach(item -> gui.addItems(new SimpleItem(new ItemBuilder(item.getMaterial())
                                 .setDisplayName(item.getDisplayName())
                                 .addLoreLines(" ")
-                                .addLoreLines(" Value: $" + ChatUtils.formatMoney(MarketManager.getPrice(item))))));
+                                .addLoreLines(" §7Value: §a$" + ChatUtils.formatMoney(MarketManager.getPrice(item))))));
                 break;
 
             case RESOURCE_COLLECTION:
@@ -191,7 +209,7 @@ public class MarketGUI {
                         .forEach(item -> gui.addItems(new SimpleItem(new ItemBuilder(item.getMaterial())
                                 .setDisplayName(item.getDisplayName())
                                 .addLoreLines(" ")
-                                .addLoreLines(" Value: $" + ChatUtils.formatMoney(MarketManager.getPrice(item))))));
+                                .addLoreLines(" §7Value: §a$" + ChatUtils.formatMoney(MarketManager.getPrice(item))))));
                 break;
         }
 

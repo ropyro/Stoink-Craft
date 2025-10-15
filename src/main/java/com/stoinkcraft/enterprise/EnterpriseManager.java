@@ -3,6 +3,7 @@ package com.stoinkcraft.enterprise;
 import com.stoinkcraft.StoinkCore;
 import com.stoinkcraft.market.boosters.Booster;
 import com.stoinkcraft.shares.ShareManager;
+import com.stoinkcraft.utils.ChatUtils;
 import com.stoinkcraft.utils.SCConstants;
 import net.citizensnpcs.api.npc.NPC;
 import net.milkbowl.vault.economy.Economy;
@@ -56,7 +57,7 @@ public class EnterpriseManager {
                 enterprise.getMembers().keySet().forEach(uuid -> {
                     Player online = Bukkit.getPlayer(uuid);
                     if (online != null && online.isOnline()) {
-                        online.sendMessage(ChatColor.GOLD + "" + booster.getMultiplier() + "x booster has expired!");
+                        ChatUtils.sendMessage(online,ChatColor.GOLD + "" + booster.getMultiplier() + "x booster has expired!");
                     }
                 });
             }
@@ -70,7 +71,7 @@ public class EnterpriseManager {
         for (UUID uuid : enterprise.getMembers().keySet()) {
             Player p = Bukkit.getPlayer(uuid);
             if (p != null && p.isOnline()) {
-                p.sendMessage(ChatColor.RED + "Your enterprise '" + enterprise.getName() + "' has been disbanded.");
+                ChatUtils.sendMessage(p,ChatColor.RED + "Your enterprise '" + enterprise.getName() + "' has been disbanded.");
             }
         }
 
@@ -99,12 +100,12 @@ public class EnterpriseManager {
             Enterprise e = getEnterpriseByMember(uuid);
             if(e.getMemberRole(uuid).equals(Role.CEO)){
                 e.setWarp(player.getLocation());
-                player.sendMessage(e.getName() + "'s warp has been set!");
+                ChatUtils.sendMessage(player,e.getName() + "'s warp has been set!");
                 EnterpriseStorage.saveAllEnterprises();
                 return true;
             }
         }
-        player.sendMessage("You must be the CEO of an enterprise to set a warp!");
+        ChatUtils.sendMessage(player,"You must be the CEO of an enterprise to set a warp!");
         return false;
     }
 
@@ -114,12 +115,12 @@ public class EnterpriseManager {
             Enterprise e = getEnterpriseByMember(uuid);
             if(e.getMemberRole(uuid).equals(Role.CEO)){
                 e.setWarp(null);
-                player.sendMessage(e.getName() + "'s warp has been deleted!");
+                ChatUtils.sendMessage(player,e.getName() + "'s warp has been deleted!");
                 EnterpriseStorage.saveAllEnterprises();
                 return true;
             }
         }
-        player.sendMessage("You must be the CEO of an enterprise to delete a warp!");
+        ChatUtils.sendMessage(player,"You must be the CEO of an enterprise to delete a warp!");
         return false;
     }
 

@@ -1,6 +1,12 @@
 package com.stoinkcraft.utils;
 
+import org.bukkit.entity.Player;
+
 public class ChatUtils {
+
+    public static void sendMessage(Player player, String message){
+        player.sendMessage("§b§lStonk §8» §f" + message);
+    }
 
     public static String formatMoney(double value) {
         if (value >= 1_000_000_000D) {

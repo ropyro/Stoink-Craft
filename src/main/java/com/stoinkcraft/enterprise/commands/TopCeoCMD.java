@@ -3,6 +3,7 @@ package com.stoinkcraft.enterprise.commands;
 import com.stoinkcraft.StoinkCore;
 import com.stoinkcraft.enterprise.Enterprise;
 import com.stoinkcraft.enterprise.EnterpriseManager;
+import com.stoinkcraft.utils.SCConstants;
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.trait.LookClose;
@@ -29,6 +30,8 @@ public class TopCeoCMD implements CommandExecutor {
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player)) return true;
         Player player = (Player) sender;
+
+        if(!player.hasPermission(SCConstants.TOPCEO_COMMAND)) return true;
 
         // /topceo update
         if (args.length == 1 && args[0].equalsIgnoreCase("update")) {

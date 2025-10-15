@@ -3,6 +3,7 @@ package com.stoinkcraft.enterprise.commands.enterprisecmd.subcommands;
 import com.stoinkcraft.enterprise.commands.SubCommand;
 import com.stoinkcraft.enterprise.Enterprise;
 import com.stoinkcraft.enterprise.EnterpriseManager;
+import com.stoinkcraft.utils.ChatUtils;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -49,7 +50,7 @@ public class JoinSubCommand implements SubCommand {
 
         // Already in an enterprise?
         if (em.isInEnterprise(playerUUID)) {
-            player.sendMessage("§cYou're already in an enterprise. Use /enterprise resign first.");
+            ChatUtils.sendMessage(player,"§cYou're already in an enterprise. Use /enterprise resign first.");
             return;
         }
 
@@ -62,15 +63,15 @@ public class JoinSubCommand implements SubCommand {
                 .collect(Collectors.toList());
 
         if (invitedTo.isEmpty()) {
-            player.sendMessage("§cYou have no pending enterprise invites.");
+            ChatUtils.sendMessage(player,"§cYou have no pending enterprise invites.");
             return;
         }
 
         // If no enterprise name given and more than 1 invite → list choices
         if (args.length == 1 && invitedTo.size() > 1) {
-            player.sendMessage("§eYou have multiple invites. Use /enterprise join <name> to choose.");
+            ChatUtils.sendMessage(player,"§eYou have multiple invites. Use /enterprise join <name> to choose.");
             for (Enterprise e : invitedTo) {
-                player.sendMessage("§7 - §a" + e.getName());
+                ChatUtils.sendMessage(player,"§7 - §a" + e.getName());
             }
             return;
         }
@@ -92,13 +93,13 @@ public class JoinSubCommand implements SubCommand {
             }
 
             if (toJoin == null) {
-                player.sendMessage("§cYou're not invited to an enterprise named §e" + targetName);
+                ChatUtils.sendMessage(player,"§cYou're not invited to an enterprise named §e" + targetName);
                 return;
             }
         }
 
         if (toJoin == null) {
-            player.sendMessage("§cInvalid join command usage. Try /enterprise join <enterpriseName>");
+            ChatUtils.sendMessage(player,"§cInvalid join command usage. Try /enterprise join <enterpriseName>");
             return;
         }
 
@@ -106,6 +107,6 @@ public class JoinSubCommand implements SubCommand {
         toJoin.hireEmployee(playerUUID);
         em.clearInvite(playerUUID, toJoin.getCeo()); // Optional: remove only this invite
 
-        player.sendMessage("§aYou have joined §e" + toJoin.getName() + "§a! Welcome to the grind.");
+        ChatUtils.sendMessage(player,"§aYou have joined §e" + toJoin.getName() + "§a! Welcome to the grind.");
     }
 }

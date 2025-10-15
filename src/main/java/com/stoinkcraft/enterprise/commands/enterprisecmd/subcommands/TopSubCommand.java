@@ -4,6 +4,7 @@ import com.stoinkcraft.enterprise.commands.SubCommand;
 import com.stoinkcraft.enterprise.Enterprise;
 import com.stoinkcraft.enterprise.EnterpriseManager;
 import com.stoinkcraft.enterprise.guis.TopEnterprisesGUI;
+import com.stoinkcraft.utils.ChatUtils;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -36,7 +37,7 @@ public class TopSubCommand implements SubCommand {
 
 
         if (enterprises.isEmpty()) {
-            player.sendMessage("§7There are currently no enterprises.");
+            ChatUtils.sendMessage(player,"§7There are currently no enterprises.");
             return;
         }
 

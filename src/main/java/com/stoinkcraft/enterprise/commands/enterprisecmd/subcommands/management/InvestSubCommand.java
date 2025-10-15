@@ -4,6 +4,7 @@ import com.stoinkcraft.enterprise.commands.SubCommand;
 import com.stoinkcraft.enterprise.Enterprise;
 import com.stoinkcraft.enterprise.EnterpriseManager;
 import com.stoinkcraft.enterprise.Role;
+import com.stoinkcraft.utils.ChatUtils;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -33,15 +34,15 @@ public class InvestSubCommand implements SubCommand {
                         if(e.getBankBalance() >= value){
                             e.increaseNetworth(Double.valueOf(args[1]));
                             e.decreaseBankBalance(value);
-                            player.sendMessage("Invested " + args[1] + " from bank funds into networth!");
+                            ChatUtils.sendMessage(player,"Invested " + args[1] + " from bank funds into networth!");
                         }else{
-                            player.sendMessage("Enterprise has insufficient funds.");
+                            ChatUtils.sendMessage(player,"Enterprise has insufficient funds.");
                         }
                 }else{
-                    player.sendMessage("Invalid usage: " + getUsage());
+                    ChatUtils.sendMessage(player,"Invalid usage: " + getUsage());
                 }
             }else{
-                player.sendMessage("Only the CEO can invest bank funds!");
+                ChatUtils.sendMessage(player,"Only the CEO can invest bank funds!");
             }
         }
     }

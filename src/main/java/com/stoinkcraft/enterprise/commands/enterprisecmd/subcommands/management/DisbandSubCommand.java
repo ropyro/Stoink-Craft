@@ -4,6 +4,7 @@ import com.stoinkcraft.enterprise.commands.SubCommand;
 import com.stoinkcraft.enterprise.Enterprise;
 import com.stoinkcraft.enterprise.EnterpriseManager;
 import com.stoinkcraft.enterprise.Role;
+import com.stoinkcraft.utils.ChatUtils;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -29,7 +30,7 @@ public class DisbandSubCommand implements SubCommand {
             if(e.getMemberRole(player.getUniqueId()).equals(Role.CEO)){
                 em.disband(e);
             }else{
-                player.sendMessage("You must be the CEO to disband the enterprise!");
+                ChatUtils.sendMessage(player,"You must be the CEO to disband the enterprise!");
             }
         }
     }
