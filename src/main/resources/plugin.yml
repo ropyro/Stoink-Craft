@@ -27,6 +27,10 @@ commands:
   daily:
     usage: /daily
     description: Opens the daily reward menu
+  pmenu:
+    usage: /pmenu
+    description: Opens the player upgrade menua
+    aliases: ['playermenu', 'playerupgrades', 'upgrades']
 
 permissions:
   stoinkcore.admin.*:
