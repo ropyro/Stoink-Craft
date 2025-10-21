@@ -1,11 +1,14 @@
 package com.stoinkcraft.enterprise.commands.serverenterprisecmd;
 
 import com.stoinkcraft.StoinkCore;
+import com.stoinkcraft.enterprise.EnterpriseStorage;
 import com.stoinkcraft.market.boosters.BoosterItemHelper;
 import com.stoinkcraft.enterprise.Enterprise;
 import com.stoinkcraft.enterprise.EnterpriseManager;
 import com.stoinkcraft.enterprise.ServerEnterprise;
 import com.stoinkcraft.shares.ShareManager;
+import com.stoinkcraft.shares.ShareStorage;
+import com.stoinkcraft.utils.ChatUtils;
 import com.stoinkcraft.utils.SCConstants;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -32,9 +35,9 @@ public class ServerEntCMD implements CommandExecutor {
                    long duration = Long.parseLong(args[3]);
                    Player target = Bukkit.getPlayer(args[1]);
                    target.getInventory().addItem(BoosterItemHelper.getBoosterItemStack(multiplier, duration));
-                   target.sendMessage("You have received an enterprise booster!");
+                   ChatUtils.sendMessage(target, "§aYou have received an enterprise booster!");
                }else{
-                   sender.sendMessage("Invalid usage: /serverent givebooster <player> <multiplier> <duration>");
+                   sender.sendMessage("§cInvalid usage: /serverent givebooster <player> <multiplier> <duration>");
                }
                return true;
        }
@@ -43,13 +46,17 @@ public class ServerEntCMD implements CommandExecutor {
        Player player = (Player)sender;
 
        if(!player.hasPermission(SCConstants.SERVER_ENT_COMMAND)){
-           player.sendMessage("Error you do not have permission for this command.");
+           ChatUtils.sendMessage(player, "§cError you do not have permission for this command.");
            return true;
        }
 
        if(args.length == 0){
            player.sendMessage("== Server Admin Help ==");
-           player.sendMessage( " - /serverenterprise setwarp <enterprise> - sets the warp for the enterprise");
+           player.sendMessage( " - /se setwarp <enterprise> - sets the warp for the enterprise");
+           player.sendMessage(" - /se updateceo");
+           player.sendMessage(" - /se pricesnapshot");
+           player.sendMessage(" - /se updateceo");
+           player.sendMessage( " - /se save - saves enterprise data");
        }else
        if(args.length >= 1){
            if(args[0].equalsIgnoreCase("setwarp")){
@@ -77,6 +84,19 @@ public class ServerEntCMD implements CommandExecutor {
            }
            if(args[0].equalsIgnoreCase("pricesnapshot")){
                EnterpriseManager.getEnterpriseManager().recordPriceSnapshots();
+               return true;
+           }
+           if(args[0].equalsIgnoreCase("save")){
+               try {
+                   EnterpriseStorage.saveAllEnterprises();
+                   ShareStorage.saveShares();
+                   Bukkit.getLogger().info("[AutoSave] Enterprises and shares saved successfully.");
+                   ChatUtils.sendMessage(player, "Enterprises & shares saved successfully!");
+               } catch (Exception e) {
+                   Bukkit.getLogger().severe("[AutoSave] Failed to save enterprises/shares: " + e.getMessage());
+                   e.printStackTrace();
+                   ChatUtils.sendMessage(player, "Error occurred while saving enterprises & shares!");
+               }
                return true;
            }
        }

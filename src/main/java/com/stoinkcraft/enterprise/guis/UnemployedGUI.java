@@ -47,6 +47,9 @@ public class UnemployedGUI {
                         return new ItemBuilder(Material.GRASS_BLOCK)
                                 .setDisplayName(" §aFarmerLLC ")
                                 .addLoreLines(" ")
+                                .addLoreLines("§fJoin the farmers and harvest")
+                                .addLoreLines("§fthe freshest crops available!")
+                                .addLoreLines(" ")
                                 .addLoreLines("§a(!) Click here to join (!)");
                     }
                     @Override
@@ -61,6 +64,9 @@ public class UnemployedGUI {
                     public ItemProvider getItemProvider() {
                         return new ItemBuilder(Material.IRON_PICKAXE)
                                 .setDisplayName(" §aMinerCorp ")
+                                .addLoreLines(" ")
+                                .addLoreLines("§fJoin the miners and collect")
+                                .addLoreLines("§fevery ore in sight!")
                                 .addLoreLines(" ")
                                 .addLoreLines("§a(!) Click here to join (!)");
                     }
@@ -77,6 +83,9 @@ public class UnemployedGUI {
                         return new ItemBuilder(Material.ZOMBIE_HEAD)
                                 .setDisplayName(" §aHunterInc ")
                                 .addLoreLines(" ")
+                                .addLoreLines("§fJoin the hunters and slay")
+                                .addLoreLines("§fevery monster in your path!")
+                                .addLoreLines(" ")
                                 .addLoreLines("§a(!) Click here to join (!)");
                     }
                     @Override
@@ -92,16 +101,22 @@ public class UnemployedGUI {
                         .addLoreLines(" §a• §fTo create a private enterprise, use ")
                         .addLoreLines(" §f/enterprise create <name> ")
                         .addLoreLines(" ")
-                        .addLoreLines(" §a• §fCost: " + ChatUtils.formatMoney(SCConstants.ENTERPRISE_FOUNDING_COST))))
+                        .addLoreLines(" §a• §fCost: " + ChatUtils.formatMoneyNoCents(SCConstants.ENTERPRISE_FOUNDING_COST))))
                 .addIngredient('?', new SimpleItem(new ItemBuilder(Material.OAK_SIGN)
-                        .setDisplayName(" §aEnterprise Help ")
+                        .setDisplayName("§8§l» §a§lEnterprise Help §8»")
                         .addLoreLines(" ")
-                        .addLoreLines(" §a• §f/enterprise setwarp - sets the public warp for the enterprise")
-                        .addLoreLines(" §a• §f/enterprise info - sets the public warp for the enterprise")
-                        .addLoreLines(" §a• §f/enterprise resign - sets the public warp for the enterprise")
-                        .addLoreLines(" §a• §f/enterprise disband - sets the public warp for the enterprise")
+                        .addLoreLines("§a§lHow to earn money §8»")
+                        .addLoreLines(" §a• §fTo make money, you need a job!")
+                        .addLoreLines(" §a• §fSelect a server owned enterprise below OR")
+                        .addLoreLines("   §fcreate your own! It does cost money...")
+                        .addLoreLines(" §a• §fWhen in an enterprise completing tasks makes money")
+                        .addLoreLines("   §ffor you, and the enterprise!")
+                        .addLoreLines(" §a• §fTo see the available tasks do §a/market")
+                        .addLoreLines(" ")
+                        .addLoreLines("§a§lCommands §8»")
+                        .addLoreLines(" §a• §f/enterprise - opens your enterprise management menu")
+                        .addLoreLines(" §a• §f/enterprise resign - lets you leave an enterprise")
                         .addLoreLines(" §a• §f/enterprise warp [name] - teleports to an enterprise")
-                        .addLoreLines(" §a• §f/enterprise invite <player> - invite new members")
                 ))
                 .build();
 

@@ -12,6 +12,7 @@ import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
+import org.bukkit.profile.PlayerProfile;
 import org.jetbrains.annotations.NotNull;
 import xyz.xenondevs.invui.gui.Gui;
 import xyz.xenondevs.invui.item.ItemProvider;
@@ -73,8 +74,8 @@ public class TopEnterprisesGUI {
 
             ItemStack skull = new ItemStack(Material.PLAYER_HEAD);
             SkullMeta meta = (SkullMeta) skull.getItemMeta();
-            OfflinePlayer ceo = Bukkit.getOfflinePlayer(e.getCeo());
-            meta.setOwningPlayer(ceo);
+            PlayerProfile profile = e instanceof ServerEnterprise ? Bukkit.createPlayerProfile("CEO") : Bukkit.createPlayerProfile(e.getCeo());
+            meta.setOwnerProfile(profile);
             skull.setItemMeta(meta);
 
             ItemBuilder item = new ItemBuilder(skull)

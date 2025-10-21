@@ -8,7 +8,7 @@ import org.bukkit.Location;
 import java.util.*;
 
 public class Enterprise {
-    private final String name;
+    private String name;
     private final UUID ceo;
     private final Map<UUID, Role> members = new HashMap<UUID, Role>();
     private double bankBalance;
@@ -146,6 +146,10 @@ public class Enterprise {
             }
         }
         return uuids;
+    }
+
+    public void setName(String name){
+        this.name = name;
     }
 
     public Location getWarp() {

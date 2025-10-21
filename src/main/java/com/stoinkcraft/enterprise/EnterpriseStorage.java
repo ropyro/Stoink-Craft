@@ -2,6 +2,7 @@ package com.stoinkcraft.enterprise;
 
 import com.stoinkcraft.StoinkCore;
 import org.bukkit.Bukkit;
+import org.bukkit.World;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
@@ -87,7 +88,12 @@ public class EnterpriseStorage {
         // Warp
         if (e.getWarp() != null) {
             Location loc = e.getWarp();
-            config.set("warp.", loc);
+            config.set("warp.world", loc.getWorld().getName());
+            config.set("warp.x", loc.getX());
+            config.set("warp.y", loc.getY());
+            config.set("warp.z", loc.getZ());
+            config.set("warp.yaw", loc.getYaw());
+            config.set("warp.pitch", loc.getPitch());
         }
 
         try {
@@ -157,8 +163,17 @@ public class EnterpriseStorage {
 
         // Warp
         if (config.isConfigurationSection("warp")) {
-            Location location = config.getLocation("warp.");
-            e.setWarp(location);
+            String worldName = config.getString("warp.world");
+            World world = Bukkit.getWorld(worldName);
+            double x = config.getDouble("warp.x");
+            double y = config.getDouble("warp.y");
+            double z = config.getDouble("warp.z");
+            float yaw = (float) config.getDouble("warp.yaw");
+            float pitch = (float) config.getDouble("warp.pitch");
+
+            if (world != null) {
+                e.setWarp(new Location(world, x, y, z, yaw, pitch));
+            }
         }
 
         return e;

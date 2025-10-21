@@ -101,7 +101,6 @@ public class EnterpriseManager {
             if(e.getMemberRole(uuid).equals(Role.CEO)){
                 e.setWarp(player.getLocation());
                 ChatUtils.sendMessage(player,e.getName() + "'s warp has been set!");
-                EnterpriseStorage.saveAllEnterprises();
                 return true;
             }
         }
@@ -116,7 +115,6 @@ public class EnterpriseManager {
             if(e.getMemberRole(uuid).equals(Role.CEO)){
                 e.setWarp(null);
                 ChatUtils.sendMessage(player,e.getName() + "'s warp has been deleted!");
-                EnterpriseStorage.saveAllEnterprises();
                 return true;
             }
         }
@@ -267,7 +265,7 @@ public class EnterpriseManager {
                     lastRotationTime = Instant.now();
                 });
             }
-        }.runTaskTimer(plugin, 0L, 20L * 60 * 60 * 24); // 24 hours
+        }.runTaskTimer(plugin, 20L * 60 * 60 * 24, 20L * 60 * 60 * 24); // 24 hours
     }
 
 

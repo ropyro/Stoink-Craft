@@ -1,6 +1,6 @@
 package com.stoinkcraft.shares;
 
-import com.stoinkcraft.shares.guis.ShareViewerGUI;
+import com.stoinkcraft.shares.guis.SharePortfolioGUI;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -13,7 +13,7 @@ public class SharesCMD implements CommandExecutor {
         if(!(sender instanceof Player)) return true;
         Player player = (Player)sender;
 
-        new ShareViewerGUI(player).openWindow();
+        new SharePortfolioGUI(player).openWindow();
 
         return true;
     }
