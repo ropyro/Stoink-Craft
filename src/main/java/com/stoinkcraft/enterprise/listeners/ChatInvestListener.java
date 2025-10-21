@@ -3,6 +3,7 @@ package com.stoinkcraft.enterprise.listeners;
 import com.stoinkcraft.StoinkCore;
 import com.stoinkcraft.enterprise.Enterprise;
 import com.stoinkcraft.enterprise.EnterpriseManager;
+import com.stoinkcraft.utils.ChatUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -35,27 +36,27 @@ public class ChatInvestListener implements Listener {
             try {
                 double amount = Double.parseDouble(event.getMessage());
                 if (amount <= 0) {
-                    player.sendMessage("§cPlease enter a valid amount.");
+                    ChatUtils.sendMessage(player,"§cPlease enter a valid amount.");
                     return;
                 }
 
                 Enterprise ent = EnterpriseManager.getEnterpriseManager().getEnterpriseByMember(uuid);
                 if (ent == null) {
-                    player.sendMessage("§cYou're no longer in an enterprise.");
+                    ChatUtils.sendMessage(player,"§cYou're no longer in an enterprise.");
                     return;
                 }
 
                 if (ent.getBankBalance() < amount) {
-                    player.sendMessage("§cInsufficient enterprise funds.");
+                    ChatUtils.sendMessage(player,"§cInsufficient enterprise funds.");
                     return;
                 }
 
                 ent.decreaseBankBalance(amount);
-                player.sendMessage("§Invested §e$" + amount + " §afrom your enterprise bank into networth.");
+                ChatUtils.sendMessage(player,"§aInvested §e$" + amount + " §afrom your enterprise bank into networth.");
                 ent.increaseNetworth(amount);
 
             } catch (NumberFormatException ex) {
-                player.sendMessage("§cInvalid number. Try again.");
+                ChatUtils.sendMessage(player,"§cInvalid number. Try again.");
             } finally {
                 awaitingInvestment.remove(uuid);
             }

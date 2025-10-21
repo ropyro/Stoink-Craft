@@ -2,7 +2,6 @@ package com.stoinkcraft.shares.guis;
 
 import com.stoinkcraft.enterprise.Enterprise;
 import com.stoinkcraft.enterprise.EnterpriseManager;
-import com.stoinkcraft.shares.Share;
 import com.stoinkcraft.shares.ShareManager;
 import com.stoinkcraft.utils.ChatUtils;
 import com.stoinkcraft.utils.SCConstants;
@@ -18,8 +17,6 @@ import xyz.xenondevs.invui.item.impl.AbstractItem;
 import xyz.xenondevs.invui.item.impl.SimpleItem;
 import xyz.xenondevs.invui.window.Window;
 
-import java.util.List;
-
 public class ShareMarketGUI {
     private Player opener;
 
@@ -27,7 +24,7 @@ public class ShareMarketGUI {
         this.opener = opener;
     }
 
-    public void openWindow(){
+    public void openWindow() {
         Gui gui = Gui.normal()
                 .setStructure(
                         "# # # # ? # # # #",
@@ -37,43 +34,57 @@ public class ShareMarketGUI {
                         "# # # # $ # # # #")
                 .addIngredient('#', new SimpleItem(new ItemBuilder(Material.BLACK_STAINED_GLASS_PANE)
                         .setDisplayName(" ")))
-                .addIngredient('?', new SimpleItem(new ItemBuilder(Material.CLOCK)
-                        .setDisplayName(" Stonks For Sale")
+                .addIngredient('?', new SimpleItem(new ItemBuilder(Material.OAK_SIGN)
+                        .setDisplayName("§6Stonks Marketplace")
                         .addLoreLines(" ")
-                        .addLoreLines("Your currently owned stonks")
-                        .addLoreLines("can be viewed & managed in")
-                        .addLoreLines("this menu!")))
+                        .addLoreLines("§7Browse enterprises currently offering")
+                        .addLoreLines("§7public shares on the open market.")
+                        .addLoreLines(" ")
+                        .addLoreLines("§eCompare values, spot trends, and invest wisely!")))
                 .addIngredient('$', new AbstractItem() {
                     @Override
                     public ItemProvider getItemProvider() {
                         return new ItemBuilder(Material.CHEST)
-                                .setDisplayName("Your Portfolio");
+                                .setDisplayName("§6Your Portfolio")
+                                .addLoreLines(" ")
+                                .addLoreLines("§7View and manage all the shares")
+                                .addLoreLines("§7you currently own.")
+                                .addLoreLines(" ")
+                                .addLoreLines("§eClick to open your portfolio.");
                     }
 
                     @Override
                     public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull InventoryClickEvent inventoryClickEvent) {
-                        new ShareViewerGUI(opener).openWindow();
+                        new SharePortfolioGUI(opener).openWindow();
                     }
                 })
                 .build();
 
-        for(Enterprise enterprise : EnterpriseManager.getEnterpriseManager().getEnterpriseList()){
-            if(enterprise.getOutstandingShares() < SCConstants.MAX_SHARES){
+        for (Enterprise enterprise : EnterpriseManager.getEnterpriseManager().getEnterpriseList()) {
+            if(enterprise.getAvailableShares() == 0) continue;
+            if (enterprise.getOutstandingShares() < SCConstants.MAX_SHARES) {
                 gui.addItems(new AbstractItem() {
                     @Override
                     public ItemProvider getItemProvider() {
                         return new ItemBuilder(Material.GOLD_INGOT)
-                                .setDisplayName("Share of: " + enterprise.getName())
+                                .setDisplayName("§e" + enterprise.getName() + " §7Stock")
                                 .addLoreLines(" ")
-                                .addLoreLines("Cost: $" + ChatUtils.formatMoney(enterprise.getShareValue()))
+                                .addLoreLines("§7Current Price: §a$" + ChatUtils.formatMoney(enterprise.getShareValue()))
+                                .addLoreLines("§7Available Shares: §f" + (SCConstants.MAX_SHARES - enterprise.getOutstandingShares()))
                                 .addLoreLines(" ")
-                                .addLoreLines("(!) Click here to buy this share (!) ");
+                                .addLoreLines("§f(!) §bLeft §fclick to purchase one share §f(!)")
+                                .addLoreLines("§f(!) §bRight §fclick to see stock history for (!)");
                     }
 
                     @Override
                     public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull InventoryClickEvent inventoryClickEvent) {
-                        ShareManager.getInstance().buyShare(opener, enterprise, 1);
-                        new ShareViewerGUI(opener).openWindow();
+                        if(clickType.isRightClick()){
+                            new ShareGraphGUI(player, enterprise.getID()).openWindow();
+                        }else if(clickType.isLeftClick()){
+                            new ConfirmationGUI(player, "Buy Share of, " + enterprise.getName(),
+                                    () -> ShareManager.getInstance().buyShare(opener, enterprise, 1),
+                                    () -> new SharePortfolioGUI(opener).openWindow()).openWindow();
+                        }
                     }
                 });
             }
@@ -81,9 +92,10 @@ public class ShareMarketGUI {
 
         Window window = Window.single()
                 .setViewer(opener)
-                .setTitle("§8Stonks For Sale")
+                .setTitle("§8Stonks Marketplace")
                 .setGui(gui)
                 .build();
         window.open();
     }
+
 }

@@ -43,12 +43,15 @@ public class CreateSubCommand implements SubCommand {
             return;
         }
 
-//        StringBuilder nameBuilder = new StringBuilder(args[1]);
-//        List<String> argsList = Arrays.stream(args).toList();
-//        argsList.remove(0);
-//        argsList.forEach(a -> nameBuilder.append(" " + a));
+        StringBuilder entName = new StringBuilder("");
+        for(int i = 1; i < args.length; i++){
+            if(i == args.length - 1)
+                entName.append(args[i]);
+            else
+                entName.append(args[i] + " ");
+        }
 
-        String name = args[1];
+        String name = entName.toString();
         Enterprise e = new Enterprise(name, player.getUniqueId());
         EnterpriseManager.getEnterpriseManager().createEnterprise(e);
 

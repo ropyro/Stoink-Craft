@@ -3,6 +3,7 @@ package com.stoinkcraft.enterprise.listeners;
 import com.stoinkcraft.StoinkCore;
 import com.stoinkcraft.enterprise.Enterprise;
 import com.stoinkcraft.enterprise.EnterpriseManager;
+import com.stoinkcraft.utils.ChatUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -35,28 +36,28 @@ public class ChatDepositListener implements Listener {
             try {
                 double amount = Double.parseDouble(event.getMessage());
                 if (amount <= 0) {
-                    player.sendMessage("§cPlease enter a valid amount.");
+                    ChatUtils.sendMessage(player, "§cPlease enter a valid amount.");
                     return;
                 }
 
                 Enterprise ent = EnterpriseManager.getEnterpriseManager().getEnterpriseByMember(uuid);
                 if (ent == null) {
-                    player.sendMessage("§cYou're no longer in an enterprise.");
+                    ChatUtils.sendMessage(player,"§cYou're no longer in an enterprise.");
                     return;
                 }
 
                 if (StoinkCore.getEconomy().getBalance(player) < amount) {
-                    player.sendMessage("§cInsufficient funds.");
+                    ChatUtils.sendMessage(player,"§cInsufficient funds.");
                     return;
                 }
 
                 ent.increaseBankBalance(amount);
-                player.sendMessage("§aDeposited §e$" + amount + " §ainto your enterprise bank.");
+                ChatUtils.sendMessage(player,"§aDeposited §e$" + amount + " §ainto your enterprise bank.");
                 // Add to player's personal balance here (Economy API)
                 StoinkCore.getEconomy().withdrawPlayer(player, amount); // Assuming Vault integration
 
             } catch (NumberFormatException ex) {
-                player.sendMessage("§cInvalid number. Try again.");
+                ChatUtils.sendMessage(player,"§cInvalid number. Try again.");
             } finally {
                 awaitingDeposit.remove(uuid);
             }
