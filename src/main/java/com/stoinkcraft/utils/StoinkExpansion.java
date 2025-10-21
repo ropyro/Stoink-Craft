@@ -52,7 +52,7 @@ public class StoinkExpansion extends PlaceholderExpansion {
         switch (identifier.toLowerCase()) {
             case "enterprise":
                 if(e == null){
-                    return "&a&lDo /enterprise to get started!    ";
+                    return "§7Unemployed";
                 }
                 return e.getName();
             case "role":

@@ -20,6 +20,7 @@ import com.stoinkcraft.enterprise.listeners.PlayerJoinListener;
 import com.stoinkcraft.market.MarketManager;
 import com.stoinkcraft.enterprise.EnterpriseManager;
 import com.stoinkcraft.misc.JoinMOTDListener;
+import com.stoinkcraft.playerupgrades.PMenuCommand;
 import com.stoinkcraft.shares.SharesCMD;
 import com.stoinkcraft.shares.ShareManager;
 import com.stoinkcraft.shares.ShareStorage;
@@ -31,7 +32,9 @@ import net.citizensnpcs.trait.SkinTrait;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -114,6 +117,7 @@ public class StoinkCore extends JavaPlugin {
             getCommand("topceo").setExecutor(new TopCeoCMD());
             getCommand("shares").setExecutor(new SharesCMD());
             getCommand("daily").setExecutor(new DailyCMD());
+            getCommand("pmenu").setExecutor(new PMenuCommand());
         });
 
         //Register Earning listeners
