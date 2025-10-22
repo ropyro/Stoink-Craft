@@ -96,7 +96,7 @@ public class TopEnterprisesGUI {
                                 .addLoreLines(" §a• §fEmployees §a" + e.getMembers().keySet().size() + "/" + EnterpriseManager.getEnterpriseManager().getMaximumEmployees() + "§f:");
                         for(UUID member : e.getMembers().keySet()){
                             if(member.equals(e.getCeo())) continue;
-                            String name = Bukkit.getOfflinePlayer(member).getPlayer().getName();
+                            String name = Bukkit.getOfflinePlayer(member).getName();
                             item.addLoreLines(" §a• §f" + name);
                         }
 
