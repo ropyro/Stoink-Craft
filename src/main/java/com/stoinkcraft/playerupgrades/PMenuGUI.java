@@ -318,6 +318,7 @@ public class PMenuGUI {
                 }
             }
         });
+        gui.addItems(new MoreHomesItem());
 
         Window window = Window.single()
                 .setViewer(opener)
@@ -326,4 +327,103 @@ public class PMenuGUI {
                 .build();
         window.open();
     }
+
+    public class MoreHomesItem extends AbstractItem {
+
+        @Override
+        public ItemProvider getItemProvider(Player player) {
+            ItemBuilder item = new ItemBuilder(Material.BOOK);
+
+            // Determine current tier
+            int tier = getHomeTier(player);
+            int nextTier = tier + 1;
+
+            if (tier >= 5) {
+                item.setDisplayName("§a§lMore Homes (MAXED)");
+                item.addLoreLines(" ");
+                item.addLoreLines("§a§l(!) You already have the maximum number of homes! (!)");
+                //item.addLoreLines("§7You can now set up to §a5 homes§7.");
+            } else {
+                int cost = getCostForTier(nextTier);
+
+                item.setDisplayName("§c§lMore Homes §7(Tier " + nextTier + ")");
+                item.addLoreLines(" ");
+                item.addLoreLines("§7Want to set more homes?");
+                item.addLoreLines("§7Upgrade to unlock §a" + nextTier + " total homes§7.");
+                item.addLoreLines(" ");
+                item.addLoreLines("§c§l(!) Click to buy for $" + ChatUtils.formatMoney(cost) + " (!)");
+            }
+
+            return item;
+        }
+
+        @Override
+        public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull InventoryClickEvent event) {
+            int tier = getHomeTier(player);
+            int nextTier = tier + 1;
+
+            if (tier >= 5) {
+                player.closeInventory();
+                player.sendMessage("§cYou already have the maximum number of homes!");
+                return;
+            }
+
+            int cost = getCostForTier(nextTier);
+            double balance = StoinkCore.getEconomy().getBalance(player);
+
+            if (balance < cost) {
+                player.closeInventory();
+                ChatUtils.sendMessage(player, "§cInsufficient funds, next home upgrade costs $" + ChatUtils.formatMoney(cost));
+                return;
+            }
+
+            new ConfirmationGUI(player, "Buy More Homes (" + nextTier + " total) for $" + ChatUtils.formatMoney(cost),
+                    () -> {
+                        StoinkCore.getEconomy().withdrawPlayer(player, cost);
+                        grantNextHomePermission(player, nextTier);
+                        ChatUtils.sendMessage(player, "§aYou can now set up to " + nextTier + " homes!");
+                    },
+                    () -> new PMenuGUI(player).openWindow()
+            ).openWindow();
+        }
+
+        private int getHomeTier(Player player) {
+            if (player.hasPermission("essentials.sethome.multiple.five")) return 5;
+            if (player.hasPermission("essentials.sethome.multiple.four")) return 4;
+            if (player.hasPermission("essentials.sethome.multiple.three")) return 3;
+            if (player.hasPermission("essentials.sethome.multiple.two")) return 2;
+            return 1;
+        }
+
+        private void grantNextHomePermission(Player player, int nextTier) {
+            removePermissions(player);
+            switch (nextTier) {
+                //case 1 -> PlayerUtils.givePermission(player, "essentials.sethome.multiple");
+                case 2 -> PlayerUtils.givePermission(player, "essentials.sethome.multiple.two");
+                case 3 -> PlayerUtils.givePermission(player, "essentials.sethome.multiple.three");
+                case 4 -> PlayerUtils.givePermission(player, "essentials.sethome.multiple.four");
+                case 5 -> PlayerUtils.givePermission(player, "essentials.sethome.multiple.five");
+            }
+        }
+
+        private void removePermissions(Player player){
+            PlayerUtils.removePermission(player, "essentials.sethome.multiple.two");
+            PlayerUtils.removePermission(player, "essentials.sethome.multiple.three");
+            PlayerUtils.removePermission(player, "essentials.sethome.multiple.four");
+            PlayerUtils.removePermission(player, "essentials.sethome.multiple.five");
+        }
+
+        private int getCostForTier(int tier) {
+            // Example progression curve
+            return switch (tier) {
+                //case 1 -> 10000;
+                case 2 -> 50000;
+                case 3 -> 150000;
+                case 4 -> 300000;
+                case 5 -> 500000;
+                default -> 0;
+            };
+        }
+    }
+
 }

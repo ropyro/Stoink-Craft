@@ -36,4 +36,16 @@ public class PlayerUtils {
             Bukkit.getLogger().info(e.getMessage());
         }
     }
+
+    public static void removePermission(Player player, String permission){
+        try{
+            LuckPerms luckPerms = StoinkCore.getInstance().getServer().getServicesManager().load(LuckPerms.class);
+            User user = luckPerms.getPlayerAdapter(Player.class).getUser(player);
+            Node node = Node.builder(permission).value(true).build();
+            user.data().remove(node);
+            luckPerms.getUserManager().saveUser(user);
+        }catch (Exception e){
+            Bukkit.getLogger().info(e.getMessage());
+        }
+    }
 }

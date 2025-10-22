@@ -256,6 +256,7 @@ public class EnterpriseManager {
     private static final Duration ROTATION_INTERVAL = Duration.ofDays(1);
 
     public static void startDailyTaxes(JavaPlugin plugin) {
+        lastRotationTime = Instant.now();
         new BukkitRunnable() {
             @Override
             public void run() {
