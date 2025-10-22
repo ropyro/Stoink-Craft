@@ -19,6 +19,7 @@ import com.stoinkcraft.enterprise.listeners.ChatWithdrawListener;
 import com.stoinkcraft.enterprise.listeners.PlayerJoinListener;
 import com.stoinkcraft.market.MarketManager;
 import com.stoinkcraft.enterprise.EnterpriseManager;
+import com.stoinkcraft.misc.EnderChestListener;
 import com.stoinkcraft.misc.JoinMOTDListener;
 import com.stoinkcraft.playerupgrades.PMenuCommand;
 import com.stoinkcraft.shares.SharesCMD;
@@ -129,6 +130,7 @@ public class StoinkCore extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new PhantomSpawnDisabler(), this);
         getServer().getPluginManager().registerEvents(new BoostNoteInteractionListener(), this);
         getServer().getPluginManager().registerEvents(new JoinMOTDListener(), this);
+        getServer().getPluginManager().registerEvents(new EnderChestListener(), this);
 
         startAutoSaveTask();
         startPriceSnapshotRecording();
@@ -194,7 +196,7 @@ public class StoinkCore extends JavaPlugin {
 
                     npc.setName(data.displayName());
                 }
-                Bukkit.getLogger().info("§aTop CEO NPCs updated.");
+                Bukkit.getLogger().info("Top CEO NPCs updated.");
             });
         });
     }
