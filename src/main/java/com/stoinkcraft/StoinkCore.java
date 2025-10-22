@@ -9,6 +9,7 @@ import com.stoinkcraft.enterprise.commands.enterprisecmd.EnterpriseCMD;
 import com.stoinkcraft.enterprise.commands.enterprisecmd.EnterpriseTabCompleter;
 import com.stoinkcraft.enterprise.commands.serverenterprisecmd.ServerEntCMD;
 import com.stoinkcraft.enterprise.commands.serverenterprisecmd.ServerEntTabCompleter;
+import com.stoinkcraft.market.listeners.BlockPlacedManager;
 import com.stoinkcraft.market.listeners.EarningListener;
 import com.stoinkcraft.enterprise.Enterprise;
 import com.stoinkcraft.enterprise.EnterpriseStorage;
@@ -31,11 +32,14 @@ import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.trait.SkinTrait;
 import net.milkbowl.vault.economy.Economy;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.OfflinePlayer;
+import org.bukkit.*;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockType;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -47,7 +51,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class StoinkCore extends JavaPlugin {
+public class StoinkCore extends JavaPlugin implements Listener {
 
     private static Economy econ = null;
 
@@ -131,6 +135,9 @@ public class StoinkCore extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new BoostNoteInteractionListener(), this);
         getServer().getPluginManager().registerEvents(new JoinMOTDListener(), this);
         getServer().getPluginManager().registerEvents(new EnderChestListener(), this);
+        getServer().getPluginManager().registerEvents(this, this);
+
+        new BlockPlacedManager(this);
 
         startAutoSaveTask();
         startPriceSnapshotRecording();
@@ -138,6 +145,25 @@ public class StoinkCore extends JavaPlugin {
 
         getLogger().info("StoinkCore loaded.");
     }
+
+    @EventHandler
+    public void onPlace(BlockPlaceEvent event) {
+        Block block = event.getBlockPlaced();
+        if (block.getType() == Material.COBBLESTONE || block.getType() == Material.SUGAR_CANE) {
+            Bukkit.getLogger().info("[DEBUG] Player placed: " + block.getType() + " at " + block.getLocation());
+            BlockPlacedManager.getInstance().markPlaced(block);
+        }
+    }
+
+    @EventHandler
+    public void onDestroy(BlockBreakEvent event){
+        Block block = event.getBlock();
+        if (block.getType() == Material.COBBLESTONE || block.getType() == Material.SUGAR_CANE) {
+            Bukkit.getLogger().info("[DEBUG] Player destroyed: " + block.getType() + " at " + block.getLocation());
+            BlockPlacedManager.getInstance().unmarkPlaced(block);
+        }
+    }
+
 
     public static StoinkCore getInstance() {
         return INSTANCE;
