@@ -88,6 +88,7 @@ public class TopEnterprisesGUI {
                                 .addLoreLines(" ")
                                 .addLoreLines("§c(!) THIS IS A SERVER OWNED ENTERPRISE (!)");
                     }else{
+
                         item.addLoreLines(" ")
                                 .addLoreLines(" §a• §fBalance: §a$" + balance)
                                 .addLoreLines(" §a• §fNet Worth: §a$" + netWorth)
