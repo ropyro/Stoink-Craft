@@ -143,13 +143,19 @@ public class StoinkCore extends JavaPlugin implements Listener {
         startPriceSnapshotRecording();
         startAutoTopCEOUpdate();
 
+        placedblockblacklist.add(Material.SUGAR_CANE);
+        placedblockblacklist.add(Material.COBBLESTONE);
+        placedblockblacklist.add(Material.LILY_PAD);
+
         getLogger().info("StoinkCore loaded.");
     }
+
+    private List<Material> placedblockblacklist = new ArrayList<>();
 
     @EventHandler
     public void onPlace(BlockPlaceEvent event) {
         Block block = event.getBlockPlaced();
-        if (block.getType() == Material.COBBLESTONE || block.getType() == Material.SUGAR_CANE) {
+        if (placedblockblacklist.contains(block.getType())) {
             Bukkit.getLogger().info("[DEBUG] Player placed: " + block.getType() + " at " + block.getLocation());
             BlockPlacedManager.getInstance().markPlaced(block);
         }
@@ -158,7 +164,7 @@ public class StoinkCore extends JavaPlugin implements Listener {
     @EventHandler
     public void onDestroy(BlockBreakEvent event){
         Block block = event.getBlock();
-        if (block.getType() == Material.COBBLESTONE || block.getType() == Material.SUGAR_CANE) {
+        if (placedblockblacklist.contains(block.getType())) {
             Bukkit.getLogger().info("[DEBUG] Player destroyed: " + block.getType() + " at " + block.getLocation());
             BlockPlacedManager.getInstance().unmarkPlaced(block);
         }

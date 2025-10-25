@@ -137,7 +137,7 @@ public class PMenuGUI {
             @Override
             public ItemProvider getItemProvider() {
                 ItemBuilder guiButton = new ItemBuilder(Material.CRAFTING_TABLE);
-                if(opener.hasPermission("essentials.craft")){
+                if(opener.hasPermission("essentials.workbench")){
                     guiButton.setDisplayName("§a§l/craft");
                     guiButton.addLoreLines(" ");
                     guiButton.addLoreLines("§a§l(!) This upgrade is already unlocked! (!)");
@@ -155,7 +155,7 @@ public class PMenuGUI {
 
             @Override
             public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull InventoryClickEvent inventoryClickEvent) {
-                if (!player.hasPermission("essentials.craft")) {
+                if (!player.hasPermission("essentials.workbench")) {
                     if(StoinkCore.getEconomy().getBalance(player) < 100000){
                         player.closeInventory();
                         ChatUtils.sendMessage(player, "§cInsufficient funds, /craft costs $100k");
@@ -164,7 +164,7 @@ public class PMenuGUI {
                     new ConfirmationGUI(player, "Buy /craft for $100k",
                             () -> {
                                 StoinkCore.getEconomy().withdrawPlayer(player, 100000);
-                                PlayerUtils.givePermission(player, "essentials.craft");
+                                PlayerUtils.givePermission(player, "essentials.workbench");
                             }, () -> new PMenuGUI(player).openWindow()).openWindow();
                 }
             }
