@@ -10,13 +10,17 @@ import com.stoinkcraft.shares.ShareManager;
 import com.stoinkcraft.shares.ShareStorage;
 import com.stoinkcraft.utils.ChatUtils;
 import com.stoinkcraft.utils.SCConstants;
+import com.stoinkcraft.utils.SchematicPaster;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.File;
+import java.util.Map;
 import java.util.Optional;
 
 public class ServerEntCMD implements CommandExecutor {
@@ -98,6 +102,18 @@ public class ServerEntCMD implements CommandExecutor {
                    ChatUtils.sendMessage(player, "Error occurred while saving enterprises & shares!");
                }
                return true;
+           }
+           if(args[0].equalsIgnoreCase("setup")){
+               if(args.length >= 2) {
+                   // In your command executor
+                   int index = Integer.parseInt(args[1]);
+                   Map<String, Location> locs = StoinkCore.getEnterprisePlotManager().assignPlots(player.getUniqueId(), index);
+
+                   SchematicPaster.pasteSchematic(new File(StoinkCore.getInstance().getDataFolder(),"/schematics/building.schem"), locs.get("building"), true);
+                   SchematicPaster.pasteSchematic(new File(StoinkCore.getInstance().getDataFolder(),"/schematics/quarry.schem"), locs.get("quarry"), true);
+
+                   player.teleport(locs.get("quarry").add(0.5, 0, 0.5));
+               }
            }
        }
         return true;

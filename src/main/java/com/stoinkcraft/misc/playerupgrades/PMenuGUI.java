@@ -1,35 +1,20 @@
-package com.stoinkcraft.playerupgrades;
+package com.stoinkcraft.misc.playerupgrades;
 
 import com.stoinkcraft.StoinkCore;
-import com.stoinkcraft.market.values.EntityValue;
 import com.stoinkcraft.shares.guis.ConfirmationGUI;
 import com.stoinkcraft.utils.ChatUtils;
 import com.stoinkcraft.utils.PlayerUtils;
-import com.stoinkcraft.utils.SCConstants;
-import net.luckperms.api.LuckPerms;
-import net.luckperms.api.LuckPermsProvider;
-import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Material;
-import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 import xyz.xenondevs.invui.gui.Gui;
-import xyz.xenondevs.invui.item.Item;
 import xyz.xenondevs.invui.item.ItemProvider;
 import xyz.xenondevs.invui.item.builder.ItemBuilder;
 import xyz.xenondevs.invui.item.impl.AbstractItem;
-import xyz.xenondevs.invui.item.impl.AutoUpdateItem;
 import xyz.xenondevs.invui.item.impl.SimpleItem;
 import xyz.xenondevs.invui.window.Window;
-
-import java.util.Arrays;
-
-import static com.stoinkcraft.market.MarketManager.JobType.*;
 
 public class PMenuGUI {
 
@@ -286,7 +271,7 @@ public class PMenuGUI {
             @Override
             public ItemProvider getItemProvider() {
                 ItemBuilder guiButton = new ItemBuilder(Material.ANVIL);
-                if(opener.hasPermission("essentials.fix")){
+                if(opener.hasPermission("essentials.repair")){
                     guiButton.setDisplayName("§a§l/fix");
                     guiButton.addLoreLines(" ");
                     guiButton.addLoreLines("§a§l(!) This upgrade is already unlocked! (!)");
@@ -313,7 +298,7 @@ public class PMenuGUI {
                     new ConfirmationGUI(player, "Buy /fix for $350k",
                             () -> {
                                 StoinkCore.getEconomy().withdrawPlayer(player, 350000);
-                                PlayerUtils.givePermission(player, "essentials.fix");
+                                PlayerUtils.givePermission(player, "essentials.repair");
                             }, () -> new PMenuGUI(player).openWindow()).openWindow();
                 }
             }

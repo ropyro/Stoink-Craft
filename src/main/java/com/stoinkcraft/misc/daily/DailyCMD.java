@@ -1,4 +1,4 @@
-package com.stoinkcraft.daily;
+package com.stoinkcraft.misc.daily;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;

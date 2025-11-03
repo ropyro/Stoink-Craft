@@ -93,13 +93,6 @@ public class EarningListener implements Listener {
 
         Block block = event.getBlock();
         Material dropType = event.getItems().get(0).getItemStack().getType();
-        if (dropType == Material.COBBLESTONE || dropType == Material.SMOOTH_STONE) {
-            if (BlockPlacedManager.getInstance().isPlayerPlaced(block)) return;
-        }
-
-        if (dropType == Material.SUGAR_CANE) {
-            if (BlockPlacedManager.getInstance().isPlayerPlaced(block)) event.getItems().remove(0);
-        }
 
         Enterprise e = EnterpriseManager.getEnterpriseManager()
                 .getEnterpriseByMember(player.getUniqueId());

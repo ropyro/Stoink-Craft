@@ -1,7 +1,7 @@
 package com.stoinkcraft;
 
-import com.stoinkcraft.daily.DailyCMD;
-import com.stoinkcraft.daily.DailyManager;
+import com.stoinkcraft.misc.daily.DailyCMD;
+import com.stoinkcraft.misc.daily.DailyManager;
 import com.stoinkcraft.market.boosters.BoostNoteInteractionListener;
 import com.stoinkcraft.market.MarketCMD;
 import com.stoinkcraft.enterprise.commands.TopCeoCMD;
@@ -9,7 +9,6 @@ import com.stoinkcraft.enterprise.commands.enterprisecmd.EnterpriseCMD;
 import com.stoinkcraft.enterprise.commands.enterprisecmd.EnterpriseTabCompleter;
 import com.stoinkcraft.enterprise.commands.serverenterprisecmd.ServerEntCMD;
 import com.stoinkcraft.enterprise.commands.serverenterprisecmd.ServerEntTabCompleter;
-import com.stoinkcraft.market.listeners.BlockPlacedManager;
 import com.stoinkcraft.market.listeners.EarningListener;
 import com.stoinkcraft.enterprise.Enterprise;
 import com.stoinkcraft.enterprise.EnterpriseStorage;
@@ -22,34 +21,37 @@ import com.stoinkcraft.market.MarketManager;
 import com.stoinkcraft.enterprise.EnterpriseManager;
 import com.stoinkcraft.misc.EnderChestListener;
 import com.stoinkcraft.misc.JoinMOTDListener;
-import com.stoinkcraft.playerupgrades.PMenuCommand;
+import com.stoinkcraft.misc.playerupgrades.PMenuCommand;
 import com.stoinkcraft.shares.SharesCMD;
 import com.stoinkcraft.shares.ShareManager;
 import com.stoinkcraft.shares.ShareStorage;
 import com.stoinkcraft.misc.PhantomSpawnDisabler;
 import com.stoinkcraft.utils.StoinkExpansion;
+import com.stoinkcraft.world.EnterprisePlotManager;
+import com.stoinkcraft.world.EnterpriseWorldManager;
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.trait.SkinTrait;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.*;
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockType;
-import org.bukkit.configuration.serialization.ConfigurationSerialization;
-import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import xyz.xenondevs.invui.InvUI;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.net.URL;
+import java.nio.file.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class StoinkCore extends JavaPlugin implements Listener {
 
@@ -57,11 +59,35 @@ public class StoinkCore extends JavaPlugin implements Listener {
 
     private static StoinkCore INSTANCE;
 
+    private static EnterpriseManager em;
+    public static EnterpriseManager getEnterpriseManager(){
+        return em;
+    }
+
+    private static DailyManager dm;
+    public static DailyManager getDailyManager(){
+        return dm;
+    }
+
+    private static ShareManager sm;
+    public static ShareManager getShareManager(){
+        return sm;
+    }
+
+    private static EnterpriseWorldManager ewm;
+    public static EnterpriseWorldManager getEnterpriseWorldManager(){
+        return ewm;
+    }
+
+    private static EnterprisePlotManager epm;
+    public static EnterprisePlotManager getEnterprisePlotManager(){
+        return epm;
+    }
+
     @Override
     public void onDisable() {
         EnterpriseStorage.saveAllEnterprises();
         ShareStorage.saveShares();
-
         getLogger().info(String.format("[%s] Disabled Version %s", getDescription().getName(), getDescription().getVersion()));
     }
 
@@ -79,20 +105,24 @@ public class StoinkCore extends JavaPlugin implements Listener {
             return;
         }
 
-        DailyManager dm = new DailyManager();
-
-        //Inititalize the enterprise manager class TODO: pull enterprise list from saved data
-        EnterpriseManager em = new EnterpriseManager(this, econ, 2);
-        ShareManager sm = new ShareManager();
-
-        if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) { //
-            new StoinkExpansion(this).register(); //
+        //PAPI Expansion
+        if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
+            new StoinkExpansion(this).register();
         }
+
+        dm = new DailyManager();
+        em = new EnterpriseManager(this, econ, 2);
+        sm = new ShareManager();
+        ewm = new EnterpriseWorldManager();
+        epm = new EnterprisePlotManager(ewm);
 
         File marketFile = new File(getDataFolder(), "market.yml");
         if(!marketFile.exists()){
             saveResource("market.yml", false);
         }
+
+        saveResourceFolder("schematics", false);
+
         MarketManager.loadMarketPrices(marketFile);
         MarketManager.startRotatingBoosts(this);
 
@@ -111,7 +141,7 @@ public class StoinkCore extends JavaPlugin implements Listener {
             EnterpriseStorage.saveAllEnterprises();
         }
 
-        //Register /enterprise command + tap completer
+        //Register commands
         Bukkit.getScheduler().runTask(this, () -> {
             EnterpriseCMD enterpriseCMD = new EnterpriseCMD(this);
             getCommand("enterprise").setExecutor(enterpriseCMD);
@@ -125,7 +155,7 @@ public class StoinkCore extends JavaPlugin implements Listener {
             getCommand("pmenu").setExecutor(new PMenuCommand());
         });
 
-        //Register Earning listeners
+        //Register listeners
         getServer().getPluginManager().registerEvents(new EarningListener(this), this);
         getServer().getPluginManager().registerEvents(new PlayerJoinListener(this), this);
         getServer().getPluginManager().registerEvents(new ChatWithdrawListener(this), this);
@@ -137,37 +167,11 @@ public class StoinkCore extends JavaPlugin implements Listener {
         getServer().getPluginManager().registerEvents(new EnderChestListener(), this);
         getServer().getPluginManager().registerEvents(this, this);
 
-        new BlockPlacedManager(this);
-
         startAutoSaveTask();
         startPriceSnapshotRecording();
         startAutoTopCEOUpdate();
 
-        placedblockblacklist.add(Material.SUGAR_CANE);
-        placedblockblacklist.add(Material.COBBLESTONE);
-        placedblockblacklist.add(Material.LILY_PAD);
-
         getLogger().info("StoinkCore loaded.");
-    }
-
-    private List<Material> placedblockblacklist = new ArrayList<>();
-
-    @EventHandler
-    public void onPlace(BlockPlaceEvent event) {
-        Block block = event.getBlockPlaced();
-        if (placedblockblacklist.contains(block.getType())) {
-            Bukkit.getLogger().info("[DEBUG] Player placed: " + block.getType() + " at " + block.getLocation());
-            BlockPlacedManager.getInstance().markPlaced(block);
-        }
-    }
-
-    @EventHandler
-    public void onDestroy(BlockBreakEvent event){
-        Block block = event.getBlock();
-        if (placedblockblacklist.contains(block.getType())) {
-            Bukkit.getLogger().info("[DEBUG] Player destroyed: " + block.getType() + " at " + block.getLocation());
-            BlockPlacedManager.getInstance().unmarkPlaced(block);
-        }
     }
 
 
@@ -249,6 +253,45 @@ public class StoinkCore extends JavaPlugin implements Listener {
             if (npc.data().get("top_ceo_position").equals(position)) return npc;
         }
         return null;
+    }
+
+
+    public void saveResourceFolder(String path, boolean replace) {
+        File outDir = new File(getDataFolder(), path);
+        if (!outDir.exists()) outDir.mkdirs();
+
+        try (InputStream stream = getResource(path)) {
+            if (stream == null) {
+                // It’s a directory, not a single file — iterate contents manually
+                URL url = getClassLoader().getResource(path);
+                if (url == null) return;
+
+                URI uri = url.toURI();
+                FileSystem fileSystem = FileSystems.newFileSystem(uri, Collections.emptyMap());
+                Path jarPath = fileSystem.getPath(path);
+
+                try (Stream<Path> walk = Files.walk(jarPath)) {
+                    walk.filter(Files::isRegularFile).forEach(file -> {
+                        try (InputStream is = Files.newInputStream(file)) {
+                            File outFile = new File(outDir, file.getFileName().toString());
+                            if (!outFile.exists() || replace) {
+                                Files.copy(is, outFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                            }
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    });
+                }
+            } else {
+                // Single file resource
+                File outFile = new File(outDir, new File(path).getName());
+                if (!outFile.exists() || replace) {
+                    Files.copy(stream, outFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 

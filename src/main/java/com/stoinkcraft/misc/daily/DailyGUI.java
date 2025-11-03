@@ -1,6 +1,5 @@
-package com.stoinkcraft.daily;
+package com.stoinkcraft.misc.daily;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;

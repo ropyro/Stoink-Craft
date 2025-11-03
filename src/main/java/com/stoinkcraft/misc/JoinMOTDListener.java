@@ -1,7 +1,7 @@
 package com.stoinkcraft.misc;
 
 import com.stoinkcraft.StoinkCore;
-import com.stoinkcraft.daily.DailyManager;
+import com.stoinkcraft.misc.daily.DailyManager;
 import com.stoinkcraft.enterprise.Enterprise;
 import com.stoinkcraft.enterprise.EnterpriseManager;
 import com.stoinkcraft.utils.ChatUtils;

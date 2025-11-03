@@ -1,11 +1,9 @@
-package com.stoinkcraft.daily;
+package com.stoinkcraft.misc.daily;
 
 import com.stoinkcraft.utils.SCConstants;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
-import java.time.Instant;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
