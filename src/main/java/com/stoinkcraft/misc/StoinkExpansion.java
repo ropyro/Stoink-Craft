@@ -1,8 +1,10 @@
-package com.stoinkcraft.utils;
+package com.stoinkcraft.misc;
 
 import com.stoinkcraft.StoinkCore;
 import com.stoinkcraft.enterprise.Enterprise;
 import com.stoinkcraft.enterprise.EnterpriseManager;
+import com.stoinkcraft.utils.ChatUtils;
+import com.stoinkcraft.utils.PlayerUtils;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import net.milkbowl.vault.chat.Chat;
 import org.bukkit.OfflinePlayer;
