@@ -1,7 +1,4 @@
 package com.stoinkcraft.jobs;
 
-public class Job {
-
-
-
+public enum JobType {
 }

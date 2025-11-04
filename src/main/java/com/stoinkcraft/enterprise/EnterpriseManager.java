@@ -1,6 +1,7 @@
 package com.stoinkcraft.enterprise;
 
 import com.stoinkcraft.StoinkCore;
+import com.stoinkcraft.jobs.jobsites.sites.SkyriseSite;
 import com.stoinkcraft.market.boosters.Booster;
 import com.stoinkcraft.shares.ShareManager;
 import com.stoinkcraft.utils.ChatUtils;

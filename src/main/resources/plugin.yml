@@ -2,8 +2,7 @@ name: StoinkCore
 main: com.stoinkcraft.StoinkCore
 version: 0.1
 api-version: 1.21.8
-depend: [Vault]
-softdepend: [PlaceholderAPI, Citizens]
+depend: [Vault, PlaceholderAPI, Citizens, FastAsyncWorldEdit, DecentHolograms, WorldGuard]
 commands:
   enterprise:
     description: Enterprise commands

@@ -6,11 +6,10 @@ import com.stoinkcraft.market.boosters.BoosterItemHelper;
 import com.stoinkcraft.enterprise.Enterprise;
 import com.stoinkcraft.enterprise.EnterpriseManager;
 import com.stoinkcraft.enterprise.ServerEnterprise;
-import com.stoinkcraft.shares.ShareManager;
 import com.stoinkcraft.shares.ShareStorage;
 import com.stoinkcraft.utils.ChatUtils;
 import com.stoinkcraft.utils.SCConstants;
-import com.stoinkcraft.utils.SchematicPaster;
+import com.stoinkcraft.utils.SchematicUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
@@ -103,18 +102,18 @@ public class ServerEntCMD implements CommandExecutor {
                }
                return true;
            }
-           if(args[0].equalsIgnoreCase("setup")){
-               if(args.length >= 2) {
-                   // In your command executor
-                   int index = Integer.parseInt(args[1]);
-                   Map<String, Location> locs = StoinkCore.getEnterprisePlotManager().assignPlots(player.getUniqueId(), index);
-
-                   SchematicPaster.pasteSchematic(new File(StoinkCore.getInstance().getDataFolder(),"/schematics/building.schem"), locs.get("building"), true);
-                   SchematicPaster.pasteSchematic(new File(StoinkCore.getInstance().getDataFolder(),"/schematics/quarry.schem"), locs.get("quarry"), true);
-
-                   player.teleport(locs.get("quarry").add(0.5, 0, 0.5));
-               }
-           }
+//           if(args[0].equalsIgnoreCase("setup")){
+//               if(args.length >= 2) {
+//                   // In your command executor
+//                   int index = Integer.parseInt(args[1]);
+//                   Map<String, Location> locs = StoinkCore.getEnterprisePlotManager().assignPlots(player.getUniqueId(), index);
+//
+//                   SchematicUtils.pasteSchematic(new File(StoinkCore.getInstance().getDataFolder(),"/schematics/building.schem"), locs.get("building"), true);
+//                   SchematicUtils.pasteSchematic(new File(StoinkCore.getInstance().getDataFolder(),"/schematics/quarry.schem"), locs.get("quarry"), true);
+//
+//                   player.teleport(locs.get("quarry").add(0.5, 0, 0.5));
+//               }
+//           }
        }
         return true;
     }

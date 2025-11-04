@@ -46,7 +46,8 @@ public class EnterpriseGUI {
                         "# # # # # # # # #",
                         "# # # # ? # # # #",
                         "# # # # # # # # #",
-                        "# # A B C D E # #",
+                        "# # A B C D S # #",
+                        "# # # # . # # # #",
                         "# # # # # # # # #")
                 .addIngredient('#', new SimpleItem(new ItemBuilder(Material.BLACK_STAINED_GLASS_PANE)
                         .setDisplayName(" ")))
@@ -117,9 +118,23 @@ public class EnterpriseGUI {
                         }
                     }
                 })
-                .addIngredient('E', new SimpleItem(new ItemBuilder(Material.GRASS_BLOCK)
-                        .setDisplayName(" §aClaiming coming soon... ")
-                ))
+                .addIngredient('S', new AbstractItem() {
+
+                    @Override
+                    public ItemProvider getItemProvider() {
+                        ItemStack item = new ItemStack(Material.DARK_OAK_LOG);
+
+                        ItemBuilder openerhead = new ItemBuilder(item)
+                                .setDisplayName(" §aTeleport to Skyrise");
+
+                        return openerhead;
+                    }
+
+                    @Override
+                    public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull InventoryClickEvent inventoryClickEvent) {
+                        enterprise.getSkyriseSite().teleportPlayer(player);
+                    }
+                })
                 .build();
 
         ItemStack openerskull = new ItemStack(Material.PLAYER_HEAD);
