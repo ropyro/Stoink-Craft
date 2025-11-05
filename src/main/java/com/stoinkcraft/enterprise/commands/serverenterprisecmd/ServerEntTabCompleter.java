@@ -1,5 +1,6 @@
 package com.stoinkcraft.enterprise.commands.serverenterprisecmd;
 
+import com.stoinkcraft.StoinkCore;
 import com.stoinkcraft.enterprise.Enterprise;
 import com.stoinkcraft.enterprise.EnterpriseManager;
 import com.stoinkcraft.enterprise.ServerEnterprise;
@@ -34,8 +35,12 @@ public class ServerEntTabCompleter implements TabCompleter {
             return Bukkit.getOnlinePlayers().stream().map(p -> p.getName()).toList();
         }
 
+        if (args.length == 2 && args[0].equalsIgnoreCase("rebuild")) {
+            return StoinkCore.getEnterpriseManager().getEnterpriseList().stream().map(e -> e.getName()).toList();
+        }
+
         if (args.length == 1) {
-            return List.of("setwarp", "updateeco", "givebooster");
+            return List.of("setwarp", "updateeco", "givebooster", "rebuild");
         }
 
         return List.of();

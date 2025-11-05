@@ -2,6 +2,7 @@ package com.stoinkcraft.enterprise;
 
 import com.stoinkcraft.StoinkCore;
 import com.stoinkcraft.jobs.jobsites.JobSite;
+import com.stoinkcraft.jobs.jobsites.JobSiteManager;
 import com.stoinkcraft.jobs.jobsites.JobSiteType;
 import com.stoinkcraft.jobs.jobsites.sites.SkyriseSite;
 import com.stoinkcraft.market.boosters.Booster;
@@ -22,10 +23,8 @@ public class Enterprise {
     private int outstandingShares;
     private final List<PriceSnapshot> priceHistory = new ArrayList<>();
     private UUID enterpriseID;
-    private SkyriseSite skyriseSite;
-
-    private Map<JobSiteType, Location> plots;
-
+    private int plotIndex = -1;
+    private JobSiteManager jsm;
 
     public Enterprise(String name, UUID ceo) {
         this(name, ceo, 0, 0, 0, null, UUID.randomUUID());
@@ -40,15 +39,25 @@ public class Enterprise {
         members.put(ceo, Role.CEO);
         this.activeBooster = activeBooster;
         this.enterpriseID = enterpriseID;
-        plots = StoinkCore.getEnterprisePlotManager().assignPlots(enterpriseID, 1);
-        skyriseSite = new SkyriseSite(this, plots.get(JobSiteType.SKYRISE), false);
     }
 
-
-    public SkyriseSite getSkyriseSite(){
-        return this.skyriseSite;
+    public void initializeJobSiteManager(boolean skyriseIsBuilt, boolean quarryIsBuilt){
+        if(plotIndex == -1) plotIndex = StoinkCore.getEnterprisePlotManager().getNextAvailablePlotIndex();
+        jsm = new JobSiteManager(this, plotIndex);
+        jsm.initializeJobSites(skyriseIsBuilt, quarryIsBuilt);
     }
 
+    public JobSiteManager getJSM(){
+        return jsm;
+    }
+
+    public int getPlotIndex() {
+        return plotIndex;
+    }
+
+    public void setPlotIndex(int plotIndex) {
+        this.plotIndex = plotIndex;
+    }
 
     public void setEnterpriseID(UUID id){
         this.enterpriseID = id;

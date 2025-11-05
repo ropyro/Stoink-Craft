@@ -1,8 +1,10 @@
 package com.stoinkcraft.enterpriseworld;
 
+import com.stoinkcraft.enterprise.Enterprise;
 import com.stoinkcraft.jobs.jobsites.JobSiteType;
 import org.bukkit.Location;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -13,9 +15,26 @@ public class EnterprisePlotManager {
     private final int plotSpacing = 500;
     private final int jobOffset = 250; // Distance between each schematic
 
+    private int nextIndex = 0;
+
     public EnterprisePlotManager(EnterpriseWorldManager worldManager) {
         this.worldManager = worldManager;
     }
+
+    public int getNextAvailablePlotIndex() {
+        return nextIndex++;
+    }
+
+    // Optional: on load, find the max assigned index and start from there
+    public void resetNextIndex(Collection<Enterprise> enterprises) {
+        int max = enterprises.stream()
+                .mapToInt(e -> e.getPlotIndex())
+                .filter(i -> i >= 0)
+                .max()
+                .orElse(0);
+        nextIndex = max + 1;
+    }
+
 
     public Map<JobSiteType, Location> assignPlots(UUID enterpriseId, int index) {
         Map<JobSiteType, Location> locations = new HashMap<>();

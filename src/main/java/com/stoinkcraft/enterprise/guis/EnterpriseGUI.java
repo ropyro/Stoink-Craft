@@ -47,7 +47,7 @@ public class EnterpriseGUI {
                         "# # # # ? # # # #",
                         "# # # # # # # # #",
                         "# # A B C D S # #",
-                        "# # # # . # # # #",
+                        "# # # Q G F # # #",
                         "# # # # # # # # #")
                 .addIngredient('#', new SimpleItem(new ItemBuilder(Material.BLACK_STAINED_GLASS_PANE)
                         .setDisplayName(" ")))
@@ -70,6 +70,8 @@ public class EnterpriseGUI {
                         .addLoreLines(" §a• §f/enterprise setwarp - sets the public warp for the enterprise")
                         .addLoreLines(" §a• §f/enterprise disband - sets the public warp for the enterprise")
                         .addLoreLines(" §a• §f/enterprise invite <player> - invite new members")
+                        .addLoreLines(" ")
+                        .addLoreLines("ID: " + enterprise.getID())
                 ))
                 .addIngredient('A', new SimpleItem(new ItemBuilder(Material.BOOK)
                         .setDisplayName(" §aHiring coming soon... ")))
@@ -119,58 +121,41 @@ public class EnterpriseGUI {
                     }
                 })
                 .addIngredient('S', new AbstractItem() {
-
                     @Override
                     public ItemProvider getItemProvider() {
-                        ItemStack item = new ItemStack(Material.DARK_OAK_LOG);
+                        ItemStack item = new ItemStack(Material.BRICKS);
 
                         ItemBuilder openerhead = new ItemBuilder(item)
-                                .setDisplayName(" §aTeleport to Skyrise");
+                                .setDisplayName("§aTeleport to Skyrise");
 
                         return openerhead;
                     }
 
                     @Override
                     public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull InventoryClickEvent inventoryClickEvent) {
-                        enterprise.getSkyriseSite().teleportPlayer(player);
+                        enterprise.getJSM().getSkyriseSite().teleportPlayer(player);
                     }
                 })
+        .addIngredient('Q', new AbstractItem() {
+            @Override
+            public ItemProvider getItemProvider() {
+                ItemStack item = new ItemStack(Material.DIAMOND_PICKAXE);
+
+                ItemBuilder openerhead = new ItemBuilder(item)
+                        .setDisplayName("§aTeleport to Quarry");
+
+                return openerhead;
+            }
+
+            @Override
+            public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull InventoryClickEvent inventoryClickEvent) {
+                enterprise.getJSM().getQuarrySite().teleportPlayer(player);
+            }
+        })
                 .build();
 
-        ItemStack openerskull = new ItemStack(Material.PLAYER_HEAD);
-        SkullMeta meta = (SkullMeta) openerskull.getItemMeta();
-        meta.setOwningPlayer(opener);
-        openerskull.setItemMeta(meta);
-
-        ItemBuilder openerhead = new ItemBuilder(openerskull)
-                .setDisplayName(" §aYOU ")
-                .addLoreLines(" ")
-                .addLoreLines(" §a• §fRole: " + enterprise.getMemberRole(opener.getUniqueId()))
-                .addLoreLines(" ");
-
-        gui.addItems(new SimpleItem(openerhead));
-
-        // Add top enterprises to slots 1–6
-        for (UUID uuid : enterprise.getMembers().keySet()) {
-            if(uuid.equals(opener.getUniqueId()) || uuid.equals(SCConstants.serverCEO)) continue;
-            OfflinePlayer member = Bukkit.getOfflinePlayer(uuid);
-
-            ItemStack memberSkull = new ItemStack(Material.PLAYER_HEAD);
-            SkullMeta memberSkullMeta = (SkullMeta) memberSkull.getItemMeta();
-            memberSkullMeta.setOwningPlayer(member);
-            memberSkull.setItemMeta(memberSkullMeta);
-
-            ItemBuilder memberHead = new ItemBuilder(memberSkull)
-                    .setDisplayName(" §a" + member.getName())
-                    .addLoreLines(" ")
-                    .addLoreLines(" §a• §fRole: " + enterprise.getMemberRole(uuid))
-                    .addLoreLines(" ");
-
-            gui.addItems(new SimpleItem(memberHead));
-        }
-
         if(enterprise.isBoosted()){
-            gui.setItem(1, 1, new SimpleItem(new ItemBuilder(Material.FIRE_CHARGE)
+            gui.setItem(4, 4, new SimpleItem(new ItemBuilder(Material.FIRE_CHARGE)
                     .setDisplayName(" §6§l" + enterprise.getActiveBooster().getMultiplier() + "x booster active!")
                     .addLoreLines(" ")
                     .addLoreLines(" §7• Time Left: ")

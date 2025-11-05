@@ -39,14 +39,16 @@ public class RegionUtils {
                 region.getMaximumPoint()
         );
 
-            // Set flags
+        // Set flags
         protectedRegion.setFlag(Flags.BUILD, StateFlag.State.DENY);
         protectedRegion.setFlag(Flags.BLOCK_BREAK, StateFlag.State.DENY);
         protectedRegion.setFlag(Flags.BLOCK_PLACE, StateFlag.State.DENY);
+        protectedRegion.setFlag(Flags.MOB_SPAWNING, StateFlag.State.DENY);
+        protectedRegion.setFlag(Flags.MOB_DAMAGE, StateFlag.State.DENY);
         protectedRegion.setFlag(Flags.USE, StateFlag.State.ALLOW);
         protectedRegion.setFlag(Flags.INTERACT, StateFlag.State.ALLOW);
 
-            // Add to manager
+        // Add to manager
         if(manager.getRegion(id) != null) manager.removeRegion(id);
         manager.addRegion(protectedRegion);
 

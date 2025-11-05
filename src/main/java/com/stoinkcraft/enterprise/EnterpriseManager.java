@@ -85,6 +85,8 @@ public class EnterpriseManager {
             ShareManager.getInstance().sellSharesOffline(player, enterprise, 1);
         });
 
+        enterprise.getJSM().onEnterpriseDisband();
+
         // Remove from enterprise list
         enterpriseList.remove(enterprise);
 

@@ -10,6 +10,7 @@ import com.stoinkcraft.shares.ShareStorage;
 import com.stoinkcraft.utils.ChatUtils;
 import com.stoinkcraft.utils.SCConstants;
 import com.stoinkcraft.utils.SchematicUtils;
+import net.milkbowl.vault.chat.Chat;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
@@ -102,18 +103,17 @@ public class ServerEntCMD implements CommandExecutor {
                }
                return true;
            }
-//           if(args[0].equalsIgnoreCase("setup")){
-//               if(args.length >= 2) {
-//                   // In your command executor
-//                   int index = Integer.parseInt(args[1]);
-//                   Map<String, Location> locs = StoinkCore.getEnterprisePlotManager().assignPlots(player.getUniqueId(), index);
-//
-//                   SchematicUtils.pasteSchematic(new File(StoinkCore.getInstance().getDataFolder(),"/schematics/building.schem"), locs.get("building"), true);
-//                   SchematicUtils.pasteSchematic(new File(StoinkCore.getInstance().getDataFolder(),"/schematics/quarry.schem"), locs.get("quarry"), true);
-//
-//                   player.teleport(locs.get("quarry").add(0.5, 0, 0.5));
-//               }
-//           }
+           if(args[0].equalsIgnoreCase("rebuild")){
+               if(args.length >= 2){
+                   String enterpriseName = args[1];
+                   Enterprise enterprise = StoinkCore.getEnterpriseManager().getEnterpriseByName(enterpriseName);
+                   if(enterprise != null){
+                       enterprise.getJSM().getSkyriseSite().rebuild();
+                       enterprise.getJSM().getQuarrySite().rebuild();
+                       ChatUtils.sendMessage(player, "Rebuilt jobsites for " + enterprise.getName());
+                   }
+               }
+           }
        }
         return true;
     }

@@ -96,6 +96,10 @@ public class EnterpriseStorage {
             config.set("warp.pitch", loc.getPitch());
         }
 
+        config.set("jobsites.plotIndex", e.getPlotIndex());
+        config.set("jobsites.skyrise.isBuilt", e.getJSM().getSkyriseSite().isBuilt());
+        config.set("jobsites.quarry.isBuilt", e.getJSM().getQuarrySite().isBuilt());
+
         try {
             config.save(file);
         } catch (IOException ex) {
@@ -127,6 +131,8 @@ public class EnterpriseStorage {
     public static void loadAllEnterprises() {
         if (!ENTERPRISES_DIR.exists()) return;
 
+        EnterpriseManager manager = EnterpriseManager.getEnterpriseManager();
+
         for (File folder : Objects.requireNonNull(ENTERPRISES_DIR.listFiles(File::isDirectory))) {
             File mainFile = new File(folder, "enterprise.yml");
             File historyFile = new File(folder, "pricehistory.yml");
@@ -134,10 +140,13 @@ public class EnterpriseStorage {
 
             Enterprise e = loadEnterprise(mainFile);
             loadPriceHistory(e, historyFile);
-            EnterpriseManager.getEnterpriseManager().loadEnterprise(e);
-
+            manager.loadEnterprise(e); // Add to list
         }
+
+        // After all are loaded, sync plot indexes
+        StoinkCore.getEnterprisePlotManager().resetNextIndex(manager.getEnterpriseList());
     }
+
 
     private static Enterprise loadEnterprise(File file) {
         YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
@@ -152,6 +161,10 @@ public class EnterpriseStorage {
         e.setBankBalance(config.getDouble("bankBalance"));
         e.addOutstandingShares(config.getInt("outstandingShares"));
         e.setEnterpriseID(id);
+
+        e.setPlotIndex(config.getInt("jobsites.plotIndex", -1));
+        e.initializeJobSiteManager(config.getBoolean("jobsites.skyrise.isBuilt", false),
+                config.getBoolean("jobsites.quarry.isBuilt", false));
 
         // Members
         if (config.isConfigurationSection("members")) {
