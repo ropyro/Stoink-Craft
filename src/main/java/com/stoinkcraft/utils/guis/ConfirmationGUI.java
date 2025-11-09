@@ -1,4 +1,4 @@
-package com.stoinkcraft.shares.guis;
+package com.stoinkcraft.utils.guis;
 
 import com.stoinkcraft.StoinkCore;
 import org.bukkit.Bukkit;
