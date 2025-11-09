@@ -4,8 +4,11 @@ import com.stoinkcraft.StoinkCore;
 import com.stoinkcraft.enterprise.commands.SubCommand;
 import com.stoinkcraft.enterprise.Enterprise;
 import com.stoinkcraft.enterprise.EnterpriseManager;
+import com.stoinkcraft.misc.playerupgrades.PMenuGUI;
 import com.stoinkcraft.utils.ChatUtils;
+import com.stoinkcraft.utils.PlayerUtils;
 import com.stoinkcraft.utils.SCConstants;
+import com.stoinkcraft.utils.guis.ConfirmationGUI;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -51,13 +54,20 @@ public class CreateSubCommand implements SubCommand {
                 entName.append(args[i] + " ");
         }
 
-        String name = entName.toString();
-        Enterprise e = new Enterprise(name, player.getUniqueId());
-        e.initializeJobSiteManager(false, false);
-        EnterpriseManager.getEnterpriseManager().createEnterprise(e);
+        new ConfirmationGUI(player, "Create Enterprise for $10k",
+                () -> {
+                    String name = entName.toString();
+                    Enterprise e = new Enterprise(name, player.getUniqueId());
+                    e.initializeJobSiteManager(false, false);
+                    EnterpriseManager.getEnterpriseManager().createEnterprise(e);
 
-        StoinkCore.getEconomy().withdrawPlayer(player, SCConstants.ENTERPRISE_FOUNDING_COST);
+                    StoinkCore.getEconomy().withdrawPlayer(player, SCConstants.ENTERPRISE_FOUNDING_COST);
 
-        ChatUtils.sendMessage(player,ChatColor.GREEN + "Enterprise '" + name + "' created.");
+                    player.closeInventory();
+                    ChatUtils.sendMessage(player,ChatColor.GREEN + "Enterprise '" + name + "' created.");
+                }, () ->{
+                    player.closeInventory();
+                    ChatUtils.sendMessage(player,ChatColor.RED + "Enterprise creation cancelled.");
+                }).openWindow();
     }
 }
