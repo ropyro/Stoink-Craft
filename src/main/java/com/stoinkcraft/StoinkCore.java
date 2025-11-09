@@ -141,6 +141,8 @@ public class StoinkCore extends JavaPlugin implements Listener {
             EnterpriseStorage.saveAllEnterprises();
         }
 
+        em.startJobSiteTicker(this);
+
         //Register commands
         Bukkit.getScheduler().runTask(this, () -> {
             EnterpriseCMD enterpriseCMD = new EnterpriseCMD(this);

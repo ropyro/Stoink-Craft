@@ -1,9 +1,6 @@
 package com.stoinkcraft.enterpriseworld;
 
-import org.bukkit.Bukkit;
-import org.bukkit.World;
-import org.bukkit.WorldCreator;
-import org.bukkit.WorldType;
+import org.bukkit.*;
 
 public class EnterpriseWorldManager {
 
@@ -16,6 +13,8 @@ public class EnterpriseWorldManager {
             creator.environment(World.Environment.NORMAL);
             creator.type(WorldType.FLAT);
             this.world = creator.createWorld();
+            world.setGameRule(GameRule.KEEP_INVENTORY, true);
+            world.setGameRule(GameRule.MOB_GRIEFING, false);
         } else {
             this.world = Bukkit.getWorld("enterprise_world");
         }

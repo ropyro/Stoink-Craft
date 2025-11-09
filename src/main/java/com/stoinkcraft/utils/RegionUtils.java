@@ -48,6 +48,8 @@ public class RegionUtils {
         protectedRegion.setFlag(Flags.USE, StateFlag.State.ALLOW);
         protectedRegion.setFlag(Flags.INTERACT, StateFlag.State.ALLOW);
 
+        protectedRegion.setPriority(0);
+
         // Add to manager
         if(manager.getRegion(id) != null) manager.removeRegion(id);
         manager.addRegion(protectedRegion);
@@ -55,7 +57,7 @@ public class RegionUtils {
         Bukkit.getLogger().info("Created protected region: " + id + " for world " + world.getName());
     }
 
-    public static void createProtectedRegion(World world, Region region, String id, Map<StateFlag, StateFlag.State> flags) {
+    public static void createProtectedRegion(World world, Region region, String id, Map<StateFlag, StateFlag.State> flags, int priority) {
         RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
         RegionManager manager = container.get(FaweAPI.getWorld(world.getName()));
 
@@ -75,6 +77,8 @@ public class RegionUtils {
         flags.keySet().stream().forEach(flag -> {
             protectedRegion.setFlag(flag, flags.get(flag));
         });
+
+        protectedRegion.setPriority(priority);
 
         // Add to manager
         //manager.getRegion(id) != null

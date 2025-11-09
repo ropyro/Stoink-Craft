@@ -1,6 +1,7 @@
 package com.stoinkcraft.enterprise;
 
 import com.stoinkcraft.StoinkCore;
+import com.stoinkcraft.jobs.jobsites.JobSiteManager;
 import com.stoinkcraft.jobs.jobsites.sites.SkyriseSite;
 import com.stoinkcraft.market.boosters.Booster;
 import com.stoinkcraft.shares.ShareManager;
@@ -253,6 +254,23 @@ public class EnterpriseManager {
     }
 
 
+    public void startJobSiteTicker(JavaPlugin plugin) {
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                for (Enterprise enterprise : getEnterpriseList()) {
+                    JobSiteManager jsm = enterprise.getJSM();
+                    if (jsm == null) continue;
+
+                    // Tick each job site
+                    if (jsm.getSkyriseSite() != null) jsm.getSkyriseSite().tick();
+                    if (jsm.getQuarrySite() != null) jsm.getQuarrySite().tick();
+                    if (jsm.getFarmlandSite() != null) jsm.getFarmlandSite().tick();
+                    if (jsm.getGraveyardSite() != null) jsm.getGraveyardSite().tick();
+                }
+            }
+        }.runTaskTimer(plugin, 20L, 20L); // run every second (20 ticks)
+    }
 
 
     private static Instant lastRotationTime;

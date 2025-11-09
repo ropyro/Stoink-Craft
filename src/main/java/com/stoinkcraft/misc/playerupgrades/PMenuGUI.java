@@ -1,7 +1,7 @@
 package com.stoinkcraft.misc.playerupgrades;
 
 import com.stoinkcraft.StoinkCore;
-import com.stoinkcraft.shares.guis.ConfirmationGUI;
+import com.stoinkcraft.utils.guis.ConfirmationGUI;
 import com.stoinkcraft.utils.ChatUtils;
 import com.stoinkcraft.utils.PlayerUtils;
 import org.bukkit.Material;

@@ -82,14 +82,17 @@ public abstract class JobSite {
         DHAPI.createHologram(name, loc, true, lines);
     }
 
-    public void teleportPlayer(Player player){
-        if(!isBuilt) build();
+    public void teleportPlayer(Player player, boolean ignoreBuilt){
+        if(!isBuilt && !ignoreBuilt) build();
         Location spawn = spawnPoint.clone().add(0.5, 0, 0.5);
         spawn.setYaw(90);
         player.teleport(spawn);
     }
+    public void teleportPlayer(Player player){
+        teleportPlayer(player, false);
+    }
 
-    public void build() {
+        public void build() {
         if (isBuilt) {
             StoinkCore.getInstance().getLogger().info(type + " site for " + enterprise.getName() + " already built.");
             return;
