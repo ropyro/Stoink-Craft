@@ -47,6 +47,8 @@ public class RegionUtils {
         protectedRegion.setFlag(Flags.MOB_DAMAGE, StateFlag.State.DENY);
         protectedRegion.setFlag(Flags.USE, StateFlag.State.ALLOW);
         protectedRegion.setFlag(Flags.INTERACT, StateFlag.State.ALLOW);
+        protectedRegion.setFlag(Flags.SOIL_DRY, StateFlag.State.DENY);
+        protectedRegion.setFlag(Flags.MOISTURE_CHANGE, StateFlag.State.DENY);
 
         protectedRegion.setPriority(0);
 

@@ -2,8 +2,10 @@ package com.stoinkcraft.jobs.jobsites;
 
 import com.stoinkcraft.StoinkCore;
 import com.stoinkcraft.enterprise.Enterprise;
+import com.stoinkcraft.jobs.jobsites.data.FarmlandData;
 import com.stoinkcraft.jobs.jobsites.data.QuarryData;
 import com.stoinkcraft.jobs.jobsites.data.SkyriseData;
+import com.stoinkcraft.jobs.jobsites.sites.FarmlandSite;
 import com.stoinkcraft.jobs.jobsites.sites.QuarrySite;
 import com.stoinkcraft.jobs.jobsites.sites.SkyriseSite;
 import org.bukkit.Location;
@@ -16,6 +18,7 @@ public class JobSiteManager {
     private Enterprise enterprise;
     private SkyriseSite skyriseSite;
     private QuarrySite quarrySite;
+    private FarmlandSite farmlandSite;
     private Map<JobSiteType, Location> plots;
     private int plotIndex;
 
@@ -27,12 +30,13 @@ public class JobSiteManager {
     public void onEnterpriseDisband() {
         if (skyriseSite != null) skyriseSite.disband();
         if (quarrySite != null) quarrySite.disband();
+        if (farmlandSite != null) farmlandSite.disband();
     }
 
     /**
      * Initialize job sites with provided data (from JSON load)
      */
-    public void initializeJobSites(SkyriseData skyriseData, QuarryData quarryData) {
+    public void initializeJobSites(SkyriseData skyriseData, QuarryData quarryData, FarmlandData farmlandData) {
         if (plotIndex == -1) {
             plotIndex = StoinkCore.getEnterprisePlotManager().getNextAvailablePlotIndex();
             enterprise.setPlotIndex(plotIndex);
@@ -52,13 +56,20 @@ public class JobSiteManager {
             quarryData = createDefaultQuarryData();
         }
         quarrySite = new QuarrySite(enterprise, quarryLoc, quarryData);
+
+        //Initialize Farmland
+        Location farmlandLoc = plots.get(JobSiteType.FARMLAND);
+        if(farmlandData == null){
+            farmlandData = createDefaultFarmlandData();
+        }
+        farmlandSite = new FarmlandSite(enterprise, farmlandLoc, farmlandData);
     }
 
     /**
      * Initialize with default values (new enterprise)
      */
     public void initializeJobSites() {
-        initializeJobSites(null, null);
+        initializeJobSites(null, null, null);
     }
 
     // Default data factories
@@ -77,6 +88,10 @@ public class JobSiteManager {
         );
     }
 
+    private FarmlandData createDefaultFarmlandData(){
+        return new FarmlandData(false);
+    }
+
     // Getters for serialization
     public SkyriseData getSkyriseData() {
         if (skyriseSite == null) return null;
@@ -88,12 +103,21 @@ public class JobSiteManager {
         return quarrySite.getData();
     }
 
+    public FarmlandData getFarmlandData(){
+        if(farmlandSite == null) return null;
+        return farmlandSite.getData();
+    }
+
     public SkyriseSite getSkyriseSite() {
         return skyriseSite;
     }
 
     public QuarrySite getQuarrySite() {
         return quarrySite;
+    }
+
+    public FarmlandSite getFarmlandSite(){
+        return farmlandSite;
     }
 
     public int getPlotIndex() {

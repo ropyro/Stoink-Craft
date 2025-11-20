@@ -112,4 +112,8 @@ public abstract class JobSite {
     public boolean contains(Location loc) {
         return region.contains(RegionUtils.toBlockVector3(loc));
     }
+
+    public Location getSpawnPoint() {
+        return spawnPoint;
+    }
 }

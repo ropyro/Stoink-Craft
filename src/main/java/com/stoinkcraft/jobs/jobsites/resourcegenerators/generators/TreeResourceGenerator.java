@@ -41,6 +41,11 @@ public class TreeResourceGenerator extends ResourceGenerator {
         }
     }
 
+    @Override
+    public void init() {
+
+    }
+
     private boolean isTreePresent() {
         Material type = baseLocation.getBlock().getType();
         return switch (type) {

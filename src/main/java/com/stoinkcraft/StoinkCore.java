@@ -1,6 +1,7 @@
 package com.stoinkcraft;
 
 import com.stoinkcraft.enterprise.*;
+import com.stoinkcraft.jobs.listeners.BlockBreakListener;
 import com.stoinkcraft.misc.daily.DailyCMD;
 import com.stoinkcraft.misc.daily.DailyManager;
 import com.stoinkcraft.market.boosters.BoostNoteInteractionListener;
@@ -32,6 +33,7 @@ import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.trait.SkinTrait;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.*;
+import org.bukkit.block.Block;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.RegisteredServiceProvider;
@@ -160,12 +162,18 @@ public class StoinkCore extends JavaPlugin implements Listener {
 
             ServerEnterprise farmer = new ServerEnterprise("FarmerLLC");
             mgr.createEnterprise(farmer);
+            farmer.initializeJobSiteManager();
+            farmer.getJobSiteManager().initializeJobSites();
 
             ServerEnterprise miner = new ServerEnterprise("MinerCorp");
             mgr.createEnterprise(miner);
+            miner.initializeJobSiteManager();
+            miner.getJobSiteManager().initializeJobSites();
 
             ServerEnterprise hunter = new ServerEnterprise("HunterInc");
             mgr.createEnterprise(hunter);
+            hunter.initializeJobSiteManager();
+            hunter.getJobSiteManager().initializeJobSites();
 
             getLogger().info("Server enterprises created and saved.");
         }
@@ -209,6 +217,9 @@ public class StoinkCore extends JavaPlugin implements Listener {
         getServer().getPluginManager().registerEvents(new JoinMOTDListener(), this);
         getServer().getPluginManager().registerEvents(new EnderChestListener(), this);
         getServer().getPluginManager().registerEvents(this, this);
+
+        //Job listeners
+        getServer().getPluginManager().registerEvents(new BlockBreakListener(), this);
 
         //startAutoSaveTask();
         startPriceSnapshotRecording();

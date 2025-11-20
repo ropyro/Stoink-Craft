@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import com.stoinkcraft.StoinkCore;
 import com.stoinkcraft.enterprise.Enterprise;
 import com.stoinkcraft.enterprise.EnterpriseManager;
+import com.stoinkcraft.jobs.jobsites.data.FarmlandData;
 import com.stoinkcraft.jobs.jobsites.data.QuarryData;
 import com.stoinkcraft.jobs.jobsites.data.SkyriseData;
 import org.bukkit.Bukkit;
@@ -110,8 +111,9 @@ public class EnterpriseStorageJson {
 
         SkyriseData skyriseData = enterprise.getJobSiteManager().getSkyriseData();
         QuarryData quarryData = enterprise.getJobSiteManager().getQuarryData();
+        FarmlandData farmlandData = enterprise.getJobSiteManager().getFarmlandData();
 
-        jobSiteStorage.saveJobSites(enterprise.getID(), skyriseData, quarryData);
+        jobSiteStorage.saveJobSites(enterprise.getID(), skyriseData, quarryData, farmlandData);
     }
 
     // ======= LOAD =======
@@ -128,7 +130,7 @@ public class EnterpriseStorageJson {
             int yamlCount = EnterpriseMigration.getYamlFilesCount();
             Bukkit.getLogger().warning("==============================================");
             Bukkit.getLogger().warning("Found " + yamlCount + " YAML enterprises to migrate!");
-            Bukkit.getLogger().warning("Run '/migrate-enterprises' to convert to JSON");
+            Bukkit.getLogger().warning("Run '/se migrate' to convert to JSON");
             Bukkit.getLogger().warning("==============================================");
         }
 
@@ -210,9 +212,10 @@ public class EnterpriseStorageJson {
         // Load job site data from separate files
         SkyriseData skyriseData = jobSiteStorage.loadSkyriseData(enterprise.getID());
         QuarryData quarryData = jobSiteStorage.loadQuarryData(enterprise.getID());
+        FarmlandData farmlandData = jobSiteStorage.loadFarmlandData(enterprise.getID());
 
         // Initialize job sites with loaded data (or defaults if null)
-        enterprise.getJobSiteManager().initializeJobSites(skyriseData, quarryData);
+        enterprise.getJobSiteManager().initializeJobSites(skyriseData, quarryData, farmlandData);
     }
 
     // ======= DELETE =======

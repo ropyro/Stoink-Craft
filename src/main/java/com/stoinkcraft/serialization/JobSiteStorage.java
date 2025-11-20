@@ -2,6 +2,7 @@ package com.stoinkcraft.serialization;
 
 import com.google.gson.Gson;
 import com.stoinkcraft.StoinkCore;
+import com.stoinkcraft.jobs.jobsites.data.FarmlandData;
 import com.stoinkcraft.jobs.jobsites.data.QuarryData;
 import com.stoinkcraft.jobs.jobsites.data.SkyriseData;
 import org.bukkit.Bukkit;
@@ -26,7 +27,7 @@ public class JobSiteStorage {
     /**
      * Save all job site data for an enterprise
      */
-    public boolean saveJobSites(UUID enterpriseID, SkyriseData skyriseData, QuarryData quarryData) {
+    public boolean saveJobSites(UUID enterpriseID, SkyriseData skyriseData, QuarryData quarryData, FarmlandData farmlandData) {
         File jobSitesDir = getJobSitesDirectory(enterpriseID);
         if (!jobSitesDir.exists()) {
             jobSitesDir.mkdirs();
@@ -40,6 +41,10 @@ public class JobSiteStorage {
 
         if (quarryData != null) {
             success &= saveJobSite(jobSitesDir, "quarry.json", quarryData, QuarryData.class);
+        }
+
+        if(farmlandData != null){
+            success &= saveJobSite(jobSitesDir, "farmland.json", farmlandData, FarmlandData.class);
         }
 
         return success;
@@ -134,6 +139,33 @@ public class JobSiteStorage {
                 try {
                     Bukkit.getLogger().info("Attempting to load from backup...");
                     return loadJobSite(backupFile, QuarryData.class);
+                } catch (Exception ex) {
+                    Bukkit.getLogger().log(Level.SEVERE, "Backup also failed!", ex);
+                }
+            }
+            return null;
+        }
+    }
+
+    public FarmlandData loadFarmlandData(UUID enterpriseID) {
+        File jobSitesDir = getJobSitesDirectory(enterpriseID);
+        File jsonFile = new File(jobSitesDir, "farmland.json");
+
+        if (!jsonFile.exists()) {
+            return null; // Will use defaults
+        }
+
+        try {
+            return loadJobSite(jsonFile, FarmlandData.class);
+        } catch (Exception e) {
+            Bukkit.getLogger().log(Level.SEVERE, "Failed to load farmland data for: " + enterpriseID, e);
+
+            // Try backup
+            File backupFile = new File(jobSitesDir, "farmland.json.backup");
+            if (backupFile.exists()) {
+                try {
+                    Bukkit.getLogger().info("Attempting to load from backup...");
+                    return loadJobSite(backupFile, FarmlandData.class);
                 } catch (Exception ex) {
                     Bukkit.getLogger().log(Level.SEVERE, "Backup also failed!", ex);
                 }

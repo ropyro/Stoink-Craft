@@ -119,6 +119,7 @@ public class ServerEntCMD implements CommandExecutor {
                    if(enterprise != null){
                        enterprise.getJobSiteManager().getSkyriseSite().rebuild();
                        enterprise.getJobSiteManager().getQuarrySite().rebuild();
+                       enterprise.getJobSiteManager().getFarmlandSite().rebuild();
                        ChatUtils.sendMessage(player, "Rebuilt jobsites for " + enterprise.getName());
                    }
                }

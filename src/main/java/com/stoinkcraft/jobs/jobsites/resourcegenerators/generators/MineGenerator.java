@@ -9,14 +9,20 @@ import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.world.block.BlockTypes;
+import com.sk89q.worldguard.protection.flags.Flags;
+import com.sk89q.worldguard.protection.flags.StateFlag;
 import com.stoinkcraft.jobs.jobsites.JobSite;
 import com.stoinkcraft.jobs.jobsites.resourcegenerators.ResourceGenerator;
 import com.stoinkcraft.utils.ChatUtils;
+import com.stoinkcraft.utils.RegionUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class MineGenerator extends ResourceGenerator {
 
@@ -25,14 +31,16 @@ public class MineGenerator extends ResourceGenerator {
     private final World bukkitWorld;
     private int regenIntervalSeconds;
     private CuboidRegion cuboidRegion;
+    private String regionName;
 
-    public MineGenerator(Location corner1, Location corner2, JobSite parent, int regenIntervalSeconds) {
+    public MineGenerator(Location corner1, Location corner2, JobSite parent, int regenIntervalSeconds, String regionName) {
         super(parent);
         this.corner1 = corner1;
         this.corner2 = corner2;
         this.bukkitWorld = corner1.getWorld();
         this.regenIntervalSeconds = regenIntervalSeconds;
         setRegion(corner1, corner2);
+        this.regionName = regionName;
     }
 
     @Override
@@ -40,6 +48,23 @@ public class MineGenerator extends ResourceGenerator {
         if (getTickCounter() % regenIntervalSeconds == 0) {
             regenerateMine();
         }
+    }
+
+    @Override
+    public void init() {
+        Map<StateFlag, StateFlag.State> flags = new HashMap<>();
+        flags.put(Flags.BLOCK_BREAK, StateFlag.State.ALLOW);
+        flags.put(Flags.INTERACT, StateFlag.State.ALLOW);
+        flags.put(Flags.USE, StateFlag.State.ALLOW);
+        flags.put(Flags.BLOCK_PLACE, StateFlag.State.DENY);
+        flags.put(Flags.MOB_SPAWNING, StateFlag.State.DENY);
+        flags.put(Flags.MOB_DAMAGE, StateFlag.State.DENY);
+        RegionUtils.createProtectedRegion(
+                getParent().getSpawnPoint().getWorld(),
+                getCuboidRegion(),
+                regionName,
+                flags,
+                10);
     }
 
     public long remainingTicks() {

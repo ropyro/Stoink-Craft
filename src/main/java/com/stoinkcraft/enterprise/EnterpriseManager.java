@@ -264,7 +264,7 @@ public class EnterpriseManager {
                     // Tick each job site
                     if (jsm.getSkyriseSite() != null) jsm.getSkyriseSite().tick();
                     if (jsm.getQuarrySite() != null) jsm.getQuarrySite().tick();
-//                    if (jsm.getFarmlandSite() != null) jsm.getFarmlandSite().tick();
+                    if (jsm.getFarmlandSite() != null) jsm.getFarmlandSite().tick();
 //                    if (jsm.getGraveyardSite() != null) jsm.getGraveyardSite().tick();
                 }
             }

@@ -58,7 +58,8 @@ public class CreateSubCommand implements SubCommand {
                 () -> {
                     String name = entName.toString();
                     Enterprise e = new Enterprise(name, player.getUniqueId());
-                    //e.initializeJobSiteManager();
+                    e.initializeJobSiteManager();
+                    e.getJobSiteManager().initializeJobSites();
                     EnterpriseManager.getEnterpriseManager().createEnterprise(e);
 
                     StoinkCore.getEconomy().withdrawPlayer(player, SCConstants.ENTERPRISE_FOUNDING_COST);

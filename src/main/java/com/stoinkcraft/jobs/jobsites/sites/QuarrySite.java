@@ -29,13 +29,13 @@ public class QuarrySite extends JobSite {
                 new File(StoinkCore.getInstance().getDataFolder(), "/schematics/quarry.schem"),
                 data.isBuilt());
         this.data = data;
+        mineRegionID = enterprise.getID() + "_" + JobSiteType.QUARRY.name() + "_mine";
         welcomeHologramName = enterprise.getID() + "_" + JobSiteType.QUARRY.name() + "_welcome";
 
         Location corner1 = spawnPoint.clone().add(data.getMineCorner1Offset());
         Location corner2 = spawnPoint.clone().add(data.getMineCorner2Offset());
-        this.mineGenerator = new MineGenerator(corner1, corner2, this, (int) data.getRegenIntervalSeconds());
+        this.mineGenerator = new MineGenerator(corner1, corner2, this, (int) data.getRegenIntervalSeconds(), mineRegionID);
         mineGenerator.setTickCounter(data.getTickCounter());
-        mineRegionID = enterprise.getID() + "_" + JobSiteType.QUARRY.name() + "_mine";
     }
 
     @Override
@@ -53,21 +53,8 @@ public class QuarrySite extends JobSite {
         Location holoLoc = spawnPoint.clone().add(data.getEntryHologramOffset());
         initializeHologram(welcomeHologramName, entryHoloGramLines, holoLoc);
 
+        mineGenerator.init();
         mineGenerator.regenerateMine();
-
-        Map<StateFlag, StateFlag.State> flags = new HashMap<>();
-        flags.put(Flags.BLOCK_BREAK, StateFlag.State.ALLOW);
-        flags.put(Flags.INTERACT, StateFlag.State.ALLOW);
-        flags.put(Flags.USE, StateFlag.State.ALLOW);
-        flags.put(Flags.BLOCK_PLACE, StateFlag.State.DENY);
-        flags.put(Flags.MOB_SPAWNING, StateFlag.State.DENY);
-        flags.put(Flags.MOB_DAMAGE, StateFlag.State.DENY);
-        RegionUtils.createProtectedRegion(
-                spawnPoint.getWorld(),
-                mineGenerator.getCuboidRegion(),
-                mineRegionID,
-                flags,
-                10);
     }
 
     @Override

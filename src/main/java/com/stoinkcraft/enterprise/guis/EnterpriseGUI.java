@@ -47,7 +47,7 @@ public class EnterpriseGUI {
                         "# # # # ? # # # #",
                         "# # # # # # # # #",
                         "# # A B C D S # #",
-                        "# # # Q G F # # #",
+                        "# # # F Q G # # #",
                         "# # # # # # # # #")
                 .addIngredient('#', new SimpleItem(new ItemBuilder(Material.BLACK_STAINED_GLASS_PANE)
                         .setDisplayName(" ")))
@@ -152,6 +152,38 @@ public class EnterpriseGUI {
                 enterprise.getJobSiteManager().getQuarrySite().teleportPlayer(player);
             }
         })
+                .addIngredient('G', new AbstractItem() {
+                    @Override
+                    public ItemProvider getItemProvider() {
+                        ItemStack item = new ItemStack(Material.SKELETON_SKULL);
+
+                        ItemBuilder openerhead = new ItemBuilder(item)
+                                .setDisplayName("§aGraveyard Coming soon...");
+
+                        return openerhead;
+                    }
+
+                    @Override
+                    public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull InventoryClickEvent inventoryClickEvent) {
+                        //enterprise.getJobSiteManager().getFarmlandSite().teleportPlayer(player);
+                    }
+                })
+                .addIngredient('F', new AbstractItem() {
+                    @Override
+                    public ItemProvider getItemProvider() {
+                        ItemStack item = new ItemStack(Material.WHEAT);
+
+                        ItemBuilder openerhead = new ItemBuilder(item)
+                                .setDisplayName("§aTeleport to Farmland");
+
+                        return openerhead;
+                    }
+
+                    @Override
+                    public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull InventoryClickEvent inventoryClickEvent) {
+                        enterprise.getJobSiteManager().getFarmlandSite().teleportPlayer(player);
+                    }
+                })
                 .build();
 
         if(enterprise.isBoosted()){

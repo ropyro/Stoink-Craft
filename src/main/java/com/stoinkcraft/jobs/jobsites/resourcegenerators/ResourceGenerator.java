@@ -30,4 +30,6 @@ public abstract class ResourceGenerator {
 
     protected abstract void onTick();
 
+    public abstract void init();
+
 }
