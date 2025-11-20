@@ -1,5 +1,6 @@
 package com.stoinkcraft;
 
+import com.stoinkcraft.enterprise.*;
 import com.stoinkcraft.misc.daily.DailyCMD;
 import com.stoinkcraft.misc.daily.DailyManager;
 import com.stoinkcraft.market.boosters.BoostNoteInteractionListener;
@@ -10,18 +11,15 @@ import com.stoinkcraft.enterprise.commands.enterprisecmd.EnterpriseTabCompleter;
 import com.stoinkcraft.enterprise.commands.serverenterprisecmd.ServerEntCMD;
 import com.stoinkcraft.enterprise.commands.serverenterprisecmd.ServerEntTabCompleter;
 import com.stoinkcraft.market.listeners.EarningListener;
-import com.stoinkcraft.enterprise.Enterprise;
-import com.stoinkcraft.enterprise.EnterpriseStorage;
-import com.stoinkcraft.enterprise.ServerEnterprise;
 import com.stoinkcraft.enterprise.listeners.ChatDepositListener;
 import com.stoinkcraft.enterprise.listeners.ChatInvestListener;
 import com.stoinkcraft.enterprise.listeners.ChatWithdrawListener;
 import com.stoinkcraft.enterprise.listeners.PlayerJoinListener;
 import com.stoinkcraft.market.MarketManager;
-import com.stoinkcraft.enterprise.EnterpriseManager;
 import com.stoinkcraft.misc.EnderChestListener;
 import com.stoinkcraft.misc.JoinMOTDListener;
 import com.stoinkcraft.misc.playerupgrades.PMenuCommand;
+import com.stoinkcraft.serialization.EnterpriseStorageJson;
 import com.stoinkcraft.shares.SharesCMD;
 import com.stoinkcraft.shares.ShareManager;
 import com.stoinkcraft.shares.ShareStorage;
@@ -34,6 +32,7 @@ import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.trait.SkinTrait;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.*;
+import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -84,10 +83,19 @@ public class StoinkCore extends JavaPlugin implements Listener {
         return epm;
     }
 
+
     @Override
     public void onDisable() {
-        EnterpriseStorage.saveAllEnterprises();
-        ShareStorage.saveShares();
+        getLogger().info("Disabling StoinkCore...");
+
+        EnterpriseStorageJson.saveAllEnterprises();
+
+        try {
+            ShareStorage.saveShares();
+        } catch (Exception ex) {
+            getLogger().severe("Failed to save shares: " + ex.getMessage());
+        }
+
         getLogger().info(String.format("[%s] Disabled Version %s", getDescription().getName(), getDescription().getVersion()));
     }
 
@@ -126,39 +134,72 @@ public class StoinkCore extends JavaPlugin implements Listener {
         MarketManager.loadMarketPrices(marketFile);
         MarketManager.startRotatingBoosts(this);
 
-        EnterpriseStorage.loadAllEnterprises();
-        EnterpriseManager.startDailyTaxes(this);
+
+        //EnterpriseStorage.loadAllEnterprises();
+        EnterpriseStorageJson.loadAllEnterprises();
+
+        // Periodic autosave (every 5 minutes):
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                EnterpriseStorageJson.saveAllEnterprisesAsync();
+            }
+        }.runTaskTimerAsynchronously(this, 20L * 60 * 5, 20L * 60 * 5);
+
+
+
+        em.startDailyTaxes(this);
+
+
 
         ShareStorage.loadShares();
 
-        if(EnterpriseManager.getEnterpriseManager().getEnterpriseList()
-                .stream()
-                .noneMatch(e -> e instanceof ServerEnterprise)){
+        EnterpriseManager mgr = EnterpriseManager.getEnterpriseManager();
+        if (mgr.getEnterpriseList().stream().noneMatch(e -> e instanceof ServerEnterprise)) {
             getLogger().info("Adding server enterprises...");
-            EnterpriseManager.getEnterpriseManager().createEnterprise(new ServerEnterprise("FarmerLLC"));
-            EnterpriseManager.getEnterpriseManager().createEnterprise(new ServerEnterprise("MinerCorp"));
-            EnterpriseManager.getEnterpriseManager().createEnterprise(new ServerEnterprise("HunterInc"));
-            EnterpriseStorage.saveAllEnterprises();
+
+            ServerEnterprise farmer = new ServerEnterprise("FarmerLLC");
+            mgr.createEnterprise(farmer);
+
+            ServerEnterprise miner = new ServerEnterprise("MinerCorp");
+            mgr.createEnterprise(miner);
+
+            ServerEnterprise hunter = new ServerEnterprise("HunterInc");
+            mgr.createEnterprise(hunter);
+
+            getLogger().info("Server enterprises created and saved.");
         }
+
 
         em.startJobSiteTicker(this);
 
         //Register commands
-        Bukkit.getScheduler().runTask(this, () -> {
-            EnterpriseCMD enterpriseCMD = new EnterpriseCMD(this);
-            getCommand("enterprise").setExecutor(enterpriseCMD);
-            getCommand("enterprise").setTabCompleter(new EnterpriseTabCompleter(enterpriseCMD.getSubcommands()));
-            getCommand("market").setExecutor(new MarketCMD());
-            getCommand("serverenterprise").setExecutor(new ServerEntCMD());
-            getCommand("serverenterprise").setTabCompleter(new ServerEntTabCompleter());
-            getCommand("topceo").setExecutor(new TopCeoCMD());
-            getCommand("shares").setExecutor(new SharesCMD());
-            getCommand("daily").setExecutor(new DailyCMD());
-            getCommand("pmenu").setExecutor(new PMenuCommand());
-        });
+//        Bukkit.getScheduler().runTask(this, () -> {
+//            EnterpriseCMD enterpriseCMD = new EnterpriseCMD(this);
+//            getCommand("enterprise").setExecutor(enterpriseCMD);
+//            getCommand("enterprise").setTabCompleter(new EnterpriseTabCompleter(enterpriseCMD.getSubcommands()));
+//            getCommand("market").setExecutor(new MarketCMD());
+//            getCommand("serverenterprise").setExecutor(new ServerEntCMD());
+//            getCommand("serverenterprise").setTabCompleter(new ServerEntTabCompleter());
+//            getCommand("topceo").setExecutor(new TopCeoCMD());
+//            getCommand("shares").setExecutor(new SharesCMD());
+//            getCommand("daily").setExecutor(new DailyCMD());
+//            getCommand("pmenu").setExecutor(new PMenuCommand());
+//        });
+
+        EnterpriseCMD enterpriseCMD = new EnterpriseCMD(this);
+        getCommand("enterprise").setExecutor(enterpriseCMD);
+        getCommand("enterprise").setTabCompleter(new EnterpriseTabCompleter(enterpriseCMD.getSubcommands()));
+        getCommand("market").setExecutor(new MarketCMD());
+        getCommand("serverenterprise").setExecutor(new ServerEntCMD());
+        getCommand("serverenterprise").setTabCompleter(new ServerEntTabCompleter());
+        getCommand("topceo").setExecutor(new TopCeoCMD());
+        getCommand("shares").setExecutor(new SharesCMD());
+        getCommand("daily").setExecutor(new DailyCMD());
+        getCommand("pmenu").setExecutor(new PMenuCommand());
 
         //Register listeners
-        getServer().getPluginManager().registerEvents(new EarningListener(this), this);
+        //getServer().getPluginManager().registerEvents(new EarningListener(this), this);
         getServer().getPluginManager().registerEvents(new PlayerJoinListener(this), this);
         getServer().getPluginManager().registerEvents(new ChatWithdrawListener(this), this);
         getServer().getPluginManager().registerEvents(new ChatInvestListener(this), this);
@@ -169,7 +210,7 @@ public class StoinkCore extends JavaPlugin implements Listener {
         getServer().getPluginManager().registerEvents(new EnderChestListener(), this);
         getServer().getPluginManager().registerEvents(this, this);
 
-        startAutoSaveTask();
+        //startAutoSaveTask();
         startPriceSnapshotRecording();
         startAutoTopCEOUpdate();
 
@@ -187,21 +228,22 @@ public class StoinkCore extends JavaPlugin implements Listener {
         }, 0L, 20L * 60 * 5);
     }
 
-    private void startAutoSaveTask() {
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                try {
-                    EnterpriseStorage.saveAllEnterprises();
-                    ShareStorage.saveShares();
-                    getLogger().info("[AutoSave] Enterprises and shares saved successfully.");
-                } catch (Exception e) {
-                    getLogger().severe("[AutoSave] Failed to save enterprises/shares: " + e.getMessage());
-                    e.printStackTrace();
-                }
-            }
-        }.runTaskTimerAsynchronously(this, 20L * 60L * 5L, 20L * 60L * 5L); // every 5 minutes
-    }
+//    private void startAutoSaveTask() {
+//        new BukkitRunnable() {
+//            @Override
+//            public void run() {
+//                try {
+//                    EnterpriseStorage.saveAllEnterprises();
+//                    ShareStorage.saveShares();
+//                    getLogger().info("[AutoSave] Enterprises and shares saved successfully.");
+//                } catch (Exception e) {
+//                    getLogger().severe("[AutoSave] Failed to save enterprises/shares: " + e.getMessage());
+//                    e.printStackTrace();
+//                }
+//            }
+//        }.runTaskTimerAsynchronously(this, 20L * 60L * 5L, 20L * 60L * 5L); // every 5 minutes
+//    }
+
 
     public void updateTopCeoNpcs() {
         // Run async for data sorting and lookups

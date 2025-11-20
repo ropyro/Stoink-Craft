@@ -24,6 +24,10 @@ public abstract class ResourceGenerator {
         return tickCounter;
     }
 
+    public void setTickCounter(long ticks){
+        this.tickCounter = ticks;
+    }
+
     protected abstract void onTick();
 
 }

@@ -133,7 +133,7 @@ public class EnterpriseGUI {
 
                     @Override
                     public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull InventoryClickEvent inventoryClickEvent) {
-                        enterprise.getJSM().getSkyriseSite().teleportPlayer(player);
+                        enterprise.getJobSiteManager().getSkyriseSite().teleportPlayer(player);
                     }
                 })
         .addIngredient('Q', new AbstractItem() {
@@ -149,7 +149,7 @@ public class EnterpriseGUI {
 
             @Override
             public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull InventoryClickEvent inventoryClickEvent) {
-                enterprise.getJSM().getQuarrySite().teleportPlayer(player);
+                enterprise.getJobSiteManager().getQuarrySite().teleportPlayer(player);
             }
         })
                 .build();

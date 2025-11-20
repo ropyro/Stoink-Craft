@@ -4,6 +4,7 @@ import com.stoinkcraft.StoinkCore;
 import com.stoinkcraft.jobs.jobsites.JobSiteManager;
 import com.stoinkcraft.jobs.jobsites.sites.SkyriseSite;
 import com.stoinkcraft.market.boosters.Booster;
+import com.stoinkcraft.serialization.EnterpriseStorageJson;
 import com.stoinkcraft.shares.ShareManager;
 import com.stoinkcraft.utils.ChatUtils;
 import com.stoinkcraft.utils.SCConstants;
@@ -86,16 +87,14 @@ public class EnterpriseManager {
             ShareManager.getInstance().sellSharesOffline(player, enterprise, 1);
         });
 
-        enterprise.getJSM().onEnterpriseDisband();
 
         // Remove from enterprise list
         enterpriseList.remove(enterprise);
 
+        EnterpriseStorageJson.disband(enterprise);
+
         // Optional: log to console
         Bukkit.getLogger().info("[StoinkCore] Disbanded enterprise: " + enterprise.getName());
-
-        // Optional: trigger save
-        EnterpriseStorage.disband(enterprise);
     }
 
     public boolean setEnterpriseWarp(Player player){
@@ -259,14 +258,14 @@ public class EnterpriseManager {
             @Override
             public void run() {
                 for (Enterprise enterprise : getEnterpriseList()) {
-                    JobSiteManager jsm = enterprise.getJSM();
+                    JobSiteManager jsm = enterprise.getJobSiteManager();
                     if (jsm == null) continue;
 
                     // Tick each job site
                     if (jsm.getSkyriseSite() != null) jsm.getSkyriseSite().tick();
                     if (jsm.getQuarrySite() != null) jsm.getQuarrySite().tick();
-                    if (jsm.getFarmlandSite() != null) jsm.getFarmlandSite().tick();
-                    if (jsm.getGraveyardSite() != null) jsm.getGraveyardSite().tick();
+//                    if (jsm.getFarmlandSite() != null) jsm.getFarmlandSite().tick();
+//                    if (jsm.getGraveyardSite() != null) jsm.getGraveyardSite().tick();
                 }
             }
         }.runTaskTimer(plugin, 20L, 20L); // run every second (20 ticks)

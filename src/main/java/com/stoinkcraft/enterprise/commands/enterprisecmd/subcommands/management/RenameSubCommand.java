@@ -67,6 +67,6 @@ public class RenameSubCommand implements SubCommand {
 
         ChatUtils.sendMessage(player,"§a" + e.getName() + " §fhas been renamed to §a" + entName);
         e.setName(entName.toString());
-        e.getJSM().getSkyriseSite().initializeEntryHologram();
+        e.getJobSiteManager().getSkyriseSite().initializeEntryHologram();
     }
 }

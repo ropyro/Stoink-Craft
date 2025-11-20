@@ -20,14 +20,21 @@ public class ConfirmationGUI {
     private final Player opener;
     private final String actionString;
     private final Runnable confirmationAction;
+    private final Runnable cancelAction;
     private final Runnable returnAction;
 
     public ConfirmationGUI(Player opener, String actionString, Runnable confirmationAction, Runnable returnAction) {
+        this(opener, actionString, confirmationAction, null, returnAction);
+    }
+
+    public ConfirmationGUI(Player opener, String actionString, Runnable confirmationAction, Runnable cancelAction, Runnable returnAction) {
         this.opener = opener;
         this.actionString = actionString;
         this.confirmationAction = confirmationAction;
+        this.cancelAction = cancelAction;
         this.returnAction = returnAction;
     }
+
 
     public void openWindow() {
         Gui gui = Gui.normal()
@@ -71,6 +78,9 @@ public class ConfirmationGUI {
                         Bukkit.getScheduler().runTaskLater(StoinkCore.getInstance(), () -> {
                             if (returnAction != null) {
                                 returnAction.run();
+                            }
+                            if(cancelAction != null){
+                                cancelAction.run();
                             }
                         }, 2L);
                     }

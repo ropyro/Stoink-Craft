@@ -92,7 +92,7 @@ public abstract class JobSite {
         teleportPlayer(player, false);
     }
 
-        public void build() {
+    public void build() {
         if (isBuilt) {
             StoinkCore.getInstance().getLogger().info(type + " site for " + enterprise.getName() + " already built.");
             return;

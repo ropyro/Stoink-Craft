@@ -3,6 +3,7 @@ package com.stoinkcraft.jobs.jobsites.resourcegenerators.generators;
 import com.fastasyncworldedit.core.FaweAPI;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.WorldEdit;
+import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldedit.function.pattern.RandomPattern;
 import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.regions.CuboidRegion;
@@ -22,26 +23,30 @@ public class MineGenerator extends ResourceGenerator {
     private final Location corner1;
     private final Location corner2;
     private final World bukkitWorld;
-    private int regenIntervalSeconds = 60 * 10; // every 10 minutes
+    private int regenIntervalSeconds;
     private CuboidRegion cuboidRegion;
 
-    public MineGenerator(Location corner1, Location corner2, JobSite parent){
+    public MineGenerator(Location corner1, Location corner2, JobSite parent, int regenIntervalSeconds) {
         super(parent);
         this.corner1 = corner1;
         this.corner2 = corner2;
         this.bukkitWorld = corner1.getWorld();
+        this.regenIntervalSeconds = regenIntervalSeconds;
         setRegion(corner1, corner2);
     }
 
     @Override
     protected void onTick() {
-        //every 5minutes
         if (getTickCounter() % regenIntervalSeconds == 0) {
             regenerateMine();
         }
     }
 
-    public void setRegion(Location corner1, Location corner2){
+    public long remainingTicks() {
+        return getTickCounter() % regenIntervalSeconds;
+    }
+
+    public void setRegion(Location corner1, Location corner2) {
         BlockVector3 min = BlockVector3.at(
                 Math.min(corner1.getBlockX(), corner2.getBlockX()),
                 Math.min(corner1.getBlockY(), corner2.getBlockY()),
@@ -55,7 +60,7 @@ public class MineGenerator extends ResourceGenerator {
         cuboidRegion = new CuboidRegion(min, max);
     }
 
-    public CuboidRegion getCuboidRegion(){
+    public CuboidRegion getCuboidRegion() {
         return cuboidRegion;
     }
 
@@ -69,22 +74,19 @@ public class MineGenerator extends ResourceGenerator {
         for (Player player : Bukkit.getOnlinePlayers()) {
             Location loc = player.getLocation();
 
-            // Only teleport players currently inside this job site
             if (getParent().contains(loc)) {
                 getParent().teleportPlayer(player, true);
-                ChatUtils.sendMessage(player,ChatColor.YELLOW + "⛏ The quarry is regenerating, you've been moved to safety!");
+                ChatUtils.sendMessage(player, ChatColor.YELLOW + "⛏ The quarry is regenerating, you've been moved to safety!");
             }
         }
     }
 
-    public void regenerateMine(){
+    public void regenerateMine() {
         teleportPlayersOutOfMine();
 
         com.sk89q.worldedit.world.World weWorld = FaweAPI.getWorld(bukkitWorld.getName());
 
-
         try (EditSession session = WorldEdit.getInstance().newEditSession(weWorld)) {
-
             RandomPattern pattern = new RandomPattern();
             pattern.add(BlockTypes.COBBLESTONE.getDefaultState(), 80);
             pattern.add(BlockTypes.COAL_ORE.getDefaultState(), 10);

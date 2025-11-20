@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
+@Deprecated
 public class EnterpriseStorage {
 
     private static final File ENTERPRISES_DIR = new File(StoinkCore.getInstance().getDataFolder(), "Enterprises");
@@ -96,10 +97,6 @@ public class EnterpriseStorage {
             config.set("warp.pitch", loc.getPitch());
         }
 
-        config.set("jobsites.plotIndex", e.getPlotIndex());
-        config.set("jobsites.skyrise.isBuilt", e.getJSM().getSkyriseSite().isBuilt());
-        config.set("jobsites.quarry.isBuilt", e.getJSM().getQuarrySite().isBuilt());
-
         try {
             config.save(file);
         } catch (IOException ex) {
@@ -162,9 +159,6 @@ public class EnterpriseStorage {
         e.addOutstandingShares(config.getInt("outstandingShares"));
         e.setEnterpriseID(id);
 
-        e.setPlotIndex(config.getInt("jobsites.plotIndex", -1));
-        e.initializeJobSiteManager(config.getBoolean("jobsites.skyrise.isBuilt", false),
-                config.getBoolean("jobsites.quarry.isBuilt", false));
 
         // Members
         if (config.isConfigurationSection("members")) {

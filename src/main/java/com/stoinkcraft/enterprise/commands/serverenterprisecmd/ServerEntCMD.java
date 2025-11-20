@@ -6,12 +6,15 @@ import com.stoinkcraft.market.boosters.BoosterItemHelper;
 import com.stoinkcraft.enterprise.Enterprise;
 import com.stoinkcraft.enterprise.EnterpriseManager;
 import com.stoinkcraft.enterprise.ServerEnterprise;
+import com.stoinkcraft.serialization.EnterpriseMigration;
+import com.stoinkcraft.serialization.EnterpriseStorageJson;
 import com.stoinkcraft.shares.ShareStorage;
 import com.stoinkcraft.utils.ChatUtils;
 import com.stoinkcraft.utils.SCConstants;
 import com.stoinkcraft.utils.SchematicUtils;
 import net.milkbowl.vault.chat.Chat;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -91,28 +94,53 @@ public class ServerEntCMD implements CommandExecutor {
                return true;
            }
            if(args[0].equalsIgnoreCase("save")){
-               try {
-                   EnterpriseStorage.saveAllEnterprises();
-                   ShareStorage.saveShares();
-                   Bukkit.getLogger().info("[AutoSave] Enterprises and shares saved successfully.");
-                   ChatUtils.sendMessage(player, "Enterprises & shares saved successfully!");
-               } catch (Exception e) {
-                   Bukkit.getLogger().severe("[AutoSave] Failed to save enterprises/shares: " + e.getMessage());
-                   e.printStackTrace();
-                   ChatUtils.sendMessage(player, "Error occurred while saving enterprises & shares!");
-               }
-               return true;
-           }
+               Bukkit.getScheduler().runTaskAsynchronously(StoinkCore.getInstance(), () -> {
+                   try {
+
+                       EnterpriseStorageJson.saveAllEnterprises();
+                       ShareStorage.saveShares();
+                       Bukkit.getScheduler().runTask(StoinkCore.getInstance(), () -> {
+                           Bukkit.getLogger().info("[AutoSave] Enterprises and shares saved successfully.");
+                           ChatUtils.sendMessage(player, "Enterprises & shares saved successfully!");
+                       });
+                   } catch (Exception e) {
+                       Bukkit.getLogger().severe("[AutoSave] Failed to save enterprises/shares: " + e.getMessage());
+                       e.printStackTrace();
+                       Bukkit.getScheduler().runTask(StoinkCore.getInstance(), () ->
+                               ChatUtils.sendMessage(player, "Error occurred while saving enterprises & shares!")
+                       );
+                   }
+               });
+               return true;           }
            if(args[0].equalsIgnoreCase("rebuild")){
                if(args.length >= 2){
                    String enterpriseName = args[1];
                    Enterprise enterprise = StoinkCore.getEnterpriseManager().getEnterpriseByName(enterpriseName);
                    if(enterprise != null){
-                       enterprise.getJSM().getSkyriseSite().rebuild();
-                       enterprise.getJSM().getQuarrySite().rebuild();
+                       enterprise.getJobSiteManager().getSkyriseSite().rebuild();
+                       enterprise.getJobSiteManager().getQuarrySite().rebuild();
                        ChatUtils.sendMessage(player, "Rebuilt jobsites for " + enterprise.getName());
                    }
                }
+           }
+           if(args[0].equalsIgnoreCase("migrate")){
+
+               int count = EnterpriseMigration.getYamlFilesCount();
+
+               if (count == 0) {
+                   ChatUtils.sendMessage(player, ChatColor.GREEN + "No YAML files to migrate!");
+                   return true;
+               }
+
+               ChatUtils.sendMessage(player, ChatColor.YELLOW + "Starting migration of " + count + " enterprises...");
+               ChatUtils.sendMessage(player, ChatColor.YELLOW + "This may take a moment...");
+
+               int migrated = EnterpriseMigration.migrateAllYamlToJson(false);
+
+               ChatUtils.sendMessage(player, ChatColor.GREEN + "Migration complete!");
+               ChatUtils.sendMessage(player, ChatColor.GREEN + "Migrated: " + migrated + " enterprises");
+
+               sender.sendMessage(ChatColor.YELLOW + "Old YAML files kept as backup.");
            }
        }
         return true;
