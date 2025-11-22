@@ -259,7 +259,7 @@ public class EnterpriseManager {
             public void run() {
                 for (Enterprise enterprise : getEnterpriseList()) {
                     JobSiteManager jsm = enterprise.getJobSiteManager();
-                    if (jsm == null) continue;
+                    if (jsm == null || !enterprise.isOnline()) continue;
 
                     // Tick each job site
                     if (jsm.getSkyriseSite() != null) jsm.getSkyriseSite().tick();

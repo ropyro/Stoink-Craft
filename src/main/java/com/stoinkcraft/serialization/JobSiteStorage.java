@@ -2,7 +2,7 @@ package com.stoinkcraft.serialization;
 
 import com.google.gson.Gson;
 import com.stoinkcraft.StoinkCore;
-import com.stoinkcraft.jobs.jobsites.data.FarmlandData;
+import com.stoinkcraft.jobs.jobsites.sites.farmland.FarmlandData;
 import com.stoinkcraft.jobs.jobsites.data.QuarryData;
 import com.stoinkcraft.jobs.jobsites.data.SkyriseData;
 import org.bukkit.Bukkit;

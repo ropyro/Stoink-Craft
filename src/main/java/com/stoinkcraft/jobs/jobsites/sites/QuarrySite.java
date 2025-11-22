@@ -28,6 +28,7 @@ public class QuarrySite extends JobSite {
         super(enterprise, JobSiteType.QUARRY, spawnPoint,
                 new File(StoinkCore.getInstance().getDataFolder(), "/schematics/quarry.schem"),
                 data.isBuilt());
+
         this.data = data;
         mineRegionID = enterprise.getID() + "_" + JobSiteType.QUARRY.name() + "_mine";
         welcomeHologramName = enterprise.getID() + "_" + JobSiteType.QUARRY.name() + "_welcome";
@@ -55,6 +56,8 @@ public class QuarrySite extends JobSite {
 
         mineGenerator.init();
         mineGenerator.regenerateMine();
+
+        data.setBuilt(true);
     }
 
     @Override

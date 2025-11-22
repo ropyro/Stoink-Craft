@@ -1,6 +1,7 @@
 package com.stoinkcraft;
 
 import com.stoinkcraft.enterprise.*;
+import com.stoinkcraft.jobs.jobsites.sites.farmland.FarmerJoeListener;
 import com.stoinkcraft.jobs.listeners.BlockBreakListener;
 import com.stoinkcraft.misc.daily.DailyCMD;
 import com.stoinkcraft.misc.daily.DailyManager;
@@ -208,18 +209,26 @@ public class StoinkCore extends JavaPlugin implements Listener {
 
         //Register listeners
         //getServer().getPluginManager().registerEvents(new EarningListener(this), this);
+        //TODO: combine these
         getServer().getPluginManager().registerEvents(new PlayerJoinListener(this), this);
+        getServer().getPluginManager().registerEvents(new JoinMOTDListener(), this);
+
+        //Chat money listeners
         getServer().getPluginManager().registerEvents(new ChatWithdrawListener(this), this);
         getServer().getPluginManager().registerEvents(new ChatInvestListener(this), this);
         getServer().getPluginManager().registerEvents(new ChatDepositListener(this), this);
+
+        //Misc listeners
         getServer().getPluginManager().registerEvents(new PhantomSpawnDisabler(), this);
         getServer().getPluginManager().registerEvents(new BoostNoteInteractionListener(), this);
-        getServer().getPluginManager().registerEvents(new JoinMOTDListener(), this);
         getServer().getPluginManager().registerEvents(new EnderChestListener(), this);
-        getServer().getPluginManager().registerEvents(this, this);
 
-        //Job listeners
+        //Jobsite Listeners
         getServer().getPluginManager().registerEvents(new BlockBreakListener(), this);
+        //Farmland
+        getServer().getPluginManager().registerEvents(new FarmerJoeListener(this), this);
+
+        //getServer().getPluginManager().registerEvents(this, this);
 
         //startAutoSaveTask();
         startPriceSnapshotRecording();

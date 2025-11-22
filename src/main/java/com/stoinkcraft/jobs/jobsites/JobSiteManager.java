@@ -2,10 +2,11 @@ package com.stoinkcraft.jobs.jobsites;
 
 import com.stoinkcraft.StoinkCore;
 import com.stoinkcraft.enterprise.Enterprise;
-import com.stoinkcraft.jobs.jobsites.data.FarmlandData;
+import com.stoinkcraft.jobs.jobsites.sites.farmland.FarmlandData;
 import com.stoinkcraft.jobs.jobsites.data.QuarryData;
 import com.stoinkcraft.jobs.jobsites.data.SkyriseData;
-import com.stoinkcraft.jobs.jobsites.sites.FarmlandSite;
+import com.stoinkcraft.jobs.jobsites.resourcegenerators.generators.CropGenerator;
+import com.stoinkcraft.jobs.jobsites.sites.farmland.FarmlandSite;
 import com.stoinkcraft.jobs.jobsites.sites.QuarrySite;
 import com.stoinkcraft.jobs.jobsites.sites.SkyriseSite;
 import org.bukkit.Location;
@@ -89,7 +90,13 @@ public class JobSiteManager {
     }
 
     private FarmlandData createDefaultFarmlandData(){
-        return new FarmlandData(false);
+        return new FarmlandData(false,
+                -1,
+                CropGenerator.CropGeneratorType.NONE,
+                1,
+                false,
+                false,
+                false);
     }
 
     // Getters for serialization

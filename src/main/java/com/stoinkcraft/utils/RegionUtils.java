@@ -23,6 +23,23 @@ public class RegionUtils {
         return BlockVector3.at(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
     }
 
+    public static void removeProtectedRegion(World world, String id){
+        RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
+        RegionManager manager = container.get(FaweAPI.getWorld(world.getName()));
+
+        if (manager == null) {
+            Bukkit.getLogger().info("RegionManager is null for world " + world.getName());
+            return;
+        }
+
+        if(manager.getRegion(id) != null){
+            manager.removeRegion(id);
+            Bukkit.getLogger().info("Removed region: " + id + " for world " + world.getName());
+        }else{
+            Bukkit.getLogger().info("Region: " + id + " for world " + world.getName() + " could not be deleted because it does not exist");
+        }
+    }
+
     public static void createProtectedRegion(World world, Region region, String id) {
         RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
         RegionManager manager = container.get(FaweAPI.getWorld(world.getName()));
@@ -82,8 +99,12 @@ public class RegionUtils {
 
         protectedRegion.setPriority(priority);
 
+        //remove old region if it exists
+        if(manager.getRegion(id) != null){
+            manager.removeRegion(id);
+        }
+
         // Add to manager
-        //manager.getRegion(id) != null
         manager.addRegion(protectedRegion);
 
         Bukkit.getLogger().info("Created protected region: " + id + " for world " + world.getName());

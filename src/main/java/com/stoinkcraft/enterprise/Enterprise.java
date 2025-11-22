@@ -6,8 +6,10 @@ import com.stoinkcraft.jobs.jobsites.JobSiteManager;
 import com.stoinkcraft.market.boosters.Booster;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.entity.Player;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Enterprise {
 
@@ -91,6 +93,14 @@ public class Enterprise {
 
     public String getEnterpriseType() {
         return enterpriseType;
+    }
+
+    public boolean isOnline() {
+        return members.keySet().stream()
+                .anyMatch(uuid -> {
+                    Player player = Bukkit.getPlayer(uuid);
+                    return player != null && player.isOnline();
+                });
     }
 
     public int getPlotIndex() {

@@ -2,6 +2,7 @@ package com.stoinkcraft.enterprise.commands.serverenterprisecmd;
 
 import com.stoinkcraft.StoinkCore;
 import com.stoinkcraft.enterprise.EnterpriseStorage;
+import com.stoinkcraft.jobs.jobsites.sites.farmland.FarmlandGui;
 import com.stoinkcraft.market.boosters.BoosterItemHelper;
 import com.stoinkcraft.enterprise.Enterprise;
 import com.stoinkcraft.enterprise.EnterpriseManager;
@@ -142,6 +143,9 @@ public class ServerEntCMD implements CommandExecutor {
                ChatUtils.sendMessage(player, ChatColor.GREEN + "Migrated: " + migrated + " enterprises");
 
                sender.sendMessage(ChatColor.YELLOW + "Old YAML files kept as backup.");
+           }
+           if(args[0].equalsIgnoreCase("farmland")){
+               new FarmlandGui(EnterpriseManager.getEnterpriseManager().getEnterpriseByMember(player.getUniqueId()).getJobSiteManager().getFarmlandSite(), player).openWindow();
            }
        }
         return true;

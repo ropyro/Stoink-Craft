@@ -5,7 +5,7 @@ import com.google.gson.GsonBuilder;
 import com.stoinkcraft.StoinkCore;
 import com.stoinkcraft.enterprise.Enterprise;
 import com.stoinkcraft.enterprise.EnterpriseManager;
-import com.stoinkcraft.jobs.jobsites.data.FarmlandData;
+import com.stoinkcraft.jobs.jobsites.sites.farmland.FarmlandData;
 import com.stoinkcraft.jobs.jobsites.data.QuarryData;
 import com.stoinkcraft.jobs.jobsites.data.SkyriseData;
 import org.bukkit.Bukkit;
