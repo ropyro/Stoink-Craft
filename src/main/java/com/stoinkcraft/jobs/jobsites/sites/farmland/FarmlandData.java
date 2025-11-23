@@ -2,6 +2,7 @@ package com.stoinkcraft.jobs.jobsites.sites.farmland;
 
 import com.google.gson.annotations.Expose;
 import com.stoinkcraft.jobs.jobsites.resourcegenerators.generators.CropGenerator;
+import com.stoinkcraft.jobs.jobsites.resourcegenerators.generators.PassiveMobGenerator;
 import org.bukkit.util.Vector;
 
 public class FarmlandData {
@@ -30,6 +31,36 @@ public class FarmlandData {
 
     @Expose
     private boolean beetrootUnlocked;
+
+    // Add these new fields for mob generator
+    private int mobSpawnSpeedLevel = 1;
+    private int mobCapacityLevel = 1;
+    private PassiveMobGenerator.PassiveMobType currentMobType = PassiveMobGenerator.PassiveMobType.COW;
+
+    // Add getters and setters
+    public int getMobSpawnSpeedLevel() {
+        return mobSpawnSpeedLevel;
+    }
+
+    public void setMobSpawnSpeedLevel(int mobSpawnSpeedLevel) {
+        this.mobSpawnSpeedLevel = mobSpawnSpeedLevel;
+    }
+
+    public int getMobCapacityLevel() {
+        return mobCapacityLevel;
+    }
+
+    public void setMobCapacityLevel(int mobCapacityLevel) {
+        this.mobCapacityLevel = mobCapacityLevel;
+    }
+
+    public PassiveMobGenerator.PassiveMobType getCurrentMobType() {
+        return currentMobType;
+    }
+
+    public void setCurrentMobType(PassiveMobGenerator.PassiveMobType currentMobType) {
+        this.currentMobType = currentMobType;
+    }
 
 
     public FarmlandData(boolean isBuilt,

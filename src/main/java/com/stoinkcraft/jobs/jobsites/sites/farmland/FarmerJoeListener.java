@@ -4,6 +4,7 @@ import com.stoinkcraft.StoinkCore;
 import com.stoinkcraft.enterprise.Enterprise;
 import com.stoinkcraft.jobs.jobsites.JobSiteType;
 import com.stoinkcraft.utils.ChatUtils;
+import com.stoinkcraft.utils.TimeUtils;
 import net.citizensnpcs.api.event.NPCRightClickEvent;
 import net.citizensnpcs.api.npc.NPC;
 import org.bukkit.ChatColor;
@@ -55,7 +56,11 @@ public class FarmerJoeListener implements Listener {
         }
 
         // Open your upgrade GUI
-        openFarmlandUpgradeGUI(player, farmlandSite);
+        if(TimeUtils.isDay(farmlandSite.getSpawnPoint().getWorld())){
+            openFarmlandUpgradeGUI(player, farmlandSite);
+        }else{
+            ChatUtils.sendMessage(player,ChatColor.RED + "It's night time silly the crops are sleeping...");
+        }
     }
 
     private void openFarmlandUpgradeGUI(Player player, FarmlandSite farmlandSite) {

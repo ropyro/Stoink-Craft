@@ -6,6 +6,7 @@ import com.stoinkcraft.jobs.jobsites.JobSite;
 import com.stoinkcraft.jobs.jobsites.JobSiteType;
 import com.stoinkcraft.jobs.jobsites.resourcegenerators.generators.CropGenerator;
 import com.stoinkcraft.jobs.jobsites.resourcegenerators.generators.MobGenerator;
+import com.stoinkcraft.jobs.jobsites.resourcegenerators.generators.PassiveMobGenerator;
 import com.stoinkcraft.utils.RegionUtils;
 import eu.decentsoftware.holograms.api.DHAPI;
 import net.citizensnpcs.api.CitizensAPI;
@@ -38,7 +39,10 @@ public class FarmlandSite extends JobSite {
     public static Vector cropGenCorner1Offset = new Vector(-25, 0, -16);
     public static Vector cropGenCorner2Offset = new Vector(-54, 0, -45);
 
-    private MobGenerator mobGenerator;
+    private String mobRegionID;
+    private PassiveMobGenerator mobGenerator;
+    public static Vector mobGenCorner1Offset = new Vector(-47, -1, 7);
+    public static Vector mobGenCorner2Offset = new Vector(-51, 5, 3);
 
 
     public FarmlandSite(Enterprise enterprise, Location spawnPoint, FarmlandData data) {
@@ -52,6 +56,14 @@ public class FarmlandSite extends JobSite {
 
         cropGenerator = new CropGenerator(spawnPoint.clone().add(cropGenCorner1Offset),
                 spawnPoint.clone().add(cropGenCorner2Offset), this, cropRegionID);
+
+        mobRegionID = enterprise.getID() + "_" + JobSiteType.FARMLAND.name() + "_mobs";
+        mobGenerator = new PassiveMobGenerator(
+                spawnPoint.clone().add(mobGenCorner1Offset),
+                spawnPoint.clone().add(mobGenCorner2Offset),
+                this,
+                mobRegionID
+        );
 
         if (data.getFarmerJoeNpcId() != -1) {
             NPCRegistry registry = CitizensAPI.getNPCRegistry();
@@ -68,6 +80,7 @@ public class FarmlandSite extends JobSite {
     public void tick() {
         super.tick();
         cropGenerator.tick();
+        mobGenerator.tick();
     }
 
     @Override
@@ -93,6 +106,8 @@ public class FarmlandSite extends JobSite {
             createFarmerJoeNPC();
         }
 
+        mobGenerator.init();
+
         data.setBuilt(true);
     }
 
@@ -100,6 +115,9 @@ public class FarmlandSite extends JobSite {
     public void disband() {
         super.disband();
         RegionUtils.removeProtectedRegion(spawnPoint.getWorld(), cropGenerator.getRegionName());
+
+        mobGenerator.clearAllMobs();
+
         try {
             if (DHAPI.getHologram(welcomeHologramName) != null)
                 DHAPI.getHologram(welcomeHologramName).delete();
@@ -138,6 +156,10 @@ public class FarmlandSite extends JobSite {
             farmerJoeNPC.destroy();
             farmerJoeNPC = null;
         }
+    }
+
+    public PassiveMobGenerator getMobGenerator() {
+        return mobGenerator;
     }
 
     public CropGenerator getCropGenerator() {

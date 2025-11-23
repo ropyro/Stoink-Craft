@@ -61,7 +61,7 @@ public class RegionUtils {
         protectedRegion.setFlag(Flags.BLOCK_BREAK, StateFlag.State.DENY);
         protectedRegion.setFlag(Flags.BLOCK_PLACE, StateFlag.State.DENY);
         protectedRegion.setFlag(Flags.MOB_SPAWNING, StateFlag.State.DENY);
-        protectedRegion.setFlag(Flags.MOB_DAMAGE, StateFlag.State.DENY);
+        protectedRegion.setFlag(Flags.MOB_DAMAGE, StateFlag.State.ALLOW);
         protectedRegion.setFlag(Flags.USE, StateFlag.State.ALLOW);
         protectedRegion.setFlag(Flags.INTERACT, StateFlag.State.ALLOW);
         protectedRegion.setFlag(Flags.SOIL_DRY, StateFlag.State.DENY);
