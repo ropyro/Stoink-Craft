@@ -1,8 +1,10 @@
 package com.stoinkcraft;
 
 import com.stoinkcraft.enterprise.*;
+import com.stoinkcraft.enterprise.listeners.*;
 import com.stoinkcraft.jobs.jobsites.sites.farmland.FarmerJoeListener;
 import com.stoinkcraft.jobs.listeners.BlockBreakListener;
+import com.stoinkcraft.jobs.listeners.EnterpriseWorldNaturalMobSpawnDisabler;
 import com.stoinkcraft.misc.daily.DailyCMD;
 import com.stoinkcraft.misc.daily.DailyManager;
 import com.stoinkcraft.market.boosters.BoostNoteInteractionListener;
@@ -13,10 +15,6 @@ import com.stoinkcraft.enterprise.commands.enterprisecmd.EnterpriseTabCompleter;
 import com.stoinkcraft.enterprise.commands.serverenterprisecmd.ServerEntCMD;
 import com.stoinkcraft.enterprise.commands.serverenterprisecmd.ServerEntTabCompleter;
 import com.stoinkcraft.market.listeners.EarningListener;
-import com.stoinkcraft.enterprise.listeners.ChatDepositListener;
-import com.stoinkcraft.enterprise.listeners.ChatInvestListener;
-import com.stoinkcraft.enterprise.listeners.ChatWithdrawListener;
-import com.stoinkcraft.enterprise.listeners.PlayerJoinListener;
 import com.stoinkcraft.market.MarketManager;
 import com.stoinkcraft.misc.EnderChestListener;
 import com.stoinkcraft.misc.JoinMOTDListener;
@@ -107,7 +105,8 @@ public class StoinkCore extends JavaPlugin implements Listener {
         INSTANCE = this;
 
         //GUI util hook
-        InvUI.getInstance().setPlugin(this);
+        if(InvUI.getInstance().getPlugin() != this)
+            InvUI.getInstance().setPlugin(this);
 
         //Vault hook
         if (!setupEconomy()) {
@@ -209,14 +208,13 @@ public class StoinkCore extends JavaPlugin implements Listener {
 
         //Register listeners
         //getServer().getPluginManager().registerEvents(new EarningListener(this), this);
-        //TODO: combine these
         getServer().getPluginManager().registerEvents(new PlayerJoinListener(this), this);
-        getServer().getPluginManager().registerEvents(new JoinMOTDListener(), this);
 
         //Chat money listeners
-        getServer().getPluginManager().registerEvents(new ChatWithdrawListener(this), this);
-        getServer().getPluginManager().registerEvents(new ChatInvestListener(this), this);
-        getServer().getPluginManager().registerEvents(new ChatDepositListener(this), this);
+        getServer().getPluginManager().registerEvents(new PlayerChatListener(this), this);
+//        getServer().getPluginManager().registerEvents(new ChatWithdrawListener(this), this);
+//        getServer().getPluginManager().registerEvents(new ChatInvestListener(this), this);
+//        getServer().getPluginManager().registerEvents(new ChatDepositListener(this), this);
 
         //Misc listeners
         getServer().getPluginManager().registerEvents(new PhantomSpawnDisabler(), this);
@@ -224,6 +222,7 @@ public class StoinkCore extends JavaPlugin implements Listener {
         getServer().getPluginManager().registerEvents(new EnderChestListener(), this);
 
         //Jobsite Listeners
+        getServer().getPluginManager().registerEvents(new EnterpriseWorldNaturalMobSpawnDisabler(ewm.getWorld()), this);
         getServer().getPluginManager().registerEvents(new BlockBreakListener(), this);
         //Farmland
         getServer().getPluginManager().registerEvents(new FarmerJoeListener(this), this);
