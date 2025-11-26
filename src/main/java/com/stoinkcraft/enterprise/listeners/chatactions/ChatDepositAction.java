@@ -1,4 +1,4 @@
-package com.stoinkcraft.enterprise.listeners;
+package com.stoinkcraft.enterprise.listeners.chatactions;
 
 import com.stoinkcraft.StoinkCore;
 import com.stoinkcraft.enterprise.Enterprise;
@@ -6,33 +6,31 @@ import com.stoinkcraft.enterprise.EnterpriseManager;
 import com.stoinkcraft.utils.ChatUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
-public class ChatDepositListener implements Listener {
+public class ChatDepositAction implements ChatAction {
 
     public static final Set<UUID> awaitingDeposit = new HashSet<>();
 
     private StoinkCore plugin;
 
-    public ChatDepositListener(StoinkCore plugin){
+    public ChatDepositAction(StoinkCore plugin){
         this.plugin = plugin;
     }
 
-    @EventHandler
-    public void onChatWithdraw(AsyncPlayerChatEvent event) {
+    @Override
+    public void handleChat(AsyncPlayerChatEvent event) {
         Player player = event.getPlayer();
         UUID uuid = player.getUniqueId();
 
         if (!awaitingDeposit.contains(uuid)) return;
 
         event.setCancelled(true); // prevent message from showing to others
-        Bukkit.getScheduler().runTask(plugin, () -> { // move to sync thread
+        Bukkit.getScheduler().runTask(StoinkCore.getInstance(), () -> { // move to sync thread
             try {
                 double amount = Double.parseDouble(event.getMessage());
                 if (amount <= 0) {
@@ -63,5 +61,4 @@ public class ChatDepositListener implements Listener {
             }
         });
     }
-
 }

@@ -1,31 +1,30 @@
-package com.stoinkcraft.enterprise.listeners;
+package com.stoinkcraft.enterprise.listeners.chatactions;
 
 import com.stoinkcraft.StoinkCore;
 import com.stoinkcraft.enterprise.Enterprise;
 import com.stoinkcraft.enterprise.EnterpriseManager;
+import com.stoinkcraft.enterprise.listeners.chatactions.ChatAction;
 import com.stoinkcraft.utils.ChatUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
-public class ChatInvestListener implements Listener {
+public class ChatInvestAction implements ChatAction {
 
     public static final Set<UUID> awaitingInvestment = new HashSet<>();
 
     private StoinkCore plugin;
 
-    public ChatInvestListener(StoinkCore plugin){
+    public ChatInvestAction(StoinkCore plugin){
         this.plugin = plugin;
     }
 
-    @EventHandler
-    public void onChatInvest(AsyncPlayerChatEvent event){
+    @Override
+    public void handleChat(AsyncPlayerChatEvent event) {
         Player player = event.getPlayer();
         UUID uuid = player.getUniqueId();
 

@@ -1,30 +1,30 @@
-package com.stoinkcraft.enterprise.listeners;
+package com.stoinkcraft.enterprise.listeners.chatactions;
 
 import com.stoinkcraft.StoinkCore;
 import com.stoinkcraft.enterprise.Enterprise;
 import com.stoinkcraft.enterprise.EnterpriseManager;
+import com.stoinkcraft.enterprise.listeners.chatactions.ChatAction;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
-public class ChatWithdrawListener implements Listener {
+public class ChatWithdrawAction implements ChatAction {
 
     public static final Set<UUID> awaitingWithdrawal = new HashSet<>();
 
     private StoinkCore plugin;
 
-    public ChatWithdrawListener(StoinkCore plugin){
+    public ChatWithdrawAction(StoinkCore plugin){
         this.plugin = plugin;
     }
 
-    @EventHandler
-    public void onChatWithdraw(AsyncPlayerChatEvent event) {
+    @Override
+    public void handleChat(AsyncPlayerChatEvent event) {
         Player player = event.getPlayer();
         UUID uuid = player.getUniqueId();
 
@@ -62,5 +62,4 @@ public class ChatWithdrawListener implements Listener {
             }
         });
     }
-
 }
