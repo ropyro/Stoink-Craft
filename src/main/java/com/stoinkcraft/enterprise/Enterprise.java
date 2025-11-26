@@ -51,6 +51,8 @@ public class Enterprise {
     @Expose
     private int plotIndex = -1;
 
+    private List<UUID> activeEnterpriseChat = new ArrayList<>();
+
     // NOT serialized directly - loaded/saved separately
     private transient JobSiteManager jobSiteManager;
 
@@ -263,5 +265,19 @@ public class Enterprise {
 
     public void setNetWorth(double netWorth) {
         this.netWorth = netWorth;
+    }
+
+    public List<UUID> getActiveEnterpriseChat() {
+        return activeEnterpriseChat;
+    }
+
+    public void addEnterpriseChatter(UUID member) {
+        if(!activeEnterpriseChat.contains(member))
+            this.activeEnterpriseChat.add(member);
+    }
+
+    public void removeEnterpriseChatter(UUID member) {
+        if(activeEnterpriseChat.contains(member))
+            this.activeEnterpriseChat.remove(member);
     }
 }
