@@ -14,10 +14,8 @@ import com.stoinkcraft.enterprise.commands.enterprisecmd.EnterpriseCMD;
 import com.stoinkcraft.enterprise.commands.enterprisecmd.EnterpriseTabCompleter;
 import com.stoinkcraft.enterprise.commands.serverenterprisecmd.ServerEntCMD;
 import com.stoinkcraft.enterprise.commands.serverenterprisecmd.ServerEntTabCompleter;
-import com.stoinkcraft.market.listeners.EarningListener;
 import com.stoinkcraft.market.MarketManager;
 import com.stoinkcraft.misc.EnderChestListener;
-import com.stoinkcraft.misc.JoinMOTDListener;
 import com.stoinkcraft.misc.playerupgrades.PMenuCommand;
 import com.stoinkcraft.serialization.EnterpriseStorageJson;
 import com.stoinkcraft.shares.SharesCMD;
@@ -32,8 +30,6 @@ import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.trait.SkinTrait;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.*;
-import org.bukkit.block.Block;
-import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -105,8 +101,7 @@ public class StoinkCore extends JavaPlugin implements Listener {
         INSTANCE = this;
 
         //GUI util hook
-        if(InvUI.getInstance().getPlugin() != this)
-            InvUI.getInstance().setPlugin(this);
+        InvUI.getInstance().setPlugin(this);
 
         //Vault hook
         if (!setupEconomy()) {
@@ -137,7 +132,6 @@ public class StoinkCore extends JavaPlugin implements Listener {
         MarketManager.startRotatingBoosts(this);
 
 
-        //EnterpriseStorage.loadAllEnterprises();
         EnterpriseStorageJson.loadAllEnterprises();
 
         // Periodic autosave (every 5 minutes):
@@ -207,14 +201,10 @@ public class StoinkCore extends JavaPlugin implements Listener {
         getCommand("pmenu").setExecutor(new PMenuCommand());
 
         //Register listeners
-        //getServer().getPluginManager().registerEvents(new EarningListener(this), this);
         getServer().getPluginManager().registerEvents(new PlayerJoinListener(this), this);
 
         //Chat money listeners
         getServer().getPluginManager().registerEvents(new PlayerChatListener(this), this);
-//        getServer().getPluginManager().registerEvents(new ChatWithdrawListener(this), this);
-//        getServer().getPluginManager().registerEvents(new ChatInvestListener(this), this);
-//        getServer().getPluginManager().registerEvents(new ChatDepositListener(this), this);
 
         //Misc listeners
         getServer().getPluginManager().registerEvents(new PhantomSpawnDisabler(), this);
@@ -227,9 +217,7 @@ public class StoinkCore extends JavaPlugin implements Listener {
         //Farmland
         getServer().getPluginManager().registerEvents(new FarmerJoeListener(this), this);
 
-        //getServer().getPluginManager().registerEvents(this, this);
 
-        //startAutoSaveTask();
         startPriceSnapshotRecording();
         startAutoTopCEOUpdate();
 
