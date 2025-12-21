@@ -4,7 +4,7 @@ import com.stoinkcraft.enterprise.*;
 import com.stoinkcraft.enterprise.listeners.*;
 import com.stoinkcraft.jobs.jobsites.sites.farmland.FarmerJoeListener;
 import com.stoinkcraft.jobs.listeners.BlockBreakListener;
-import com.stoinkcraft.jobs.listeners.EnterpriseWorldNaturalMobSpawnDisabler;
+import com.stoinkcraft.jobs.listeners.CreatureSpawnListener;
 import com.stoinkcraft.misc.daily.DailyCMD;
 import com.stoinkcraft.misc.daily.DailyManager;
 import com.stoinkcraft.market.boosters.BoostNoteInteractionListener;
@@ -212,7 +212,7 @@ public class StoinkCore extends JavaPlugin implements Listener {
         getServer().getPluginManager().registerEvents(new EnderChestListener(), this);
 
         //Jobsite Listeners
-        getServer().getPluginManager().registerEvents(new EnterpriseWorldNaturalMobSpawnDisabler(ewm.getWorld()), this);
+        getServer().getPluginManager().registerEvents(new CreatureSpawnListener(ewm.getWorld()), this);
         getServer().getPluginManager().registerEvents(new BlockBreakListener(), this);
         //Farmland
         getServer().getPluginManager().registerEvents(new FarmerJoeListener(this), this);

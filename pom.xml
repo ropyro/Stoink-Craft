@@ -176,6 +176,32 @@
                     </execution>
                 </executions>
             </plugin>
+
+<!--            <plugin>-->
+<!--                <groupId>org.apache.maven.plugins</groupId>-->
+<!--                <artifactId>maven-resources-plugin</artifactId>-->
+<!--                <version>3.3.1</version>-->
+<!--                <executions>-->
+<!--                    <execution>-->
+<!--                        <id>copy-jar</id>-->
+<!--                        <phase>package</phase>-->
+<!--                        <goals>-->
+<!--                            <goal>copy-resources</goal>-->
+<!--                        </goals>-->
+<!--                        <configuration>-->
+<!--                            <outputDirectory>${project.basedir}/../1.21.8 Server Folder/plugins</outputDirectory>-->
+<!--                            <resources>-->
+<!--                                <resource>-->
+<!--                                    <directory>${project.build.directory}</directory>-->
+<!--                                    <includes>-->
+<!--                                        <include>*.jar</include>-->
+<!--                                    </includes>-->
+<!--                                </resource>-->
+<!--                            </resources>-->
+<!--                        </configuration>-->
+<!--                    </execution>-->
+<!--                </executions>-->
+<!--            </plugin>-->
         </plugins>
     </build>
 </project>

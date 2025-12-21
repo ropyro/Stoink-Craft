@@ -3,9 +3,9 @@ package com.stoinkcraft.enterprise.guis;
 import com.stoinkcraft.enterprise.Enterprise;
 import com.stoinkcraft.enterprise.EnterpriseManager;
 import com.stoinkcraft.enterprise.Role;
-import com.stoinkcraft.enterprise.listeners.ChatDepositListener;
-import com.stoinkcraft.enterprise.listeners.ChatInvestListener;
-import com.stoinkcraft.enterprise.listeners.ChatWithdrawListener;
+import com.stoinkcraft.enterprise.listeners.chatactions.ChatDepositAction;
+import com.stoinkcraft.enterprise.listeners.chatactions.ChatInvestAction;
+import com.stoinkcraft.enterprise.listeners.chatactions.ChatWithdrawAction;
 import com.stoinkcraft.utils.ChatUtils;
 import com.stoinkcraft.utils.SCConstants;
 import org.bukkit.Bukkit;
@@ -114,7 +114,7 @@ public class EnterpriseGUI {
                         if(enterprise.getMemberRole(player.getUniqueId()).equals(Role.CEO)){
                             player.sendMessage("§7Your enterprise bank currently has: §a" + balance);
                             player.sendMessage("§7Please enter the amount you would like to invest");
-                            ChatInvestListener.awaitingInvestment.add(player.getUniqueId());
+                            ChatInvestAction.awaitingInvestment.add(player.getUniqueId());
                         }else{
                             player.sendMessage("§cYou must be the CEO to invest enterprise funds.");
                         }
@@ -225,12 +225,12 @@ public class EnterpriseGUI {
                 if(clickType.equals(ClickType.RIGHT)){
                     player.sendMessage("§7Your enterprise bank currently has: §a" + balance);
                     player.sendMessage("§7Please enter the amount you would like to deposit");
-                    ChatDepositListener.awaitingDeposit.add(player.getUniqueId());
+                    ChatDepositAction.awaitingDeposit.add(player.getUniqueId());
                 }else if(clickType.equals(ClickType.LEFT)){
                     if(enterprise.getMemberRole(player.getUniqueId()).equals(Role.CEO)){
                         player.sendMessage("§7Your enterprise bank currently has: §a" + balance);
                         player.sendMessage("§7Please enter the amount you would like to withdraw");
-                        ChatWithdrawListener.awaitingWithdrawal.add(player.getUniqueId());
+                        ChatWithdrawAction.awaitingWithdrawal.add(player.getUniqueId());
                     }else{
                         player.sendMessage("§cYou must be the CEO to withdraw enterprise funds.");
                     }

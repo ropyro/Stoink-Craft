@@ -145,8 +145,8 @@ public class FarmlandSite extends JobSite {
 
         // Store reference to this job site in NPC's data
         farmerJoeNPC.data().setPersistent(NPC.Metadata.NAMEPLATE_VISIBLE, true);
-        farmerJoeNPC.data().set("jobsite", enterprise.getID());
-        farmerJoeNPC.data().set("jobsitetype", JobSiteType.FARMLAND.name());
+        farmerJoeNPC.data().setPersistent("ENTERPRISE_ID", enterprise.getID().toString());
+        farmerJoeNPC.data().setPersistent("JOBSITE_TYPE", JobSiteType.FARMLAND.name());
 
         data.setFarmerJoeNpcId(farmerJoeNPC.getId());
     }

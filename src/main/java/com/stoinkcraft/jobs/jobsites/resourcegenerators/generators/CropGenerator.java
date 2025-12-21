@@ -156,8 +156,6 @@ public class CropGenerator extends ResourceGenerator {
         return MAX_GROWTH_SPEED_LEVEL;
     }
 
-    // ... rest of your existing methods ...
-
 
     public CuboidRegion getCuboidRegion() {
         return cuboidRegion;

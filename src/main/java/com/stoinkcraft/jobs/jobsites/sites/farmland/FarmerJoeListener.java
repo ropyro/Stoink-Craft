@@ -28,8 +28,8 @@ public class FarmerJoeListener implements Listener {
         Player player = event.getClicker();
 
         // Get the job site data from NPC's persistent data
-        String enterpriseID = npc.data().get("jobsite").toString();
-        String jobSiteType = npc.data().get("jobsitetype").toString();
+        String enterpriseID = npc.data().get("jobsite");
+        String jobSiteType = npc.data().get("jobsitetype");
 
         if (enterpriseID == null || !JobSiteType.FARMLAND.name().equals(jobSiteType)) {
             return;
