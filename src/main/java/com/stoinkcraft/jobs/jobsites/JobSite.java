@@ -8,8 +8,6 @@ import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import com.sk89q.worldguard.protection.regions.RegionContainer;
 import com.stoinkcraft.StoinkCore;
 import com.stoinkcraft.enterprise.Enterprise;
-import com.stoinkcraft.jobs.JobActionHandler;
-import com.stoinkcraft.jobs.JobActionType;
 import com.stoinkcraft.utils.RegionUtils;
 import com.stoinkcraft.utils.SchematicUtils;
 import eu.decentsoftware.holograms.api.DHAPI;

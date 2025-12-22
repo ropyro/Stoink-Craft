@@ -11,7 +11,6 @@ public class ChatUtils {
         player.sendMessage("§b§lStonk §8» §f" + message);
     }
 
-    // In ChatUtils.java
     public static String colorizePercent(double percent) {
         String color = percent > 0 ? "§a" : percent < 0 ? "§c" : "§7";
         return color + (percent > 0 ? "+" : "") + formatPercent(percent);
