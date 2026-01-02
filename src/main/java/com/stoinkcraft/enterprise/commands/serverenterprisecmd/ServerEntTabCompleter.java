@@ -36,7 +36,7 @@ public class ServerEntTabCompleter implements TabCompleter {
         }
 
         if (args.length == 2 && args[0].equalsIgnoreCase("rebuild")) {
-            return StoinkCore.getEnterpriseManager().getEnterpriseList().stream().map(e -> e.getName()).toList();
+            return StoinkCore.getInstance().getEnterpriseManager().getEnterpriseList().stream().map(e -> e.getName()).toList();
         }
 
         if (args.length == 1) {

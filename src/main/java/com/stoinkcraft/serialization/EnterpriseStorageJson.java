@@ -6,8 +6,8 @@ import com.stoinkcraft.StoinkCore;
 import com.stoinkcraft.enterprise.Enterprise;
 import com.stoinkcraft.enterprise.EnterpriseManager;
 import com.stoinkcraft.jobs.jobsites.sites.farmland.FarmlandData;
-import com.stoinkcraft.jobs.jobsites.data.QuarryData;
-import com.stoinkcraft.jobs.jobsites.data.SkyriseData;
+import com.stoinkcraft.jobs.jobsites.sites.quarry.QuarryData;
+import com.stoinkcraft.jobs.jobsites.sites.skyrise.SkyriseData;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -189,7 +189,7 @@ public class EnterpriseStorageJson {
         Bukkit.getLogger().info("Loaded " + loaded + " enterprises with job sites. Failed: " + failed);
 
         // Sync plot indexes after loading
-        StoinkCore.getEnterprisePlotManager().resetNextIndex(manager.getEnterpriseList());
+        StoinkCore.getInstance().getEnterprisePlotManager().resetNextIndex(manager.getEnterpriseList());
     }
 
     private static Enterprise loadEnterprise(File jsonFile) throws IOException {

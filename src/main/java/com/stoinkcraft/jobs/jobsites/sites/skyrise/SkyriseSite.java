@@ -1,10 +1,9 @@
-package com.stoinkcraft.jobs.jobsites.sites;
+package com.stoinkcraft.jobs.jobsites.sites.skyrise;
 
 import com.stoinkcraft.StoinkCore;
 import com.stoinkcraft.enterprise.Enterprise;
 import com.stoinkcraft.jobs.jobsites.JobSite;
 import com.stoinkcraft.jobs.jobsites.JobSiteType;
-import com.stoinkcraft.jobs.jobsites.data.SkyriseData;
 import eu.decentsoftware.holograms.api.DHAPI;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -21,13 +20,10 @@ public class SkyriseSite extends JobSite {
     public SkyriseSite(Enterprise enterprise, Location spawnPoint, SkyriseData data) {
         super(enterprise, JobSiteType.SKYRISE, spawnPoint,
                 new File(StoinkCore.getInstance().getDataFolder(), "/schematics/building.schem"),
-                data.isBuilt());
+                data, data.isBuilt());
         this.data = data;
         entryHologramName = enterprise.getID() + "_" + JobSiteType.SKYRISE.name() + "_entryway";
     }
-
-    @Override
-    public void initializeJobs() {}
 
     @Override
     public void initializeBuild() {
@@ -41,6 +37,11 @@ public class SkyriseSite extends JobSite {
             if (DHAPI.getHologram(entryHologramName) != null)
                 DHAPI.getHologram(entryHologramName).delete();
         } catch (IllegalArgumentException e) {}
+    }
+
+    @Override
+    public void tick() {
+
     }
 
     public void initializeEntryHologram() {

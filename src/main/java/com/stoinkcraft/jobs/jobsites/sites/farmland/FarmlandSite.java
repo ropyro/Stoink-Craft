@@ -4,8 +4,8 @@ import com.stoinkcraft.StoinkCore;
 import com.stoinkcraft.enterprise.Enterprise;
 import com.stoinkcraft.jobs.jobsites.JobSite;
 import com.stoinkcraft.jobs.jobsites.JobSiteType;
+import com.stoinkcraft.jobs.jobsites.JobSiteUpgrade;
 import com.stoinkcraft.jobs.jobsites.resourcegenerators.generators.CropGenerator;
-import com.stoinkcraft.jobs.jobsites.resourcegenerators.generators.MobGenerator;
 import com.stoinkcraft.jobs.jobsites.resourcegenerators.generators.PassiveMobGenerator;
 import com.stoinkcraft.utils.RegionUtils;
 import eu.decentsoftware.holograms.api.DHAPI;
@@ -25,20 +25,30 @@ import java.util.List;
 
 public class FarmlandSite extends JobSite {
 
-    private FarmlandData data;
-
+    /**
+     * Holograms
+     */
     private String welcomeHologramName;
     public static Vector welcomeHologramOffset = new Vector(-3.5, 3, 0.5);
 
+    /**
+     * Farmer Joe NPC
+     */
     private NPC farmerJoeNPC;
     public static Vector farmerJoeOffset = new Vector(-27, 0, -14); // Adjust as needed
 
-    private String cropRegionID;
 
+    /**
+     * Crop generator
+     */
+    private String cropRegionID;
     private CropGenerator cropGenerator;
     public static Vector cropGenCorner1Offset = new Vector(-25, 0, -16);
     public static Vector cropGenCorner2Offset = new Vector(-54, 0, -45);
 
+    /**
+     * Farm animal generator
+     */
     private String mobRegionID;
     private PassiveMobGenerator mobGenerator;
     public static Vector mobGenCorner1Offset = new Vector(-47, -1, 7);
@@ -48,8 +58,7 @@ public class FarmlandSite extends JobSite {
     public FarmlandSite(Enterprise enterprise, Location spawnPoint, FarmlandData data) {
         super(enterprise, JobSiteType.FARMLAND, spawnPoint,
                 new File(StoinkCore.getInstance().getDataFolder(), "/schematics/farmland.schem"),
-                data.isBuilt());
-        this.data = data;
+                data, data.isBuilt());
 
         welcomeHologramName = enterprise.getID() + "_" + JobSiteType.FARMLAND.name() + "_welcome";
         cropRegionID = enterprise.getID() + "_" + JobSiteType.FARMLAND.name() + "_crops";
@@ -71,21 +80,132 @@ public class FarmlandSite extends JobSite {
 
             // If NPC was deleted externally, reset the ID
             if (farmerJoeNPC == null) {
-                data.setFarmerJoeNpcId(-1);
+                getData().setFarmerJoeNpcId(-1);
             }
         }
+
+        registerUpgrades();
+    }
+
+    private void registerUpgrades() {
+
+        // =========================
+        // CROP UPGRADES
+        // =========================
+
+        upgrades.add(new JobSiteUpgrade(
+                "crop_growth_speed",
+                "Crop Growth Speed",
+                10,
+                5,
+                lvl -> 5000 * lvl,
+                site -> true,
+                (site, lvl) -> {} // effect is read dynamically by CropGenerator
+        ));
+
+        upgrades.add(new JobSiteUpgrade(
+                "unlock_carrot",
+                "Unlock Carrots",
+                1,
+                5,
+                lvl -> 25000,
+                site -> true,
+                (site, lvl) -> {} // unlock = upgrade level > 0
+        ));
+
+        upgrades.add(new JobSiteUpgrade(
+                "unlock_potato",
+                "Unlock Potatoes",
+                1,
+                20,
+                lvl -> 75000,
+                site -> site.getData().getLevel("unlock_carrot") > 0,
+                (site, lvl) -> {}
+        ));
+
+        upgrades.add(new JobSiteUpgrade(
+                "unlock_beetroot",
+                "Unlock Beetroots",
+                1,
+                30,
+                lvl -> 125000,
+                site -> site.getData().getLevel("unlock_potato") > 0,
+                (site, lvl) -> {}
+        ));
+
+// =========================
+// MOB UPGRADES
+// =========================
+
+        upgrades.add(new JobSiteUpgrade(
+                "mob_spawn_speed",
+                "Animal Spawn Speed",
+                10,
+                2, // requires jobsite level 2
+                lvl -> 6000 * lvl,
+                site -> true,
+                (site, lvl) -> {}
+        ));
+
+        upgrades.add(new JobSiteUpgrade(
+                "mob_capacity",
+                "Animal Capacity",
+                10,
+                4,
+                lvl -> 9000 * lvl,
+                site -> true,
+                (site, lvl) -> {}
+        ));
+
+// -------------------------
+// MOB UNLOCKS
+// -------------------------
+
+        upgrades.add(new JobSiteUpgrade(
+                "unlock_sheep",
+                "Unlock Sheep",
+                1,
+                3,
+                lvl -> 25000,
+                site -> true,
+                (site, lvl) -> {}
+        ));
+
+        upgrades.add(new JobSiteUpgrade(
+                "unlock_pig",
+                "Unlock Pig",
+                1,
+                6,
+                lvl -> 50000,
+                site -> site.getData().getLevel("unlock_sheep") > 0,
+                (site, lvl) -> {}
+        ));
+
+        upgrades.add(new JobSiteUpgrade(
+                "unlock_chicken",
+                "Unlock Chicken",
+                1,
+                10,
+                lvl -> 75000,
+                site -> site.getData().getLevel("unlock_pig") > 0,
+                (site, lvl) -> {}
+        ));
+
+        upgrades.add(new JobSiteUpgrade(
+                "unlock_horse",
+                "Unlock Horse",
+                1,
+                18,
+                lvl -> 125000,
+                site -> site.getData().getLevel("unlock_chicken") > 0,
+                (site, lvl) -> {}
+        ));
     }
 
     @Override
     public void tick() {
-        super.tick();
         cropGenerator.tick();
         mobGenerator.tick();
-    }
-
-    @Override
-    public void initializeJobs() {
-
     }
 
     @Override
@@ -108,7 +228,7 @@ public class FarmlandSite extends JobSite {
 
         mobGenerator.init();
 
-        data.setBuilt(true);
+        getData().setBuilt(true);
     }
 
     @Override
@@ -123,6 +243,11 @@ public class FarmlandSite extends JobSite {
                 DHAPI.getHologram(welcomeHologramName).delete();
         } catch (IllegalArgumentException e) {}
         removeFarmerJoeNPC();
+    }
+
+    @Override
+    public FarmlandData getData() {
+        return (FarmlandData)super.getData();
     }
 
     private void createFarmerJoeNPC() {
@@ -148,14 +273,23 @@ public class FarmlandSite extends JobSite {
         farmerJoeNPC.data().setPersistent("ENTERPRISE_ID", enterprise.getID().toString());
         farmerJoeNPC.data().setPersistent("JOBSITE_TYPE", JobSiteType.FARMLAND.name());
 
-        data.setFarmerJoeNpcId(farmerJoeNPC.getId());
+        getData().setFarmerJoeNpcId(farmerJoeNPC.getId());
     }
 
     private void removeFarmerJoeNPC() {
-        if (farmerJoeNPC != null) {
-            farmerJoeNPC.destroy();
-            farmerJoeNPC = null;
+        NPCRegistry registry = CitizensAPI.getNPCRegistry();
+
+        int id = getData().getFarmerJoeNpcId();
+        if (id == -1) return;
+
+        NPC npc = registry.getById(id);
+        if (npc != null) {
+            npc.despawn();
+            npc.destroy();
         }
+
+        getData().setFarmerJoeNpcId(-1);
+        farmerJoeNPC = null;
     }
 
     public PassiveMobGenerator getMobGenerator() {
@@ -164,10 +298,5 @@ public class FarmlandSite extends JobSite {
 
     public CropGenerator getCropGenerator() {
         return cropGenerator;
-    }
-
-    public FarmlandData getData(){
-        data.setBuilt(isBuilt);
-        return data;
     }
 }

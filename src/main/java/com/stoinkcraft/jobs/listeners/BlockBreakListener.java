@@ -30,8 +30,8 @@ public class BlockBreakListener implements Listener {
                 event.setCancelled(true);
             } else {
                 Player player = event.getPlayer();
-                Enterprise enterprise = StoinkCore.getEnterpriseManager().getEnterpriseByMember(player.getUniqueId());
-                if(player.getWorld().equals(StoinkCore.getEnterpriseWorldManager().getWorld()) && enterprise != null){
+                Enterprise enterprise = StoinkCore.getInstance().getEnterpriseManager().getEnterpriseByMember(player.getUniqueId());
+                if(player.getWorld().equals(StoinkCore.getInstance().getEnterpriseWorldManager().getWorld()) && enterprise != null){
                     Bukkit.getScheduler().runTaskLaterAsynchronously(StoinkCore.getInstance(), () -> {
                         enterprise.getJobSiteManager().getFarmlandSite().getCropGenerator().replaceMissingCrops();
                     }, 1L);

@@ -14,6 +14,8 @@ import org.bukkit.*;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.*;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -30,48 +32,41 @@ public class PassiveMobGenerator extends ResourceGenerator {
     private final Location corner1;
     private final Location corner2;
     private final World bukkitWorld;
-    private CuboidRegion cuboidRegion;
-    private String regionName;
+
+    private final CuboidRegion cuboidRegion;
+    private final String regionName;
 
     // Tracking spawned mobs
     private final Set<UUID> spawnedMobs = new HashSet<>();
 
     // Spawn timing
     private int ticksSinceLastSpawn = 0;
-    private static final int BASE_SPAWN_INTERVAL = 3; // Base 5 seconds (100 ticks)
 
-    // Upgrade system
-    private static final int MAX_SPAWN_SPEED_LEVEL = 10;
-    private static final int MAX_MOB_CAPACITY_LEVEL = 10;
-    private static final int BASE_MAX_MOBS = 500;
-    private static final int MOBS_PER_CAPACITY_LEVEL = 3;
+    // Base values (no longer upgrades)
+    private static final int BASE_SPAWN_INTERVAL = 100; // ticks
+    private static final int BASE_MAX_MOBS = 10;
+    private static final int MOBS_PER_CAPACITY_LEVEL = 5;
 
     public PassiveMobGenerator(Location corner1, Location corner2, JobSite parent, String regionName) {
         super(parent);
-        this.corner1 = corner1;
-        this.corner2 = corner2;
+
+        this.corner1 = corner1.clone();
+        this.corner2 = corner2.clone();
         this.bukkitWorld = corner1.getWorld();
-        this.cuboidRegion = getRegion(corner1, corner2);
         this.regionName = regionName;
+
+        this.cuboidRegion = getRegion(this.corner1, this.corner2);
     }
 
     @Override
     protected void onTick() {
-        // Clean up dead/despawned mobs
         cleanupDeadMobs();
 
-        // Only spawn during daytime
-        if (!TimeUtils.isDay(getParent().getSpawnPoint().getWorld())) {
-            return;
-        }
+        if (!TimeUtils.isDay(getParent().getSpawnPoint().getWorld())) return;
 
         ticksSinceLastSpawn++;
 
-        // Calculate spawn interval based on upgrade level
-        int spawnInterval = calculateSpawnInterval();
-
-        // Check if it's time to spawn and we haven't reached capacity
-        if (ticksSinceLastSpawn >= spawnInterval && canSpawnMore()) {
+        if (ticksSinceLastSpawn >= calculateSpawnInterval() && canSpawnMore()) {
             spawnMob();
             ticksSinceLastSpawn = 0;
         }
@@ -93,70 +88,43 @@ public class PassiveMobGenerator extends ResourceGenerator {
                 cuboidRegion,
                 regionName,
                 flags,
-                10);
+                10
+        );
     }
 
-    /**
-     * Spawn a mob of the current type at a random location in the region
-     */
+    // --------------------------------------------------
+    // SPAWNING
+    // --------------------------------------------------
+
     private void spawnMob() {
         Location spawnLocation = getRandomSpawnLocation();
-        if (spawnLocation == null) {
-            return;
-        }
+        if (spawnLocation == null) return;
 
-        PassiveMobType mobType = PassiveMobType.COW;
-        if (mobType == PassiveMobType.NONE) {
-            return;
-        }
+        PassiveMobType mobType = getCurrentMobType();
+        if (mobType == PassiveMobType.NONE) return;
 
         Bukkit.getScheduler().runTask(StoinkCore.getInstance(), () -> {
-            Bukkit.getLogger().info("[PassiveMobGenerator] === SPAWN ATTEMPT ===");
-            Bukkit.getLogger().info("Location: " + spawnLocation);
-            Bukkit.getLogger().info("World: " + bukkitWorld.getName());
-            Bukkit.getLogger().info("Chunk loaded: " + spawnLocation.getChunk().isLoaded());
-
-            // Ensure chunk is loaded
             if (!spawnLocation.getChunk().isLoaded()) {
                 spawnLocation.getChunk().load();
-                Bukkit.getLogger().info("Loaded chunk!");
             }
 
-            // Check what's at the location
-            Bukkit.getLogger().info("Block at location: " + spawnLocation.getBlock().getType());
-            Bukkit.getLogger().info("Block below: " + spawnLocation.clone().subtract(0, 1, 0).getBlock().getType());
+            EntityType entityType = getEntityType(mobType);
+            if (entityType == null) return;
 
-            Entity entity = bukkitWorld.spawnEntity(spawnLocation, EntityType.COW);
+            LivingEntity entity = (LivingEntity) bukkitWorld.spawnEntity(spawnLocation, entityType);
 
-            if (entity != null) {
-                Bukkit.getLogger().info("SUCCESS! Entity spawned: " + entity.getType() + " UUID: " + entity.getUniqueId());
-                Bukkit.getLogger().info("Entity location after spawn: " + entity.getLocation());
-                Bukkit.getLogger().info("Entity is valid: " + entity.isValid());
-                Bukkit.getLogger().info("Entity is dead: " + entity.isDead());
+            entity.setRemoveWhenFarAway(false);
+            entity.setPersistent(true);
+            entity.setCustomName(ChatColor.YELLOW + mobType.getDisplayName());
+            entity.setCustomNameVisible(false);
+            entity.getAttribute(Attribute.JUMP_STRENGTH).setBaseValue(0);
 
-                spawnedMobs.add(entity.getUniqueId());
-
-                if (entity instanceof LivingEntity) {
-                    ((LivingEntity) entity).setRemoveWhenFarAway(false);
-                    entity.setPersistent(true);
-                    Bukkit.getLogger().info("Set persistence flags");
-                }
-
-                entity.setCustomName(ChatColor.YELLOW + mobType.getDisplayName());
-                entity.setCustomNameVisible(false);
-            } else {
-                Bukkit.getLogger().severe("FAILED! spawnEntity returned NULL");
-            }
-
-            Bukkit.getLogger().info("Current mob count: " + spawnedMobs.size());
+            spawnedMobs.add(entity.getUniqueId());
         });
     }
 
-    /**
-     * Spawn the actual entity based on mob type
-     */
-    private Entity spawnMobEntity(Location location, PassiveMobType mobType) {
-        EntityType entityType = switch (mobType) {
+    private EntityType getEntityType(PassiveMobType type) {
+        return switch (type) {
             case COW -> EntityType.COW;
             case SHEEP -> EntityType.SHEEP;
             case PIG -> EntityType.PIG;
@@ -164,16 +132,12 @@ public class PassiveMobGenerator extends ResourceGenerator {
             case HORSE -> EntityType.HORSE;
             default -> null;
         };
-
-        if (entityType == null) return null;
-
-        // Use SPAWNER_EGG reason to bypass mob-spawning flag
-        return bukkitWorld.spawnEntity(location, entityType);
     }
 
-    /**
-     * Get a random safe spawn location within the region
-     */
+    // --------------------------------------------------
+    // RANDOM LOCATION
+    // --------------------------------------------------
+
     private Location getRandomSpawnLocation() {
         Random random = new Random();
 
@@ -182,135 +146,81 @@ public class PassiveMobGenerator extends ResourceGenerator {
         int minZ = Math.min(corner1.getBlockZ(), corner2.getBlockZ());
         int maxZ = Math.max(corner1.getBlockZ(), corner2.getBlockZ());
 
-        int randomX = minX + random.nextInt(maxX - minX + 1);
-        int randomZ = minZ + random.nextInt(maxZ - minZ + 1);
+        int x = minX + random.nextInt(maxX - minX + 1);
+        int z = minZ + random.nextInt(maxZ - minZ + 1);
 
-        // Find highest solid block
-        Location spawnLoc = new Location(bukkitWorld, randomX, corner1.getY() + 1, randomZ);
-        return spawnLoc;
+        Location loc = new Location(bukkitWorld, x + 0.5, corner1.getY() + 1, z + 0.5);
+
+        return isSafeSpawnLocation(loc) ? loc : null;
     }
 
-    /**
-     * Check if a location is safe for spawning
-     */
-    private boolean isSafeSpawnLocation(Location location) {
-        // Check block below is solid
-        if (!location.clone().subtract(0, 1, 0).getBlock().getType().isSolid()) {
-            return false;
-        }
-
-        // Check spawn location and above are air
-        if (!location.getBlock().getType().isAir() ||
-                !location.clone().add(0, 1, 0).getBlock().getType().isAir()) {
-            return false;
-        }
-
-        return true;
+    private boolean isSafeSpawnLocation(Location loc) {
+        return loc.getBlock().getType().isAir()
+                && loc.clone().add(0, 1, 0).getBlock().getType().isAir()
+                && loc.clone().subtract(0, 1, 0).getBlock().getType().isSolid();
     }
 
-    /**
-     * Remove dead/despawned mobs from tracking
-     */
+    // --------------------------------------------------
+    // CLEANUP
+    // --------------------------------------------------
+
     private void cleanupDeadMobs() {
         spawnedMobs.removeIf(uuid -> {
-            Entity entity = Bukkit.getEntity(uuid);
-            return entity == null || entity.isDead();
+            Entity e = Bukkit.getEntity(uuid);
+            return e == null || e.isDead();
         });
     }
 
-    /**
-     * Check if more mobs can be spawned
-     */
-    private boolean canSpawnMore() {
-        return spawnedMobs.size() < getMaxMobCapacity();
-    }
-
-    /**
-     * Calculate spawn interval based on upgrade level
-     * Higher level = faster spawning
-     */
-    private int calculateSpawnInterval() {
-        int spawnSpeedLevel = getSpawnSpeedLevel();
-        // Level 1 = 100 ticks, Level 10 = 10 ticks (exponential decrease)
-        return Math.max(10, BASE_SPAWN_INTERVAL - (spawnSpeedLevel));
-    }
-
-    /**
-     * Calculate max mob capacity based on upgrade level
-     */
-    private int getMaxMobCapacity() {
-        int capacityLevel = getMobCapacityLevel();
-        return BASE_MAX_MOBS + (capacityLevel * MOBS_PER_CAPACITY_LEVEL);
-    }
-
-    /**
-     * Clear all spawned mobs (useful when changing mob type or disbanding)
-     */
     public void clearAllMobs() {
         for (UUID uuid : new HashSet<>(spawnedMobs)) {
-            Entity entity = Bukkit.getEntity(uuid);
-            if (entity != null) {
-                entity.remove();
-            }
+            Entity e = Bukkit.getEntity(uuid);
+            if (e != null) e.remove();
         }
         spawnedMobs.clear();
     }
 
-    /**
-     * Change the mob type (clears existing mobs)
-     */
-    public void setMobType(PassiveMobType mobType) {
+    // --------------------------------------------------
+    // UPGRADE INTEGRATION
+    // --------------------------------------------------
+
+    private int getSpawnSpeedLevel() {
+        return ((FarmlandSite) getParent()).getData().getLevel("mob_spawn_speed");
+    }
+
+    private int getMobCapacityLevel() {
+        return ((FarmlandSite) getParent()).getData().getLevel("mob_capacity");
+    }
+
+    private int calculateSpawnInterval() {
+        int lvl = getSpawnSpeedLevel();
+        return Math.max(10, BASE_SPAWN_INTERVAL - (lvl * 9));
+    }
+
+    private int getMaxMobCapacity() {
+        return BASE_MAX_MOBS + (getMobCapacityLevel() * MOBS_PER_CAPACITY_LEVEL);
+    }
+
+    private boolean canSpawnMore() {
+        return spawnedMobs.size() < getMaxMobCapacity();
+    }
+
+    // --------------------------------------------------
+    // MOB TYPE
+    // --------------------------------------------------
+
+    private PassiveMobType getCurrentMobType() {
+        return ((FarmlandSite) getParent()).getData().getCurrentMobType();
+    }
+
+    public void setMobType(PassiveMobType type) {
         clearAllMobs();
-        ((FarmlandSite) getParent()).getData().setCurrentMobType(mobType);
+        ((FarmlandSite) getParent()).getData().setCurrentMobType(type);
     }
 
-    // Upgrade methods for spawn speed
-    public boolean upgradeSpawnSpeed() {
-        if (getSpawnSpeedLevel() < MAX_SPAWN_SPEED_LEVEL) {
-            setSpawnSpeedLevel(getSpawnSpeedLevel() + 1);
-            return true;
-        }
-        return false;
-    }
+    // --------------------------------------------------
+    // GETTERS
+    // --------------------------------------------------
 
-    public int getSpawnSpeedLevel() {
-        return ((FarmlandSite) getParent()).getData().getMobSpawnSpeedLevel();
-    }
-
-    public void setSpawnSpeedLevel(int level) {
-        ((FarmlandSite) getParent()).getData().setMobSpawnSpeedLevel(
-                Math.min(MAX_SPAWN_SPEED_LEVEL, Math.max(1, level))
-        );
-    }
-
-    public int getMaxSpawnSpeedLevel() {
-        return MAX_SPAWN_SPEED_LEVEL;
-    }
-
-    // Upgrade methods for mob capacity
-    public boolean upgradeMobCapacity() {
-        if (getMobCapacityLevel() < MAX_MOB_CAPACITY_LEVEL) {
-            setMobCapacityLevel(getMobCapacityLevel() + 1);
-            return true;
-        }
-        return false;
-    }
-
-    public int getMobCapacityLevel() {
-        return ((FarmlandSite) getParent()).getData().getMobCapacityLevel();
-    }
-
-    public void setMobCapacityLevel(int level) {
-        ((FarmlandSite) getParent()).getData().setMobCapacityLevel(
-                Math.min(MAX_MOB_CAPACITY_LEVEL, Math.max(1, level))
-        );
-    }
-
-    public int getMaxMobCapacityLevel() {
-        return MAX_MOB_CAPACITY_LEVEL;
-    }
-
-    // Getters
     public int getCurrentMobCount() {
         cleanupDeadMobs();
         return spawnedMobs.size();
@@ -324,9 +234,10 @@ public class PassiveMobGenerator extends ResourceGenerator {
         return cuboidRegion;
     }
 
-    /**
-     * Enum for passive mob types
-     */
+    // --------------------------------------------------
+    // ENUM
+    // --------------------------------------------------
+
     public enum PassiveMobType {
         COW("Cow"),
         SHEEP("Sheep"),

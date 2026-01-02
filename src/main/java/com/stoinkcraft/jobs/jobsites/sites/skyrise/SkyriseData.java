@@ -1,29 +1,19 @@
-package com.stoinkcraft.jobs.jobsites.data;
+package com.stoinkcraft.jobs.jobsites.sites.skyrise;
 
 import com.google.gson.annotations.Expose;
+import com.stoinkcraft.jobs.jobsites.JobSiteData;
 import org.bukkit.util.Vector;
 
 /**
  * Serializable data for SkyriseSite
  */
-public class SkyriseData {
-    @Expose
-    private boolean isBuilt;
-
+public class SkyriseData extends JobSiteData {
     @Expose
     private Vector entryHologramOffset;
 
     public SkyriseData(boolean isBuilt, Vector entryHologramOffset) {
-        this.isBuilt = isBuilt;
+        super(isBuilt);
         this.entryHologramOffset = entryHologramOffset;
-    }
-
-    public boolean isBuilt() {
-        return isBuilt;
-    }
-
-    public void setBuilt(boolean built) {
-        isBuilt = built;
     }
 
     public Vector getEntryHologramOffset() {

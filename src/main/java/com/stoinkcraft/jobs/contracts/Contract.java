@@ -26,7 +26,7 @@ public class Contract {
     @Expose
     protected long expirationTime;
 
-    private boolean expired;
+    private boolean completed;
 
     public Contract(ContractType contractType, JobSiteType jobSiteType, double reward, int targetAmount,
                     int currentProgress, UUID contractId, UUID enterpriseId, long expirationTime){
@@ -38,18 +38,23 @@ public class Contract {
         this.contractId = contractId;
         this.enterpriseId = enterpriseId;
         this.expirationTime = expirationTime;
-        expired = expirationTime < System.currentTimeMillis();
+        this.completed = currentProgress >= targetAmount;
     }
 
-    public Contract(ContractType contractType, JobSiteType jobSiteType, double reward, int targetAmount,
-                    int currentProgress, UUID enterpriseId, long expirationTime){
-        this(contractType, jobSiteType, reward, targetAmount, currentProgress, UUID.randomUUID(), enterpriseId, expirationTime);
+    public Contract(ContractType contractType, JobSiteType jobSiteType, double reward, int targetAmount, UUID enterpriseId, long expirationTime){
+        this(contractType, jobSiteType, reward, targetAmount, 0, UUID.randomUUID(), enterpriseId, expirationTime);
+    }
+
+    public boolean canProgress(){
+        return !isExpired() && !completed;
     }
 
     public void addProgress(int progress){
+        if(!canProgress()) return;
         this.currentProgress += progress;
         if(currentProgress >= targetAmount){
             currentProgress = targetAmount;
+            this.completed = true;
             reward();
         }
     }
@@ -91,6 +96,10 @@ public class Contract {
     }
 
     public boolean isExpired() {
-        return expired;
+        return System.currentTimeMillis() > expirationTime;
+    }
+
+    public boolean isCompleted(){
+        return completed;
     }
 }

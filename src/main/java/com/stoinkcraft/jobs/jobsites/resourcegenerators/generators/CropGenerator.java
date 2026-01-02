@@ -15,6 +15,7 @@ import com.sk89q.worldguard.protection.flags.StateFlag;
 import com.stoinkcraft.StoinkCore;
 import com.stoinkcraft.jobs.jobsites.JobSite;
 import com.stoinkcraft.jobs.jobsites.resourcegenerators.ResourceGenerator;
+import com.stoinkcraft.jobs.jobsites.sites.farmland.FarmlandData;
 import com.stoinkcraft.jobs.jobsites.sites.farmland.FarmlandSite;
 import com.stoinkcraft.utils.RegionUtils;
 import com.stoinkcraft.utils.TimeUtils;
@@ -29,28 +30,35 @@ public class CropGenerator extends ResourceGenerator {
     private final Location corner1;
     private final Location corner2;
     private final World bukkitWorld;
-    private CuboidRegion cuboidRegion;
-    private CuboidRegion dirtLayerRegion;
 
-    // Upgrade system
-    private static final int MAX_GROWTH_SPEED_LEVEL = 10;
+    private final CuboidRegion cuboidRegion;
+    private final CuboidRegion dirtLayerRegion;
+
+    private final String regionName;
+
+    // Base growth chance per upgrade level:
+    // Level 1 = 2%
+    // Level 10 = 20%
     private static final double BASE_GROWTH_CHANCE = 0.02;
-
-    private String regionName;
 
     public CropGenerator(Location corner1, Location corner2, JobSite parent, String regionName) {
         super(parent);
-        this.corner1 = corner1;
-        this.corner2 = corner2;
+
+        this.corner1 = corner1.clone();
+        this.corner2 = corner2.clone();
         this.bukkitWorld = corner1.getWorld();
-        this.cuboidRegion = getRegion(corner1, corner2);
-        this.dirtLayerRegion = getRegion(corner1.add(0, -1, 0), corner2.add(0, -1, 0));
         this.regionName = regionName;
+
+        this.cuboidRegion = getRegion(this.corner1, this.corner2);
+
+        // IMPORTANT: clone the coords before subtracting Y
+        Location dirt1 = corner1.clone().add(0, -1, 0);
+        Location dirt2 = corner2.clone().add(0, -1, 0);
+        this.dirtLayerRegion = getRegion(dirt1, dirt2);
     }
 
     @Override
     protected void onTick() {
-        // Increase growth speed based on upgrade level
         if (TimeUtils.isDay(getParent().getSpawnPoint().getWorld())) {
             increaseGrowthSpeed();
         }
@@ -63,44 +71,41 @@ public class CropGenerator extends ResourceGenerator {
         flags.put(Flags.INTERACT, StateFlag.State.ALLOW);
         flags.put(Flags.USE, StateFlag.State.ALLOW);
         flags.put(Flags.BLOCK_PLACE, StateFlag.State.DENY);
+
         RegionUtils.createProtectedRegion(
                 getParent().getSpawnPoint().getWorld(),
-                getCuboidRegion(),
+                cuboidRegion,
                 regionName,
                 flags,
-                10);
+                10
+        );
     }
 
     /**
-     * Artificially increases crop growth based on upgrade level
-     * Higher levels = more growth stages added per tick
+     * Applies artificial growth based on upgrade level.
      */
     private void increaseGrowthSpeed() {
-        // Calculate growth chance based on level
-        // Level 1 = 5% chance, Level 10 = 50% chance per tick
-        double growthChance = BASE_GROWTH_CHANCE * ((FarmlandSite)getParent()).getData().getCropGrowthSpeedLevel();
+        int level = getGrowthSpeedLevel();
 
-        // Run async to avoid lag
+        if (level <= 0) return;
+
+        double chance = BASE_GROWTH_CHANCE * level; // 2% per level
+
         Bukkit.getScheduler().runTaskAsynchronously(StoinkCore.getInstance(), () -> {
             com.sk89q.worldedit.world.World weWorld = FaweAPI.getWorld(bukkitWorld.getName());
 
             try (EditSession session = WorldEdit.getInstance().newEditSession(weWorld)) {
-                // Iterate through all blocks in the crop region
                 for (BlockVector3 pos : cuboidRegion) {
-                    BlockState blockState = session.getBlock(pos);
+                    BlockState state = session.getBlock(pos);
 
-                    // Check if it's a crop block
-                    if (isCropBlock(blockState.getBlockType())) {
-                        // Get current age
-                        Integer currentAge = blockState.getState(PropertyKey.AGE);
-                        if (currentAge != null && currentAge < 7) {
-                            // Random chance to grow based on upgrade level
-                            if (Math.random() < growthChance) {
-                                BlockState newState = blockState.with(PropertyKey.AGE, currentAge + 1);
-                                session.setBlock(pos, newState);
-                                //Bukkit.getLogger().info("artificial growth" + pos.toString());
-                            }
-                        }
+                    if (!isCropBlock(state.getBlockType())) continue;
+
+                    Integer age = state.getState(PropertyKey.AGE);
+                    if (age == null || age >= 7) continue;
+
+                    if (Math.random() < chance) {
+                        BlockState grown = state.with(PropertyKey.AGE, age + 1);
+                        session.setBlock(pos, grown);
                     }
                 }
             } catch (Exception e) {
@@ -109,115 +114,111 @@ public class CropGenerator extends ResourceGenerator {
         });
     }
 
-    /**
-     * Calculate growth stages based on upgrade level
-     * @return number of growth stages to add per tick
-     */
-    private int calculateGrowthStages() {
-        int growthSpeedLevel = ((FarmlandSite)getParent()).getData().getCropGrowthSpeedLevel();
-        // Exponential scaling: Level 1-3 = 1 stage, 4-6 = 2 stages, 7-9 = 3 stages, 10 = 4 stages
-        if (growthSpeedLevel <= 3) return 1;
-        if (growthSpeedLevel <= 6) return 2;
-        if (growthSpeedLevel <= 9) return 3;
-        return 4;
-
-        // Alternative linear scaling: return growthSpeedLevel;
-        // Alternative percentage chance: return Random.nextDouble() < (growthSpeedLevel * 0.1) ? 1 : 0;
+    private boolean isCropBlock(BlockType type) {
+        return type == BlockTypes.WHEAT ||
+                type == BlockTypes.CARROTS ||
+                type == BlockTypes.POTATOES ||
+                type == BlockTypes.BEETROOTS;
     }
 
-    /**
-     * Check if a block type is a crop
-     */
-    private boolean isCropBlock(BlockType blockType) {
-        return blockType == BlockTypes.WHEAT ||
-                blockType == BlockTypes.CARROTS ||
-                blockType == BlockTypes.POTATOES ||
-                blockType == BlockTypes.BEETROOTS;
+    // ---------------------------------------
+    // UPGRADE INTEGRATION
+    // ---------------------------------------
+
+    private int getGrowthSpeedLevel() {
+        // directly read from upgrade map
+        return ((FarmlandSite) getParent()).getData().getLevel("crop_growth_speed");
     }
 
-    // Upgrade methods
-    public boolean upgradeGrowthSpeed() {
-        if (getGrowthSpeedLevel() < MAX_GROWTH_SPEED_LEVEL) {
-            setGrowthSpeedLevel(getGrowthSpeedLevel() + 1);
-            return true;
+    // ---------------------------------------
+    // CROP TYPE SELECTION
+    // ---------------------------------------
+
+    private FarmlandData data() {
+        return ((FarmlandSite) getParent()).getData();
+    }
+
+    private CropGeneratorType getCropType() {
+        return data().getCurrentCropType();
+    }
+
+    public void setCropType(CropGeneratorType type) {
+        data().setCurrentCropType(type);
+        regenerateCrops();
+    }
+
+    // ---------------------------------------
+    // REGENERATE CROPS ON TYPE CHANGE
+    // ---------------------------------------
+
+    public void regenerateCrops() {
+        com.sk89q.worldedit.world.World weWorld = FaweAPI.getWorld(bukkitWorld.getName());
+
+        try (EditSession session = WorldEdit.getInstance().newEditSession(weWorld)) {
+
+            // replace dirt layer with hydrated farmland
+            BlockState farmland = BlockTypes.FARMLAND.getDefaultState()
+                    .with(BlockTypes.FARMLAND.getProperty(PropertyKey.MOISTURE), 7);
+            session.setBlocks((Region) dirtLayerRegion, farmland);
+
+            // set crop layer
+            BlockState crop;
+
+            switch (getCropType()) {
+                case CARROT -> crop = BlockTypes.CARROTS.getDefaultState();
+                case POTATO -> crop = BlockTypes.POTATOES.getDefaultState();
+                case BEETROOT -> crop = BlockTypes.BEETROOTS.getDefaultState();
+                default -> crop = BlockTypes.WHEAT.getDefaultState();
+            }
+
+            session.setBlocks((Region) cuboidRegion, crop);
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        return false;
     }
 
-    public int getGrowthSpeedLevel() {
-        return ((FarmlandSite)getParent()).getData().getCropGrowthSpeedLevel();
+    public void replaceMissingCrops() {
+        com.sk89q.worldedit.world.World weWorld = FaweAPI.getWorld(bukkitWorld.getName());
+
+        BlockState air = BlockTypes.AIR.getDefaultState();
+        BlockState crop;
+
+        switch (getCropType()) {
+            case CARROT -> crop = BlockTypes.CARROTS.getDefaultState();
+            case POTATO -> crop = BlockTypes.POTATOES.getDefaultState();
+            case BEETROOT -> crop = BlockTypes.BEETROOTS.getDefaultState();
+            default -> crop = BlockTypes.WHEAT.getDefaultState();
+        }
+
+        try (EditSession session = WorldEdit.getInstance().newEditSession(weWorld)) {
+            session.replaceBlocks(
+                    cuboidRegion,
+                    Set.of(air.toBaseBlock()),
+                    crop
+            );
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
-    public void setGrowthSpeedLevel(int level) {
-        ((FarmlandSite)getParent()).getData().setCropGrowthSpeedLevel(Math.min(MAX_GROWTH_SPEED_LEVEL, Math.max(1, level)));
-    }
-
-    public int getMaxGrowthSpeedLevel() {
-        return MAX_GROWTH_SPEED_LEVEL;
-    }
-
+    // ---------------------------------------
+    // GETTERS
+    // ---------------------------------------
 
     public CuboidRegion getCuboidRegion() {
         return cuboidRegion;
-    }
-
-    public void setCropGeneratorType(CropGeneratorType cropGeneratorType) {
-        ((FarmlandSite)getParent()).getData().setCurrentType(cropGeneratorType);
-        regenerateCrops();
     }
 
     public String getRegionName() {
         return regionName;
     }
 
-    public void regenerateCrops() {
-        com.sk89q.worldedit.world.World weWorld = FaweAPI.getWorld(bukkitWorld.getName());
-
-        try (EditSession session = WorldEdit.getInstance().newEditSession(weWorld)) {
-            BlockState farmland = BlockTypes.FARMLAND.getDefaultState()
-                    .with(BlockTypes.FARMLAND.getProperty(PropertyKey.MOISTURE), 7);
-            session.setBlocks((Region) dirtLayerRegion, farmland);
-
-            switch(((FarmlandSite)getParent()).getData().getCurrentType()){
-                case CARROT -> session.setBlocks((Region) cuboidRegion, BlockTypes.CARROTS.getDefaultState());
-                case WHEAT -> session.setBlocks((Region) cuboidRegion, BlockTypes.WHEAT.getDefaultState());
-                case POTATO -> session.setBlocks((Region) cuboidRegion, BlockTypes.POTATOES.getDefaultState());
-                case BEETROOT -> session.setBlocks((Region) cuboidRegion, BlockTypes.BEETROOTS.getDefaultState());
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void replaceMissingCrops(){
-        com.sk89q.worldedit.world.World weWorld = FaweAPI.getWorld(bukkitWorld.getName());
-
-        try (EditSession session = WorldEdit.getInstance().newEditSession(weWorld)) {
-            switch(((FarmlandSite)getParent()).getData().getCurrentType()){
-                case CARROT -> session.replaceBlocks(
-                        cuboidRegion,
-                        Set.of(BlockTypes.AIR.getDefaultState().toBaseBlock()),
-                        BlockTypes.CARROTS.getDefaultState()
-                );
-                case WHEAT -> session.replaceBlocks(
-                        cuboidRegion,
-                        Set.of(BlockTypes.AIR.getDefaultState().toBaseBlock()),
-                        BlockTypes.WHEAT.getDefaultState());
-                case POTATO -> session.replaceBlocks(
-                        cuboidRegion,
-                        Set.of(BlockTypes.AIR.getDefaultState().toBaseBlock()),
-                        BlockTypes.POTATOES.getDefaultState());
-                case BEETROOT -> session.replaceBlocks(
-                        cuboidRegion,
-                        Set.of(BlockTypes.AIR.getDefaultState().toBaseBlock()),
-                        BlockTypes.BEETROOTS.getDefaultState());
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+    // ---------------------------------------
+    // ENUM
+    // ---------------------------------------
 
     public enum CropGeneratorType {
-        CARROT, WHEAT, POTATO, BEETROOT, NONE;
+        WHEAT, CARROT, POTATO, BEETROOT
     }
 }

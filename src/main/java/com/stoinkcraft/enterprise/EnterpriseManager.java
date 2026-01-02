@@ -2,14 +2,12 @@ package com.stoinkcraft.enterprise;
 
 import com.stoinkcraft.StoinkCore;
 import com.stoinkcraft.jobs.jobsites.JobSiteManager;
-import com.stoinkcraft.jobs.jobsites.sites.SkyriseSite;
 import com.stoinkcraft.market.boosters.Booster;
 import com.stoinkcraft.serialization.EnterpriseStorageJson;
 import com.stoinkcraft.shares.ShareManager;
 import com.stoinkcraft.utils.ChatUtils;
 import com.stoinkcraft.utils.SCConstants;
 import net.citizensnpcs.api.npc.NPC;
-import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
@@ -30,7 +28,6 @@ public class EnterpriseManager {
     private final Map<UUID, List<UUID>> invites = new HashMap<>();
 
     private StoinkCore plugin;
-    private Economy econ;
 
     private ArrayList<Enterprise> enterpriseList;
 
@@ -38,10 +35,8 @@ public class EnterpriseManager {
 
     private List<NPC> topCeoNpcs = new ArrayList<>();
 
-    public EnterpriseManager(StoinkCore plugin, Economy econ, int maximumEmployees){
+    public EnterpriseManager(StoinkCore plugin, int maximumEmployees){
         this.plugin = plugin;
-        this.econ = econ;
-
         enterpriseList = new ArrayList<Enterprise>();
         enterpriseManager = this;
         this.maximumEmployees = maximumEmployees;

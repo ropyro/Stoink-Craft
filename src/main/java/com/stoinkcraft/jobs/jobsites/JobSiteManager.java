@@ -3,12 +3,12 @@ package com.stoinkcraft.jobs.jobsites;
 import com.stoinkcraft.StoinkCore;
 import com.stoinkcraft.enterprise.Enterprise;
 import com.stoinkcraft.jobs.jobsites.sites.farmland.FarmlandData;
-import com.stoinkcraft.jobs.jobsites.data.QuarryData;
-import com.stoinkcraft.jobs.jobsites.data.SkyriseData;
+import com.stoinkcraft.jobs.jobsites.sites.quarry.QuarryData;
+import com.stoinkcraft.jobs.jobsites.sites.skyrise.SkyriseData;
 import com.stoinkcraft.jobs.jobsites.resourcegenerators.generators.CropGenerator;
 import com.stoinkcraft.jobs.jobsites.sites.farmland.FarmlandSite;
-import com.stoinkcraft.jobs.jobsites.sites.QuarrySite;
-import com.stoinkcraft.jobs.jobsites.sites.SkyriseSite;
+import com.stoinkcraft.jobs.jobsites.sites.quarry.QuarrySite;
+import com.stoinkcraft.jobs.jobsites.sites.skyrise.SkyriseSite;
 import org.bukkit.Location;
 import org.bukkit.util.Vector;
 
@@ -39,10 +39,10 @@ public class JobSiteManager {
      */
     public void initializeJobSites(SkyriseData skyriseData, QuarryData quarryData, FarmlandData farmlandData) {
         if (plotIndex == -1) {
-            plotIndex = StoinkCore.getEnterprisePlotManager().getNextAvailablePlotIndex();
+            plotIndex = StoinkCore.getInstance().getEnterprisePlotManager().getNextAvailablePlotIndex();
             enterprise.setPlotIndex(plotIndex);
         }
-        plots = StoinkCore.getEnterprisePlotManager().assignPlots(enterprise.getID(), plotIndex);
+        plots = StoinkCore.getInstance().getEnterprisePlotManager().assignPlots(enterprise.getID(), plotIndex);
 
         // Initialize Skyrise
         Location skyriseLoc = plots.get(JobSiteType.SKYRISE);
@@ -90,13 +90,7 @@ public class JobSiteManager {
     }
 
     private FarmlandData createDefaultFarmlandData(){
-        return new FarmlandData(false,
-                -1,
-                CropGenerator.CropGeneratorType.NONE,
-                1,
-                false,
-                false,
-                false);
+        return new FarmlandData(false);
     }
 
     // Getters for serialization

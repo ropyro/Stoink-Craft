@@ -2,9 +2,11 @@ package com.stoinkcraft;
 
 import com.stoinkcraft.enterprise.*;
 import com.stoinkcraft.enterprise.listeners.*;
+import com.stoinkcraft.jobs.contracts.ContractManager;
 import com.stoinkcraft.jobs.jobsites.sites.farmland.FarmerJoeListener;
 import com.stoinkcraft.jobs.listeners.BlockBreakListener;
 import com.stoinkcraft.jobs.listeners.CreatureSpawnListener;
+import com.stoinkcraft.jobs.listeners.EntityDeathListener;
 import com.stoinkcraft.misc.daily.DailyCMD;
 import com.stoinkcraft.misc.daily.DailyManager;
 import com.stoinkcraft.market.boosters.BoostNoteInteractionListener;
@@ -49,35 +51,40 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class StoinkCore extends JavaPlugin implements Listener {
+public class StoinkCore extends JavaPlugin {
 
     private static Economy econ = null;
 
     private static StoinkCore INSTANCE;
 
-    private static EnterpriseManager em;
-    public static EnterpriseManager getEnterpriseManager(){
+    private EnterpriseManager em;
+    public EnterpriseManager getEnterpriseManager(){
         return em;
     }
 
-    private static DailyManager dm;
-    public static DailyManager getDailyManager(){
+    private DailyManager dm;
+    public DailyManager getDailyManager(){
         return dm;
     }
 
-    private static ShareManager sm;
-    public static ShareManager getShareManager(){
+    private ShareManager sm;
+    public ShareManager getShareManager(){
         return sm;
     }
 
-    private static EnterpriseWorldManager ewm;
-    public static EnterpriseWorldManager getEnterpriseWorldManager(){
+    private EnterpriseWorldManager ewm;
+    public EnterpriseWorldManager getEnterpriseWorldManager(){
         return ewm;
     }
 
-    private static EnterprisePlotManager epm;
-    public static EnterprisePlotManager getEnterprisePlotManager(){
+    private EnterprisePlotManager epm;
+    public EnterprisePlotManager getEnterprisePlotManager(){
         return epm;
+    }
+
+    private ContractManager cm;
+    public ContractManager getContractManager(){
+        return cm;
     }
 
 
@@ -100,6 +107,18 @@ public class StoinkCore extends JavaPlugin implements Listener {
     public void onEnable() {
         INSTANCE = this;
 
+        hookLibraries();
+        initManagers();
+        initFilesAndResources();
+        ensureServerEnterprises();
+        registerCommands();
+        registerListeners();
+        startTasks();
+
+        getLogger().info("StoinkCore loaded.");
+    }
+
+    private void hookLibraries(){
         //GUI util hook
         InvUI.getInstance().setPlugin(this);
 
@@ -114,12 +133,18 @@ public class StoinkCore extends JavaPlugin implements Listener {
         if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
             new StoinkExpansion(this).register();
         }
+    }
 
+    private void initManagers(){
         dm = new DailyManager();
-        em = new EnterpriseManager(this, econ, 2);
+        em = new EnterpriseManager(this, 2);
         sm = new ShareManager();
         ewm = new EnterpriseWorldManager();
         epm = new EnterprisePlotManager(ewm);
+        cm = new ContractManager();
+    }
+
+    private void initFilesAndResources(){
 
         File marketFile = new File(getDataFolder(), "market.yml");
         if(!marketFile.exists()){
@@ -142,53 +167,28 @@ public class StoinkCore extends JavaPlugin implements Listener {
             }
         }.runTaskTimerAsynchronously(this, 20L * 60 * 5, 20L * 60 * 5);
 
-
-
         em.startDailyTaxes(this);
 
-
-
         ShareStorage.loadShares();
+    }
 
-        EnterpriseManager mgr = EnterpriseManager.getEnterpriseManager();
-        if (mgr.getEnterpriseList().stream().noneMatch(e -> e instanceof ServerEnterprise)) {
-            getLogger().info("Adding server enterprises...");
-
-            ServerEnterprise farmer = new ServerEnterprise("FarmerLLC");
-            mgr.createEnterprise(farmer);
-            farmer.initializeJobSiteManager();
-            farmer.getJobSiteManager().initializeJobSites();
-
-            ServerEnterprise miner = new ServerEnterprise("MinerCorp");
-            mgr.createEnterprise(miner);
-            miner.initializeJobSiteManager();
-            miner.getJobSiteManager().initializeJobSites();
-
-            ServerEnterprise hunter = new ServerEnterprise("HunterInc");
-            mgr.createEnterprise(hunter);
-            hunter.initializeJobSiteManager();
-            hunter.getJobSiteManager().initializeJobSites();
-
-            getLogger().info("Server enterprises created and saved.");
+    private void ensureServerEnterprises() {
+        if (em.getEnterpriseList().stream().noneMatch(e -> e instanceof ServerEnterprise)) {
+            StoinkCore.getInstance().getLogger().info("Adding server enterprises...");
+            createDefaultServerEnterprise(em, "FarmerLLC");
+            createDefaultServerEnterprise(em, "MinerCorp");
+            createDefaultServerEnterprise(em, "HunterInc");
         }
+    }
 
+    private void createDefaultServerEnterprise(EnterpriseManager mgr, String name) {
+        ServerEnterprise ent = new ServerEnterprise(name);
+        mgr.createEnterprise(ent);
+        ent.initializeJobSiteManager();
+        ent.getJobSiteManager().initializeJobSites();
+    }
 
-        em.startJobSiteTicker(this);
-
-        //Register commands
-//        Bukkit.getScheduler().runTask(this, () -> {
-//            EnterpriseCMD enterpriseCMD = new EnterpriseCMD(this);
-//            getCommand("enterprise").setExecutor(enterpriseCMD);
-//            getCommand("enterprise").setTabCompleter(new EnterpriseTabCompleter(enterpriseCMD.getSubcommands()));
-//            getCommand("market").setExecutor(new MarketCMD());
-//            getCommand("serverenterprise").setExecutor(new ServerEntCMD());
-//            getCommand("serverenterprise").setTabCompleter(new ServerEntTabCompleter());
-//            getCommand("topceo").setExecutor(new TopCeoCMD());
-//            getCommand("shares").setExecutor(new SharesCMD());
-//            getCommand("daily").setExecutor(new DailyCMD());
-//            getCommand("pmenu").setExecutor(new PMenuCommand());
-//        });
-
+    private void registerCommands(){
         EnterpriseCMD enterpriseCMD = new EnterpriseCMD(this);
         getCommand("enterprise").setExecutor(enterpriseCMD);
         getCommand("enterprise").setTabCompleter(new EnterpriseTabCompleter(enterpriseCMD.getSubcommands()));
@@ -199,31 +199,30 @@ public class StoinkCore extends JavaPlugin implements Listener {
         getCommand("shares").setExecutor(new SharesCMD());
         getCommand("daily").setExecutor(new DailyCMD());
         getCommand("pmenu").setExecutor(new PMenuCommand());
+    }
 
+    public void registerListeners(){
         //Register listeners
         getServer().getPluginManager().registerEvents(new PlayerJoinListener(this), this);
-
         //Chat money listeners
         getServer().getPluginManager().registerEvents(new PlayerChatListener(this), this);
-
         //Misc listeners
         getServer().getPluginManager().registerEvents(new PhantomSpawnDisabler(), this);
         getServer().getPluginManager().registerEvents(new BoostNoteInteractionListener(), this);
         getServer().getPluginManager().registerEvents(new EnderChestListener(), this);
-
         //Jobsite Listeners
         getServer().getPluginManager().registerEvents(new CreatureSpawnListener(ewm.getWorld()), this);
         getServer().getPluginManager().registerEvents(new BlockBreakListener(), this);
+        getServer().getPluginManager().registerEvents(new EntityDeathListener(), this);
         //Farmland
         getServer().getPluginManager().registerEvents(new FarmerJoeListener(this), this);
-
-
-        startPriceSnapshotRecording();
-        startAutoTopCEOUpdate();
-
-        getLogger().info("StoinkCore loaded.");
     }
 
+    private void startTasks(){
+        em.startJobSiteTicker(this);
+        startPriceSnapshotRecording();
+        startAutoTopCEOUpdate();
+    }
 
     public static StoinkCore getInstance() {
         return INSTANCE;
@@ -292,10 +291,12 @@ public class StoinkCore extends JavaPlugin implements Listener {
      * Starts automatic updates every 10 minutes.
      */
     public void startAutoTopCEOUpdate() {
-        Bukkit.getScheduler().runTaskTimerAsynchronously(this, this::updateTopCeoNpcs, 20L, 20L * 60 * 10);
+        Bukkit.getScheduler().runTaskTimer(this, this::updateTopCeoNpcs, 20L, 20L * 60 * 10);
     }
 
-    private record TopCeoData(int position, String ceoName, String displayName) {}
+    private record TopCeoData(int position, String ceoName, String displayName) {
+
+    }
 
 
     public static NPC getNpcByPosition(int position) {
@@ -344,8 +345,6 @@ public class StoinkCore extends JavaPlugin implements Listener {
             e.printStackTrace();
         }
     }
-
-
 
     private boolean setupEconomy() {
         if (getServer().getPluginManager().getPlugin("Vault") == null) {

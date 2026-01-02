@@ -1,7 +1,14 @@
 package com.stoinkcraft.jobs.jobsites.sites.farmland;
 
 import com.stoinkcraft.StoinkCore;
+import com.stoinkcraft.jobs.contracts.Contract;
+import com.stoinkcraft.jobs.jobsites.JobSiteType;
+import com.stoinkcraft.jobs.jobsites.JobSiteUpgrade;
+import com.stoinkcraft.jobs.jobsites.JobsiteLevelHelper;
 import com.stoinkcraft.jobs.jobsites.resourcegenerators.generators.CropGenerator;
+import com.stoinkcraft.jobs.jobsites.resourcegenerators.generators.PassiveMobGenerator;
+import com.stoinkcraft.utils.ChatUtils;
+import com.stoinkcraft.utils.SCConstants;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
@@ -15,6 +22,8 @@ import xyz.xenondevs.invui.item.impl.AbstractItem;
 import xyz.xenondevs.invui.item.impl.SimpleItem;
 import xyz.xenondevs.invui.window.Window;
 
+import java.util.List;
+
 public class FarmlandGui {
 
     private final FarmlandSite farmlandSite;
@@ -25,130 +34,89 @@ public class FarmlandGui {
         this.opener = opener;
     }
 
-    public void openWindow(){
+    private JobSiteUpgrade upgrade(String id) {
+        return farmlandSite.getUpgrades()
+                .stream()
+                .filter(u -> u.id().equals(id))
+                .findFirst()
+                .orElse(null);
+    }
+
+    private boolean unlocked(String upgradeId) {
+        return farmlandSite.getData().getLevel(upgradeId) > 0;
+    }
+
+    public void openWindow() {
+        Gui.Builder builder = createBaseGui(
+                "# # # # ? # # # #",
+                "# F A B # # C # #",
+                "# # # # # # # # #"
+        );
+
+        int xp = (int)farmlandSite.getData().getXp();
+        int level = JobsiteLevelHelper.getLevelFromXp(xp);
+        int xpToNext = JobsiteLevelHelper.getXpToNextLevel(xp);
+
+        builder.addIngredient('?', new SimpleItem(
+                new ItemBuilder(Material.OAK_SIGN)
+                        .setDisplayName("§8§l» §a§lFarmland Help §8»")
+                        .addLoreLines(" ")
+                        .addLoreLines("§a§lJobsite Progress §8»")
+                        .addLoreLines(" §a• §fFarmland Level: §a" + level)
+                        .addLoreLines(" §a• §fXP to next level: §a" + xpToNext + " XP")
+                        .addLoreLines(" ")
+                        .addLoreLines("§a§lHow Jobsite XP Works §8»")
+                        .addLoreLines(" §a• §fCompleting §adaily §fand §aweekly contracts")
+                        .addLoreLines("   §fgrants §aFarmland XP")
+                        .addLoreLines(" §a• §fXP increases your §aFarmland Level")
+                        .addLoreLines(" §a• §fHigher levels unlock §abetter contracts")
+                        .addLoreLines("   §fand are required for §aupgrades")
+                        .addLoreLines(" ")
+                        .addLoreLines("§a§lUpgrades & Unlocks §8»")
+                        .addLoreLines(" §a• §fCrop upgrades increase §agrowth speed")
+                        .addLoreLines(" §a• §fAnimal upgrades increase §aspawn rate")
+                        .addLoreLines("   §fand §amax capacity")
+                        .addLoreLines(" §a• §fSome upgrades require a")
+                        .addLoreLines("   §aspecific Farmland Level")
+                        .addLoreLines(" ")
+                        .addLoreLines("§a§lEarning Money §8»")
+                        .addLoreLines(" §a• §fHarvest crops and farm animals")
+                        .addLoreLines(" §a• §fComplete contracts for §amoney")
+                        .addLoreLines(" §a• §fMoney is split between")
+                        .addLoreLines("   §fYou (§a" + (int)(SCConstants.PLAYER_PAY_SPLIT_PERCENTAGE * 100) + "%§f)")
+                        .addLoreLines("   §fand the Enterprise (§a" +
+                                (100 - (int)(SCConstants.PLAYER_PAY_SPLIT_PERCENTAGE * 100)) + "%§f)")
+                        .addLoreLines(" ")
+                        .addLoreLines("§a§lNavigation §8»")
+                        .addLoreLines(" §a• §fCrops Manager §8– §fSelect crops & upgrades")
+                        .addLoreLines(" §a• §fAnimal Manager §8– §fSelect animals & upgrades")
+                        .addLoreLines(" §a• §fContracts §8– §fView daily & weekly goals")
+        ));
+
+        builder.addIngredient('F', button(Material.IRON_HOE, "Crops Manager", this::openCropMenu));
+        builder.addIngredient('A', button(Material.BEEF, "Animal Manager", this::openAnimalMenu));
+        builder.addIngredient('B', simple(Material.HONEYCOMB, "Coming soon.."));
+        builder.addIngredient('C', button(Material.GOLD_INGOT, "Contract List", this::openContractList));
+
+        open(builder.build(), "§8Farmland Menu");
+    }
+    private void openContractList(){
         Gui gui = Gui.normal()
                 .setStructure(
-                        "# # # # # # # # #",
-                        "# W C P B . . . #",
+                        "# # # # ? # # # #",
+                        "# . . . . . . . #",
                         "# . . . . . . . #",
                         "# # # # # # # # #")
                 .addIngredient('#', new SimpleItem(new ItemBuilder(Material.BLACK_STAINED_GLASS_PANE)
                         .setDisplayName(" ")))
-                .addIngredient('W', new AbstractItem() {
-
-                    @Override
-                    public ItemProvider getItemProvider() {
-                        ItemStack item = new ItemStack(Material.WHEAT);
-
-                        ItemBuilder wheatItem = new ItemBuilder(item);
-                        if(farmlandSite.getData().getCurrentType().equals(CropGenerator.CropGeneratorType.WHEAT)){
-                            wheatItem.setDisplayName("Selected!");
-                        }else{
-                            wheatItem.setDisplayName("Click to switch crops to wheat");
-                        }
-
-
-                        return wheatItem;
-                    }
-
-                    @Override
-                    public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull InventoryClickEvent inventoryClickEvent) {
-                        if(!farmlandSite.getData().getCurrentType().equals(CropGenerator.CropGeneratorType.WHEAT)){
-                            farmlandSite.getCropGenerator().setCropGeneratorType(CropGenerator.CropGeneratorType.WHEAT);
-                            player.closeInventory();
-                        }
-                    }
-                })
-                .addIngredient('C', new AbstractItem() {
-
-                    @Override
-                    public ItemProvider getItemProvider() {
-                        ItemStack item = new ItemStack(Material.CARROT);
-
-                        ItemBuilder carrotUpgrade = new ItemBuilder(item);
-                        if(!farmlandSite.getData().isCarrotUnlocked()){
-                            carrotUpgrade.setDisplayName("Click to unlock carrots, $25k");
-                        }else if(farmlandSite.getData().getCurrentType().equals(CropGenerator.CropGeneratorType.CARROT)){
-                            carrotUpgrade.setDisplayName("Selected!");
-                        }else{
-                            carrotUpgrade.setDisplayName("Click to switch crops to carrots");
-                        }
-
-
-                        return carrotUpgrade;
-                    }
-
-                    @Override
-                    public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull InventoryClickEvent inventoryClickEvent) {
-                        if(!farmlandSite.getData().isCarrotUnlocked()){
-                            StoinkCore.getEconomy().withdrawPlayer(player, 25000);
-                            farmlandSite.getData().setCarrotUnlocked(true);
-                        }else if(!farmlandSite.getData().getCurrentType().equals(CropGenerator.CropGeneratorType.CARROT)){
-                            farmlandSite.getCropGenerator().setCropGeneratorType(CropGenerator.CropGeneratorType.CARROT);
-                        }
-                        player.closeInventory();
-                    }
-                })
-                .addIngredient('P', new AbstractItem() {
-
-                    @Override
-                    public ItemProvider getItemProvider() {
-                        ItemStack item = new ItemStack(Material.POTATO);
-
-                        ItemBuilder potatoUpgrade = new ItemBuilder(item);
-                        if(!farmlandSite.getData().isPotatoUnlocked()){
-                            potatoUpgrade.setDisplayName("Click to unlock potatoes, $75k");
-                        }else if(farmlandSite.getData().getCurrentType().equals(CropGenerator.CropGeneratorType.POTATO)){
-                            potatoUpgrade.setDisplayName("Selected!");
-                        }else{
-                            potatoUpgrade.setDisplayName("Click to switch crops to potatos");
-                        }
-
-                        return potatoUpgrade;
-                    }
-
-                    @Override
-                    public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull InventoryClickEvent inventoryClickEvent) {
-                        if(!farmlandSite.getData().isPotatoUnlocked()){
-                            StoinkCore.getEconomy().withdrawPlayer(player, 75000);
-                            farmlandSite.getData().setPotatoUnlocked(true);
-                        }else if(!farmlandSite.getData().getCurrentType().equals(CropGenerator.CropGeneratorType.POTATO)){
-                            farmlandSite.getCropGenerator().setCropGeneratorType(CropGenerator.CropGeneratorType.POTATO);
-                        }
-                        player.closeInventory();
-                    }
-                })
-                .addIngredient('B', new AbstractItem() {
-
-                    @Override
-                    public ItemProvider getItemProvider() {
-                        ItemStack item = new ItemStack(Material.BEETROOT);
-
-                        ItemBuilder carrotUpgrade = new ItemBuilder(item);
-                        if(!farmlandSite.getData().isBeetrootUnlocked()){
-                            carrotUpgrade.setDisplayName("Click to unlock beetroots, $125k");
-                        }else if(farmlandSite.getData().getCurrentType().equals(CropGenerator.CropGeneratorType.BEETROOT)){
-                            carrotUpgrade.setDisplayName("Selected!");
-                        }else{
-                            carrotUpgrade.setDisplayName("Click to switch crops to beetroots");
-                        }
-
-
-                        return carrotUpgrade;
-                    }
-
-                    @Override
-                    public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull InventoryClickEvent inventoryClickEvent) {
-                        if(!farmlandSite.getData().isBeetrootUnlocked()){
-                            StoinkCore.getEconomy().withdrawPlayer(player, 125000);
-                            farmlandSite.getData().setBeetrootUnlocked(true);
-                        }else if(!farmlandSite.getData().getCurrentType().equals(CropGenerator.CropGeneratorType.BEETROOT)){
-                            farmlandSite.getCropGenerator().setCropGeneratorType(CropGenerator.CropGeneratorType.BEETROOT);
-                        }
-                        player.closeInventory();
-                    }
-                })
+                .addIngredient('?', new SimpleItem(new ItemBuilder(Material.OAK_SIGN)
+                        .setDisplayName(" Contract Help ")))
                 .build();
+
+        StoinkCore core = StoinkCore.getInstance();
+        List<Contract> farmlandContracts = core.getContractManager().getContracts(core.getEnterpriseManager().getEnterpriseByMember(opener.getUniqueId()), JobSiteType.FARMLAND).stream().toList();
+
+        farmlandContracts.forEach(c -> gui.addItems(getContractItem(c)));
 
         Window window = Window.single()
                 .setViewer(opener)
@@ -156,5 +124,295 @@ public class FarmlandGui {
                 .setGui(gui)
                 .build();
         window.open();
+    }
+
+    private SimpleItem getContractItem(Contract contract){
+        ItemBuilder itemBuilder;
+        switch(contract.getContractType()){
+            case COW_KILLS -> {
+                itemBuilder = new ItemBuilder(Material.COW_SPAWN_EGG);
+                if(contract.isCompleted()){
+                    itemBuilder.setDisplayName("Completed! *check mark*");
+                }else{
+                    itemBuilder.setDisplayName("In progress...");
+                }
+                itemBuilder.addLoreLines(" ");
+                itemBuilder.addLoreLines("Progress: " + contract.getCurrentProgress() + "/" + contract.getTargetAmount());
+                itemBuilder.addLoreLines("Expiration: " + contract.getExpirationTime());
+                itemBuilder.addLoreLines(" ");
+                itemBuilder.addLoreLines("Reward: " + contract.getReward());
+            }
+            default -> itemBuilder = new ItemBuilder(Material.AIR);
+        }
+        return new SimpleItem(itemBuilder);
+    }
+
+    private void openCropMenu() {
+        Gui.Builder builder = createBaseGui(
+                "# # # # ? # # # #",
+                "# W C P B # G # #",
+                "# # # # # # # # #"
+        );
+
+        addCropIngredient(builder, 'W', Material.WHEAT,
+                CropGenerator.CropGeneratorType.WHEAT, null);
+
+        addCropIngredient(builder, 'C', Material.CARROT,
+                CropGenerator.CropGeneratorType.CARROT, "unlock_carrot");
+
+        addCropIngredient(builder, 'P', Material.POTATO,
+                CropGenerator.CropGeneratorType.POTATO, "unlock_potato");
+
+        addCropIngredient(builder, 'B', Material.BEETROOT,
+                CropGenerator.CropGeneratorType.BEETROOT, "unlock_beetroot");
+
+        addUpgradeIngredient(builder, 'G',
+                "crop_growth_speed", Material.WATER_BUCKET, "Growth Speed");
+
+        open(builder.build(), "§8Crop Manager");
+    }
+
+    private void openAnimalMenu() {
+        Gui.Builder builder = createBaseGui(
+                "# # # # ? # # # #",
+                "# C S P H # M K #",
+                "# # # # # # # # #"
+        );
+
+        addMobIngredient(builder, 'C', Material.COW_SPAWN_EGG,
+                PassiveMobGenerator.PassiveMobType.COW, null);
+
+        addMobIngredient(builder, 'S', Material.SHEEP_SPAWN_EGG,
+                PassiveMobGenerator.PassiveMobType.SHEEP, "unlock_sheep");
+
+        addMobIngredient(builder, 'P', Material.PIG_SPAWN_EGG,
+                PassiveMobGenerator.PassiveMobType.PIG, "unlock_pig");
+
+        addMobIngredient(builder, 'H', Material.CHICKEN_SPAWN_EGG,
+                PassiveMobGenerator.PassiveMobType.CHICKEN, "unlock_chicken");
+
+        addUpgradeIngredient(builder, 'M',
+                "mob_spawn_speed", Material.FEATHER, "Spawn Speed");
+
+        addUpgradeIngredient(builder, 'K',
+                "mob_capacity", Material.CHEST, "Capacity");
+
+        open(builder.build(), "§8Animal Manager");
+    }
+
+    private void addCropIngredient(
+            Gui.Builder builder,
+            char slot,
+            Material mat,
+            CropGenerator.CropGeneratorType type,
+            String unlockUpgradeId
+    ) {
+        JobSiteUpgrade upg = unlockUpgradeId == null ? null : findUpgrade(unlockUpgradeId);
+
+        builder.addIngredient(slot, new AbstractItem() {
+            @Override
+            public ItemProvider getItemProvider() {
+                ItemBuilder item = new ItemBuilder(mat);
+                boolean selected = farmlandSite.getData().getCurrentCropType() == type;
+                boolean unlocked = upg == null || farmlandSite.getData().getLevel(unlockUpgradeId) > 0;
+
+                int jobsiteLevel =
+                        JobsiteLevelHelper.getLevelFromXp((int) farmlandSite.getData().getXp());
+
+                if (!unlocked) {
+                    item.setDisplayName("§cUnlock " + type.name());
+                    item.addLoreLines(" ");
+
+                    item.addLoreLines("§7Cost: §6$" + upg.cost(1));
+                    item.addLoreLines("§7Required Level: §e" + upg.requiredJobsiteLevel());
+
+                    if (jobsiteLevel < upg.requiredJobsiteLevel()) {
+                        item.addLoreLines("§c✖ You are level " + jobsiteLevel);
+                    } else {
+                        item.addLoreLines("§a✔ Requirement met");
+                    }
+
+                    item.addLoreLines(" ");
+                    item.addLoreLines("§eClick to unlock");
+
+                } else if (selected) {
+                    item.setDisplayName("§a" + type.name() + " §7(Selected)");
+                    item.addLoreLines("§7Currently active crop");
+
+                } else {
+                    item.setDisplayName("§eSelect " + type.name());
+                    item.addLoreLines("§7Click to switch crop");
+                }
+
+
+                return item;
+            }
+
+            @Override
+            public void handleClick(ClickType click, Player p, InventoryClickEvent e) {
+                if (unlockUpgradeId != null &&
+                        farmlandSite.getData().getLevel(unlockUpgradeId) == 0) {
+                    farmlandSite.purchaseUpgrade(findUpgrade(unlockUpgradeId), p);
+                } else {
+                    farmlandSite.getCropGenerator().setCropType(type);
+                }
+            }
+        });
+    }
+
+    private void addMobIngredient(
+            Gui.Builder builder,
+            char slot,
+            Material mat,
+            PassiveMobGenerator.PassiveMobType type,
+            String unlockUpgradeId
+    ) {
+        JobSiteUpgrade upg = unlockUpgradeId == null ? null : findUpgrade(unlockUpgradeId);
+
+        builder.addIngredient(slot, new AbstractItem() {
+            @Override
+            public ItemProvider getItemProvider() {
+                ItemBuilder item = new ItemBuilder(mat);
+                boolean selected = farmlandSite.getData().getCurrentMobType() == type;
+                boolean unlocked = upg == null || farmlandSite.getData().getLevel(unlockUpgradeId) > 0;
+
+                int jobsiteLevel =
+                        JobsiteLevelHelper.getLevelFromXp((int) farmlandSite.getData().getXp());
+
+                if (!unlocked) {
+                    item.setDisplayName("§cUnlock " + type.getDisplayName());
+                    item.addLoreLines(" ");
+
+                    item.addLoreLines("§7Cost: §6$" + upg.cost(1));
+                    item.addLoreLines("§7Required Level: §e" + upg.requiredJobsiteLevel());
+
+                    if (jobsiteLevel < upg.requiredJobsiteLevel()) {
+                        item.addLoreLines("§c✖ You are level " + jobsiteLevel);
+                    } else {
+                        item.addLoreLines("§a✔ Requirement met");
+                    }
+
+                    item.addLoreLines(" ");
+                    item.addLoreLines("§eClick to unlock");
+
+                } else if (selected) {
+                    item.setDisplayName("§a" + type.getDisplayName() + " §7(Selected)");
+                    item.addLoreLines("§7Currently active animal");
+
+                } else {
+                    item.setDisplayName("§eSelect " + type.getDisplayName());
+                    item.addLoreLines("§7Click to switch animal");
+                }
+
+                return item;
+            }
+
+            @Override
+            public void handleClick(ClickType click, Player p, InventoryClickEvent e) {
+                if (unlockUpgradeId != null &&
+                        farmlandSite.getData().getLevel(unlockUpgradeId) == 0) {
+                    farmlandSite.purchaseUpgrade(findUpgrade(unlockUpgradeId), p);
+                } else {
+                    farmlandSite.getMobGenerator().setMobType(type);
+                }
+            }
+        });
+    }
+
+    private void addUpgradeIngredient(
+            Gui.Builder builder,
+            char slot,
+            String upgradeId,
+            Material mat,
+            String name
+    ) {
+        JobSiteUpgrade upg = findUpgrade(upgradeId);
+        if (upg == null) return;
+
+        builder.addIngredient(slot, new AbstractItem() {
+            @Override
+            public ItemProvider getItemProvider() {
+                int lvl = farmlandSite.getData().getLevel(upgradeId);
+                ItemBuilder item = new ItemBuilder(mat)
+                        .setDisplayName("§e" + name)
+                        .addLoreLines("Level: " + lvl + "/" + upg.maxLevel());
+
+                if (lvl < upg.maxLevel()) {
+                    item.addLoreLines("Cost: $" + upg.cost(lvl + 1));
+                    item.addLoreLines("Click to upgrade");
+                } else {
+                    item.addLoreLines("§aMax Level");
+                }
+
+                int currentJobsiteLevel =
+                        JobsiteLevelHelper.getLevelFromXp((int) farmlandSite.getData().getXp());
+
+                item.addLoreLines("Required Level: " + upg.requiredJobsiteLevel());
+
+                if (currentJobsiteLevel < upg.requiredJobsiteLevel()) {
+                    item.addLoreLines("§cYou are level " + currentJobsiteLevel);
+                } else {
+                    item.addLoreLines("§aYou meet the level requirement");
+                }
+                return item;
+            }
+
+            @Override
+            public void handleClick(ClickType click, Player p, InventoryClickEvent e) {
+                if(farmlandSite.purchaseUpgrade(upg, p)){
+                    ChatUtils.sendMessage(p, "Purchased upgrade, " + name);
+                }else{
+                    ChatUtils.sendMessage(p, "Unable to purchase upgrade, insufficient funds or jobsite level");
+                }
+                p.closeInventory();
+            }
+        });
+    }
+
+    private JobSiteUpgrade findUpgrade(String id) {
+        return farmlandSite.getUpgrades().stream()
+                .filter(u -> u.id().equals(id))
+                .findFirst()
+                .orElse(null);
+    }
+
+    private SimpleItem filler() {
+        return new SimpleItem(new ItemBuilder(Material.BLACK_STAINED_GLASS_PANE).setDisplayName(" "));
+    }
+
+    private SimpleItem simple(Material mat, String name) {
+        return new SimpleItem(new ItemBuilder(mat).setDisplayName(name));
+    }
+
+    private AbstractItem button(Material mat, String name, Runnable action) {
+        return new AbstractItem() {
+            @Override
+            public ItemProvider getItemProvider() {
+                return new ItemBuilder(mat).setDisplayName(name);
+            }
+
+            @Override
+            public void handleClick(ClickType click, Player p, InventoryClickEvent e) {
+                action.run();
+            }
+        };
+    }
+
+    private Gui.Builder createBaseGui(String... structure) {
+        Gui.Builder builder = Gui.normal().setStructure(structure);
+
+        builder.addIngredient('#', filler());
+        //builder.addIngredient('?', simple(Material.OAK_SIGN, "Help"));
+
+        return builder;
+    }
+
+    private void open(Gui gui, String title) {
+        Window.single()
+                .setViewer(opener)
+                .setTitle(title)
+                .setGui(gui)
+                .build()
+                .open();
     }
 }

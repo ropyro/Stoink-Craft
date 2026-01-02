@@ -1,14 +1,10 @@
-package com.stoinkcraft.jobs.jobsites.sites;
+package com.stoinkcraft.jobs.jobsites.sites.quarry;
 
-import com.sk89q.worldguard.protection.flags.Flags;
-import com.sk89q.worldguard.protection.flags.StateFlag;
 import com.stoinkcraft.StoinkCore;
 import com.stoinkcraft.enterprise.Enterprise;
 import com.stoinkcraft.jobs.jobsites.JobSite;
 import com.stoinkcraft.jobs.jobsites.JobSiteType;
-import com.stoinkcraft.jobs.jobsites.data.QuarryData;
 import com.stoinkcraft.jobs.jobsites.resourcegenerators.generators.MineGenerator;
-import com.stoinkcraft.utils.RegionUtils;
 import eu.decentsoftware.holograms.api.DHAPI;
 import eu.decentsoftware.holograms.api.holograms.Hologram;
 import org.bukkit.ChatColor;
@@ -27,7 +23,7 @@ public class QuarrySite extends JobSite {
     public QuarrySite(Enterprise enterprise, Location spawnPoint, QuarryData data) {
         super(enterprise, JobSiteType.QUARRY, spawnPoint,
                 new File(StoinkCore.getInstance().getDataFolder(), "/schematics/quarry.schem"),
-                data.isBuilt());
+                data, data.isBuilt());
 
         this.data = data;
         mineRegionID = enterprise.getID() + "_" + JobSiteType.QUARRY.name() + "_mine";
@@ -38,9 +34,6 @@ public class QuarrySite extends JobSite {
         this.mineGenerator = new MineGenerator(corner1, corner2, this, (int) data.getRegenIntervalSeconds(), mineRegionID);
         mineGenerator.setTickCounter(data.getTickCounter());
     }
-
-    @Override
-    public void initializeJobs() {}
 
     @Override
     public void initializeBuild() {
@@ -79,7 +72,6 @@ public class QuarrySite extends JobSite {
 
     @Override
     public void tick() {
-        super.tick();
         mineGenerator.tick();
         try {
             Hologram welcomeHologram = DHAPI.getHologram(welcomeHologramName);
@@ -106,10 +98,10 @@ public class QuarrySite extends JobSite {
         return mineGenerator;
     }
 
-    // For serialization
+    @Override
     public QuarryData getData() {
         data.setBuilt(isBuilt);
         data.setTickCounter(mineGenerator.getTickCounter());
-        return data;
+        return (QuarryData)data;
     }
 }

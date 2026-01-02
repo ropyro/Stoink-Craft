@@ -1,14 +1,13 @@
-package com.stoinkcraft.jobs.jobsites.data;
+package com.stoinkcraft.jobs.jobsites.sites.quarry;
 
 import com.google.gson.annotations.Expose;
+import com.stoinkcraft.jobs.jobsites.JobSiteData;
 import org.bukkit.util.Vector;
 
 /**
  * Serializable data for QuarrySite
  */
-public class QuarryData {
-    @Expose
-    private boolean isBuilt;
+public class QuarryData extends JobSiteData {
 
     @Expose
     private Vector entryHologramOffset;
@@ -28,7 +27,7 @@ public class QuarryData {
     public QuarryData(boolean isBuilt, Vector entryHologramOffset,
                       Vector mineCorner1Offset, Vector mineCorner2Offset,
                       long regenIntervalSeconds, long tickCounter) {
-        this.isBuilt = isBuilt;
+        super(isBuilt);
         this.entryHologramOffset = entryHologramOffset;
         this.mineCorner1Offset = mineCorner1Offset;
         this.mineCorner2Offset = mineCorner2Offset;
@@ -37,14 +36,6 @@ public class QuarryData {
     }
 
     // Getters and setters
-    public boolean isBuilt() {
-        return isBuilt;
-    }
-
-    public void setBuilt(boolean built) {
-        isBuilt = built;
-    }
-
     public Vector getEntryHologramOffset() {
         return entryHologramOffset;
     }

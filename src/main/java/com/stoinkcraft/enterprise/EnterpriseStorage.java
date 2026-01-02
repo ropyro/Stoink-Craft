@@ -141,7 +141,7 @@ public class EnterpriseStorage {
         }
 
         // After all are loaded, sync plot indexes
-        StoinkCore.getEnterprisePlotManager().resetNextIndex(manager.getEnterpriseList());
+        StoinkCore.getInstance().getEnterprisePlotManager().resetNextIndex(manager.getEnterpriseList());
     }
 
 
