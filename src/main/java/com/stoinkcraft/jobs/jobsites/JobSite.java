@@ -146,4 +146,8 @@ public abstract class JobSite {
         return true;
     }
 
+    public int getLevel(){
+        return JobsiteLevelHelper.getLevelFromXp((int)getData().getXp());
+    }
+
 }

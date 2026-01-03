@@ -1,10 +1,6 @@
 package com.stoinkcraft.enterprise.commands.serverenterprisecmd;
 
 import com.stoinkcraft.StoinkCore;
-import com.stoinkcraft.enterprise.EnterpriseStorage;
-import com.stoinkcraft.jobs.contracts.Contract;
-import com.stoinkcraft.jobs.contracts.ContractType;
-import com.stoinkcraft.jobs.jobsites.JobSiteType;
 import com.stoinkcraft.jobs.jobsites.sites.farmland.FarmlandGui;
 import com.stoinkcraft.market.boosters.BoosterItemHelper;
 import com.stoinkcraft.enterprise.Enterprise;
@@ -15,21 +11,15 @@ import com.stoinkcraft.serialization.EnterpriseStorageJson;
 import com.stoinkcraft.shares.ShareStorage;
 import com.stoinkcraft.utils.ChatUtils;
 import com.stoinkcraft.utils.SCConstants;
-import com.stoinkcraft.utils.SchematicUtils;
-import net.milkbowl.vault.chat.Chat;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.File;
-import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 
 public class ServerEntCMD implements CommandExecutor {
 
@@ -129,16 +119,13 @@ public class ServerEntCMD implements CommandExecutor {
                    }
                }
            }
-           if(args[0].equalsIgnoreCase("addcontracts")){
-               StoinkCore.getInstance().getEnterpriseManager().getEnterpriseList().forEach(e -> StoinkCore.getInstance().getContractManager().addContract(e, new Contract(ContractType.COW_KILLS, JobSiteType.FARMLAND, 10000, 5, e.getID(), System.currentTimeMillis() + TimeUnit.DAYS.toMillis(1))));
-           }
            if(args[0].equalsIgnoreCase("listcontracts")){
                if(args.length >= 2){
                    String enterpriseName = args[1];
                    Enterprise enterprise = StoinkCore.getInstance().getEnterpriseManager().getEnterpriseByName(enterpriseName);
                    if(enterprise != null){
                        ChatUtils.sendMessage(player, "Contracts for: " + enterprise.getName());
-                       StoinkCore.getInstance().getContractManager().getContracts(enterprise).forEach(c -> player.sendMessage(c.getContractType() + " " + c.getContractId() + " " + c.getCurrentProgress()));
+                       StoinkCore.getInstance().getContractManager().getContracts(enterprise).forEach(c -> player.sendMessage(c.getContractId() + " " + c.getTarget() + " " + c.getProgress()));
                    }
                }
            }

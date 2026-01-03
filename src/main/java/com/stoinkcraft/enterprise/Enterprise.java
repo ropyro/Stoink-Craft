@@ -6,6 +6,7 @@ import com.stoinkcraft.jobs.jobsites.JobSiteManager;
 import com.stoinkcraft.market.boosters.Booster;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
 import java.util.*;
@@ -269,6 +270,13 @@ public class Enterprise {
 
     public List<UUID> getActiveEnterpriseChat() {
         return activeEnterpriseChat;
+    }
+
+    public List<Player> getOnlineMembers() {
+        return members.keySet().stream()
+                .map(Bukkit::getPlayer)
+                .filter(Objects::nonNull)
+                .toList();
     }
 
     public void addEnterpriseChatter(UUID member) {

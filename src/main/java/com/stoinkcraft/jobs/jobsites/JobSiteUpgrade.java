@@ -11,7 +11,7 @@ public class JobSiteUpgrade {
     private final String id;
     private final String display;
     private final int maxLevel;
-    private final int requiredJobsiteLevel; // ✅ NEW
+    private final int requiredJobsiteLevel;
     private final IntFunction<Integer> costFormula;
     private final Predicate<JobSite> unlockCondition;
     private final BiConsumer<JobSite, Integer> applyEffect;

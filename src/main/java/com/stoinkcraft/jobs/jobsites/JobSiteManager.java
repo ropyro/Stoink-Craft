@@ -121,6 +121,44 @@ public class JobSiteManager {
         return farmlandSite;
     }
 
+    public JobSite getJobSite(JobSiteType jobSiteType){
+        switch (jobSiteType){
+            case FARMLAND -> {
+                return farmlandSite;
+            }
+            case QUARRY -> {
+                return quarrySite;
+            }
+            case SKYRISE -> {
+                return skyriseSite;
+            }
+        }
+        return null;
+    }
+
+    public JobSiteType resolveJobsite(Location location) {
+
+        // FARMLAND
+        if (getFarmlandSite() != null &&
+                getFarmlandSite().contains(location)) {
+            return JobSiteType.FARMLAND;
+        }
+
+        // QUARRY (future)
+        // if (manager.getQuarrySite() != null &&
+        //         manager.getQuarrySite().contains(location)) {
+        //     return JobSiteType.QUARRY;
+        // }
+
+        // SKYRISE (future)
+        // if (manager.getSkyriseSite() != null &&
+        //         manager.getSkyriseSite().contains(location)) {
+        //     return JobSiteType.SKYRISE;
+        // }
+
+        return null;
+    }
+
     public int getPlotIndex() {
         return plotIndex;
     }

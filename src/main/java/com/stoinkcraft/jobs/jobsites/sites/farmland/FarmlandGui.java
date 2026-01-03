@@ -1,7 +1,12 @@
 package com.stoinkcraft.jobs.jobsites.sites.farmland;
 
 import com.stoinkcraft.StoinkCore;
-import com.stoinkcraft.jobs.contracts.Contract;
+import com.stoinkcraft.enterprise.Enterprise;
+import com.stoinkcraft.jobs.contracts.ActiveContract;
+import com.stoinkcraft.jobs.contracts.ContractDefinition;
+import com.stoinkcraft.jobs.contracts.rewards.CompositeReward;
+import com.stoinkcraft.jobs.contracts.rewards.DescribableReward;
+import com.stoinkcraft.jobs.contracts.rewards.Reward;
 import com.stoinkcraft.jobs.jobsites.JobSiteType;
 import com.stoinkcraft.jobs.jobsites.JobSiteUpgrade;
 import com.stoinkcraft.jobs.jobsites.JobsiteLevelHelper;
@@ -13,8 +18,6 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.NotNull;
 import xyz.xenondevs.invui.gui.Gui;
 import xyz.xenondevs.invui.item.ItemProvider;
 import xyz.xenondevs.invui.item.builder.ItemBuilder;
@@ -100,51 +103,106 @@ public class FarmlandGui {
 
         open(builder.build(), "§8Farmland Menu");
     }
-    private void openContractList(){
+    private void openContractList() {
+
+        StoinkCore core = StoinkCore.getInstance();
+        Enterprise enterprise = core.getEnterpriseManager()
+                .getEnterpriseByMember(opener.getUniqueId());
+
+        if (enterprise == null) return;
+
         Gui gui = Gui.normal()
                 .setStructure(
                         "# # # # ? # # # #",
                         "# . . . . . . . #",
                         "# . . . . . . . #",
                         "# # # # # # # # #")
-                .addIngredient('#', new SimpleItem(new ItemBuilder(Material.BLACK_STAINED_GLASS_PANE)
-                        .setDisplayName(" ")))
-                .addIngredient('?', new SimpleItem(new ItemBuilder(Material.OAK_SIGN)
-                        .setDisplayName(" Contract Help ")))
+                .addIngredient('#', new SimpleItem(
+                        new ItemBuilder(Material.BLACK_STAINED_GLASS_PANE)
+                                .setDisplayName(" ")
+                ))
+                .addIngredient('?', new SimpleItem(
+                        new ItemBuilder(Material.OAK_SIGN)
+                                .setDisplayName("§eContract Help")
+                ))
                 .build();
 
-        StoinkCore core = StoinkCore.getInstance();
-        List<Contract> farmlandContracts = core.getContractManager().getContracts(core.getEnterpriseManager().getEnterpriseByMember(opener.getUniqueId()), JobSiteType.FARMLAND).stream().toList();
+        List<ActiveContract> contracts =
+                core.getContractManager()
+                        .getContracts(enterprise, JobSiteType.FARMLAND);
 
-        farmlandContracts.forEach(c -> gui.addItems(getContractItem(c)));
+        contracts.forEach(contract ->
+                gui.addItems(createContractItem(contract)));
 
-        Window window = Window.single()
+        Window.single()
                 .setViewer(opener)
-                .setTitle("§8Farmland Menu")
+                .setTitle("§8Farmland Contracts")
                 .setGui(gui)
-                .build();
-        window.open();
+                .build()
+                .open();
     }
 
-    private SimpleItem getContractItem(Contract contract){
-        ItemBuilder itemBuilder;
-        switch(contract.getContractType()){
-            case COW_KILLS -> {
-                itemBuilder = new ItemBuilder(Material.COW_SPAWN_EGG);
-                if(contract.isCompleted()){
-                    itemBuilder.setDisplayName("Completed! *check mark*");
-                }else{
-                    itemBuilder.setDisplayName("In progress...");
-                }
-                itemBuilder.addLoreLines(" ");
-                itemBuilder.addLoreLines("Progress: " + contract.getCurrentProgress() + "/" + contract.getTargetAmount());
-                itemBuilder.addLoreLines("Expiration: " + contract.getExpirationTime());
-                itemBuilder.addLoreLines(" ");
-                itemBuilder.addLoreLines("Reward: " + contract.getReward());
-            }
-            default -> itemBuilder = new ItemBuilder(Material.AIR);
+    private SimpleItem createContractItem(ActiveContract contract) {
+
+        ContractDefinition def = contract.getDefinition();
+
+        ItemBuilder builder = new ItemBuilder(def.displayItem());
+
+        // ===== Title =====
+        if (contract.isCompleted()) {
+            builder.setDisplayName("§a✔ " + def.displayName());
+        } else {
+            builder.setDisplayName("§e" + def.displayName());
         }
-        return new SimpleItem(itemBuilder);
+
+        // ===== Description =====
+        builder.addLoreLines(" ");
+        def.description().forEach(line ->
+                builder.addLoreLines("§7" + line));
+
+        // ===== Progress =====
+        builder.addLoreLines(" ");
+        builder.addLoreLines("§eProgress: §f" +
+                contract.getProgress() + "/" + contract.getTarget());
+
+        // ===== Expiration =====
+        builder.addLoreLines("§eExpires: §f" +
+                formatTimeRemaining(contract.getExpirationTime()));
+
+        // ===== Rewards =====
+        builder.addLoreLines(" ");
+        builder.addLoreLines("§6Rewards:");
+        addRewardLore(builder, def.reward());
+
+        return new SimpleItem(builder);
+    }
+
+    private void addRewardLore(ItemBuilder builder, Reward reward) {
+
+        if (reward instanceof CompositeReward composite) {
+            composite.getRewards().forEach(r ->
+                    addRewardLore(builder, r));
+            return;
+        }
+
+        if (reward instanceof DescribableReward describable) {
+            describable.getLore().forEach(line ->
+                    builder.addLoreLines("§7- " + line));
+        }
+    }
+
+    private String formatTimeRemaining(long expiry) {
+
+        long millis = expiry - System.currentTimeMillis();
+        if (millis <= 0) return "Expired";
+
+        long minutes = millis / 60000;
+        long hours = minutes / 60;
+        long days = hours / 24;
+
+        if (days > 0) return days + "d " + (hours % 24) + "h";
+        if (hours > 0) return hours + "h " + (minutes % 60) + "m";
+        return minutes + "m";
     }
 
     private void openCropMenu() {

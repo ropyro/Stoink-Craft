@@ -27,6 +27,10 @@ public class JobSiteData {
         upgrades.put(upgradeId, level);
     }
 
+    public Map<String, Integer> getUpgrades(){
+        return upgrades;
+    }
+
     public boolean isBuilt() {
         return isBuilt;
     }

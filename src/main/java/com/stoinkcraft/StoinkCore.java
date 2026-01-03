@@ -2,6 +2,8 @@ package com.stoinkcraft;
 
 import com.stoinkcraft.enterprise.*;
 import com.stoinkcraft.enterprise.listeners.*;
+import com.stoinkcraft.jobs.contracts.ContractFeedbackManager;
+import com.stoinkcraft.jobs.contracts.ContractLoader;
 import com.stoinkcraft.jobs.contracts.ContractManager;
 import com.stoinkcraft.jobs.jobsites.sites.farmland.FarmerJoeListener;
 import com.stoinkcraft.jobs.listeners.BlockBreakListener;
@@ -27,6 +29,7 @@ import com.stoinkcraft.misc.PhantomSpawnDisabler;
 import com.stoinkcraft.misc.StoinkExpansion;
 import com.stoinkcraft.enterpriseworld.EnterprisePlotManager;
 import com.stoinkcraft.enterpriseworld.EnterpriseWorldManager;
+import com.stoinkcraft.utils.ContractTimeUtil;
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.trait.SkinTrait;
@@ -87,6 +90,11 @@ public class StoinkCore extends JavaPlugin {
         return cm;
     }
 
+    private ContractFeedbackManager cfm;
+    public ContractFeedbackManager getContractFeedbackManager(){
+        return cfm;
+    }
+
 
     @Override
     public void onDisable() {
@@ -141,7 +149,8 @@ public class StoinkCore extends JavaPlugin {
         sm = new ShareManager();
         ewm = new EnterpriseWorldManager();
         epm = new EnterprisePlotManager(ewm);
-        cm = new ContractManager();
+        cm = new ContractManager(ContractLoader.load());
+        cfm = new ContractFeedbackManager();
     }
 
     private void initFilesAndResources(){
@@ -222,10 +231,31 @@ public class StoinkCore extends JavaPlugin {
         em.startJobSiteTicker(this);
         startPriceSnapshotRecording();
         startAutoTopCEOUpdate();
+        startContractResetTask();
+        cfm.startCleanupTask(this);
     }
 
     public static StoinkCore getInstance() {
         return INSTANCE;
+    }
+
+    public void startContractResetTask() {
+
+        long now = System.currentTimeMillis();
+
+        long dailyDelay = ContractTimeUtil.nextDay() - now;
+        long weeklyDelay = ContractTimeUtil.nextWeek() - now;
+
+        // Daily
+        Bukkit.getScheduler().runTaskLater(this, () -> {
+            getContractManager().handleDailyReset();
+            startContractResetTask(); // reschedule next day
+        }, dailyDelay / 50);
+
+        // Weekly
+        Bukkit.getScheduler().runTaskLater(this, () -> {
+            getContractManager().handleWeeklyReset();
+        }, weeklyDelay / 50);
     }
 
     private void startPriceSnapshotRecording(){

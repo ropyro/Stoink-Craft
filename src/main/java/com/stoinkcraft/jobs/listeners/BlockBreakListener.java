@@ -2,41 +2,103 @@ package com.stoinkcraft.jobs.listeners;
 
 import com.stoinkcraft.StoinkCore;
 import com.stoinkcraft.enterprise.Enterprise;
+import com.stoinkcraft.jobs.contracts.ContractContext;
+import com.stoinkcraft.jobs.jobsites.JobSiteManager;
+import com.stoinkcraft.jobs.jobsites.JobSiteType;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.Ageable;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.inventory.ItemStack;
+
+import java.util.Collection;
 
 public class BlockBreakListener implements Listener {
 
-    @EventHandler
-    public void onBlockBreak(BlockBreakEvent event){
+    @EventHandler(ignoreCancelled = true)
+    public void onBlockBreak(BlockBreakEvent event) {
+        StoinkCore core = StoinkCore.getInstance();
+
+        Player player = event.getPlayer();
         Block block = event.getBlock();
         Material material = block.getType();
 
-        // Check if the block is a crop
-        if (material == Material.WHEAT || material == Material.CARROTS ||
-                material == Material.POTATOES || material == Material.BEETROOTS) {
+        // =========================
+        // ENTERPRISE CHECK
+        // =========================
+        Enterprise enterprise = core.getEnterpriseManager()
+                .getEnterpriseByMember(player.getUniqueId());
+        if (enterprise == null) return;
 
-            // Get the age/growth stage of the crop
-            Ageable ageable = (Ageable) block.getBlockData();
+        // =========================
+        // JOBSITE RESOLUTION
+        // =========================
+        JobSiteType jobSiteType = enterprise.getJobSiteManager()
+                .resolveJobsite(block.getLocation());
+        if (jobSiteType == null) return;
 
-            // Check if the crop is NOT fully grown
-            if (ageable.getAge() < ageable.getMaximumAge()) {
-                event.setCancelled(true);
-            } else {
-                Player player = event.getPlayer();
-                Enterprise enterprise = StoinkCore.getInstance().getEnterpriseManager().getEnterpriseByMember(player.getUniqueId());
-                if(player.getWorld().equals(StoinkCore.getInstance().getEnterpriseWorldManager().getWorld()) && enterprise != null){
-                    Bukkit.getScheduler().runTaskLaterAsynchronously(StoinkCore.getInstance(), () -> {
-                        enterprise.getJobSiteManager().getFarmlandSite().getCropGenerator().replaceMissingCrops();
-                    }, 1L);
+        // =========================
+        // CROP MATURITY CHECK
+        // =========================
+        boolean isCrop =
+                material == Material.WHEAT ||
+                        material == Material.CARROTS ||
+                        material == Material.POTATOES ||
+                        material == Material.BEETROOTS;
+
+        if (isCrop) {
+            BlockData data = block.getBlockData();
+            if (data instanceof Ageable ageable) {
+                if (ageable.getAge() < ageable.getMaximumAge()) {
+                    event.setCancelled(true);
+                    return;
                 }
             }
+        }
+
+        // =========================
+        // DROP-BASED PROGRESS
+        // =========================
+        ItemStack tool = player.getInventory().getItemInMainHand();
+        Collection<ItemStack> drops = block.getDrops(tool);
+
+        int amount = drops.stream()
+                .mapToInt(ItemStack::getAmount)
+                .sum();
+
+        if (amount > 0) {
+            ContractContext context = new ContractContext(
+                    player,
+                    jobSiteType,
+                    material,
+                    amount
+            );
+
+            core.getContractManager().handleContext(enterprise, context);
+            event.setDropItems(false);
+        }
+
+        // =========================
+        // FARMLAND CROP REGEN
+        // =========================
+        if (isCrop &&
+                player.getWorld().equals(core.getEnterpriseWorldManager().getWorld())) {
+
+            // Run next tick to allow break to complete
+            Bukkit.getScheduler().runTaskLater(
+                    core,
+                    () -> enterprise.getJobSiteManager()
+                            .getFarmlandSite()
+                            .getCropGenerator()
+                            .replaceMissingCrops(),
+                    1L
+            );
         }
     }
 }
