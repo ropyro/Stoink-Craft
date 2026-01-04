@@ -7,6 +7,7 @@ import com.stoinkcraft.jobs.jobsites.JobSiteType;
 import com.stoinkcraft.jobs.jobsites.JobSiteUpgrade;
 import com.stoinkcraft.jobs.jobsites.resourcegenerators.generators.CropGenerator;
 import com.stoinkcraft.jobs.jobsites.resourcegenerators.generators.PassiveMobGenerator;
+import com.stoinkcraft.jobs.jobsites.sites.farmland.structures.BarnStructure;
 import com.stoinkcraft.utils.RegionUtils;
 import eu.decentsoftware.holograms.api.DHAPI;
 import net.citizensnpcs.api.CitizensAPI;
@@ -36,7 +37,6 @@ public class FarmlandSite extends JobSite {
      */
     private NPC farmerJoeNPC;
     public static Vector farmerJoeOffset = new Vector(-27, 0, -14); // Adjust as needed
-
 
     /**
      * Crop generator
@@ -85,6 +85,7 @@ public class FarmlandSite extends JobSite {
         }
 
         registerUpgrades();
+        registerStructures();
     }
 
     private void registerUpgrades() {
@@ -202,10 +203,15 @@ public class FarmlandSite extends JobSite {
         ));
     }
 
+    private void registerStructures() {
+        structures.add(new BarnStructure());
+    }
+
     @Override
     public void tick() {
         cropGenerator.tick();
         mobGenerator.tick();
+        tickStructures();
     }
 
     @Override

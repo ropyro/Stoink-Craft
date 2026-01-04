@@ -16,6 +16,7 @@ import eu.decentsoftware.holograms.api.DHAPI;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
+import javax.annotation.Nullable;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -35,6 +36,7 @@ public abstract class JobSite {
     protected ProtectedRegion protectedRegion;
 
     protected final List<JobSiteUpgrade> upgrades = new ArrayList<>();
+    protected final List<JobSiteStructure> structures = new ArrayList<>();
 
     public JobSite(Enterprise enterprise, JobSiteType type, Location spawnPoint, File schematic, JobSiteData data, boolean isBuilt) {
         this.enterprise = enterprise;
@@ -54,6 +56,15 @@ public abstract class JobSite {
     }
     public List<JobSiteUpgrade> getUpgrades() {
         return upgrades;
+    }
+    public List<JobSiteStructure> getStructures() {
+        return structures;
+    }
+    public @Nullable JobSiteStructure getStructure(String structureId) {
+        return structures.stream()
+                .filter(s -> s.getId().equalsIgnoreCase(structureId))
+                .findFirst()
+                .orElse(null);
     }
     public void disband(){
         RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
@@ -118,6 +129,21 @@ public abstract class JobSite {
 
     public abstract void tick();
 
+    public void tickStructures() {
+        for (JobSiteStructure structure : structures) {
+            StructureData data = getData().getStructure(structure.getId());
+
+            if (data.getState() == JobSiteStructure.StructureState.BUILDING) {
+
+                structure.onBuildTick(this, data.getRemainingMillis());
+
+                if (data.isFinished()) {
+                    data.markBuilt();
+                    structure.onBuildComplete(this);
+                }
+            }
+        }
+    }
     public boolean contains(Location loc) {
         return region.contains(RegionUtils.toBlockVector3(loc));
     }
@@ -142,6 +168,24 @@ public abstract class JobSite {
         StoinkCore.getEconomy().withdrawPlayer(player, cost);
         d.setLevel(upgrade.id(), current + 1);
         upgrade.apply(this, current + 1);
+
+        return true;
+    }
+
+    public boolean purchaseStructure(JobSiteStructure structure, Player player) {
+
+        StructureData data = getData().getStructure(structure.getId());
+
+        if (data.getState() != JobSiteStructure.StructureState.LOCKED) return false;
+        if (!structure.canUnlock(this)) return false;
+
+        int cost = structure.getCost();
+        if (!StoinkCore.getEconomy().has(player, cost)) return false;
+
+        StoinkCore.getEconomy().withdrawPlayer(player, cost);
+
+        data.startBuilding(structure.getBuildTimeMillis());
+        structure.onBuildStart(this);
 
         return true;
     }

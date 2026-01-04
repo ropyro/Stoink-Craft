@@ -18,7 +18,6 @@ import java.util.*;
 public class ContractFeedbackManager {
 
     private static final long INACTIVITY_TIMEOUT_MS = 10_000; // 10 seconds
-
     private final Map<UUID, BossBar> activeBars = new HashMap<>();
     private final Map<UUID, Long> lastUpdate = new HashMap<>();
 

@@ -12,13 +12,20 @@ public class JobSiteData {
     @Expose
     private final Map<String, Integer> upgrades;
     @Expose
+    private final Map<String, StructureData> structures;
+    @Expose
     private long xp;
 
     public JobSiteData(boolean isBuilt){
         this.isBuilt = isBuilt;
         this.upgrades = new HashMap<>();
+        this.structures = new HashMap<>();
+        this.xp = 0;
     }
 
+    public StructureData getStructure(String id) {
+        return structures.computeIfAbsent(id, k -> new StructureData());
+    }
     public int getLevel(String upgradeId) {
         return upgrades.getOrDefault(upgradeId, 0);
     }

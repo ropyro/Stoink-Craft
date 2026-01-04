@@ -10,13 +10,29 @@ public abstract class ResourceGenerator {
     private JobSite parent;
     private long tickCounter = 0;
 
+    private boolean enabled;
+
     public ResourceGenerator(JobSite parent){
         this.parent = parent;
+        enabled = true;
+    }
+    public ResourceGenerator(JobSite parent, boolean enabled){
+        this.parent = parent;
+        this.enabled = enabled;
     }
 
     public void tick() {
+        if(!enabled) return;
         tickCounter++;
         onTick();
+    }
+
+    public boolean isEnabled(){
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled){
+        this.enabled = enabled;
     }
 
     public JobSite getParent(){

@@ -7,9 +7,7 @@ import com.stoinkcraft.jobs.contracts.ContractDefinition;
 import com.stoinkcraft.jobs.contracts.rewards.CompositeReward;
 import com.stoinkcraft.jobs.contracts.rewards.DescribableReward;
 import com.stoinkcraft.jobs.contracts.rewards.Reward;
-import com.stoinkcraft.jobs.jobsites.JobSiteType;
-import com.stoinkcraft.jobs.jobsites.JobSiteUpgrade;
-import com.stoinkcraft.jobs.jobsites.JobsiteLevelHelper;
+import com.stoinkcraft.jobs.jobsites.*;
 import com.stoinkcraft.jobs.jobsites.resourcegenerators.generators.CropGenerator;
 import com.stoinkcraft.jobs.jobsites.resourcegenerators.generators.PassiveMobGenerator;
 import com.stoinkcraft.utils.ChatUtils;
@@ -52,9 +50,12 @@ public class FarmlandGui {
     public void openWindow() {
         Gui.Builder builder = createBaseGui(
                 "# # # # ? # # # #",
-                "# F A B # # C # #",
+                "# # # F A B # # #",
+                "# # # # # # # # #",
+                "# . . 1 . . # C #",
                 "# # # # # # # # #"
-        );
+
+                );
 
         int xp = (int)farmlandSite.getData().getXp();
         int level = JobsiteLevelHelper.getLevelFromXp(xp);
@@ -100,6 +101,92 @@ public class FarmlandGui {
         builder.addIngredient('A', button(Material.BEEF, "Animal Manager", this::openAnimalMenu));
         builder.addIngredient('B', simple(Material.HONEYCOMB, "Coming soon.."));
         builder.addIngredient('C', button(Material.GOLD_INGOT, "Contract List", this::openContractList));
+        builder.addIngredient('1', new AbstractItem() {
+
+            @Override
+            public ItemProvider getItemProvider() {
+                ItemBuilder item = new ItemBuilder(Material.COBWEB);
+
+                JobSiteStructure barn = farmlandSite.getStructure("barn");
+                StructureData data = farmlandSite.getData().getStructure("barn");
+
+                int jobsiteLevel = JobsiteLevelHelper.getLevelFromXp(
+                        (int) farmlandSite.getData().getXp()
+                );
+
+                item.setDisplayName("§6Animal Barn");
+                item.addLoreLines("§7Expands your farmland");
+                item.addLoreLines("§7Allows more animals to be housed");
+                item.addLoreLines(" ");
+
+                switch (data.getState()) {
+
+                    case LOCKED -> {
+                        item.addLoreLines("§7Cost: §6$" + barn.getCost());
+                        item.addLoreLines("§7Required Level: §e" + barn.getRequiredJobsiteLevel());
+
+                        if (jobsiteLevel < barn.getRequiredJobsiteLevel()) {
+                            item.addLoreLines("§c✖ You are level " + jobsiteLevel);
+                        } else if (!barn.canUnlock(farmlandSite)) {
+                            item.addLoreLines("§c✖ Requirements not met");
+                        } else {
+                            item.addLoreLines("§a✔ Ready to build");
+                        }
+
+                        item.addLoreLines(" ");
+                        item.addLoreLines("§eClick to start construction");
+                    }
+
+                    case BUILDING -> {
+                        long remaining = data.getRemainingMillis();
+                        item.setMaterial(Material.SCAFFOLDING);
+                        item.addLoreLines("§eUnder Construction");
+                        item.addLoreLines(" ");
+                        item.addLoreLines("§7Time Remaining:");
+                        item.addLoreLines("§6" + ChatUtils.formatDuration(remaining));
+                    }
+
+                    case BUILT -> {
+                        item.setMaterial(Material.OAK_LOG); // or OAK_PLANKS / HAY_BLOCK
+                        item.addLoreLines("§a✔ Built");
+                        item.addLoreLines(" ");
+                        item.addLoreLines("§7This structure is complete");
+                    }
+                }
+
+                return item;
+            }
+
+            @Override
+            public void handleClick(ClickType click, Player p, InventoryClickEvent e) {
+
+                JobSiteStructure barn = farmlandSite.getStructure("barn");
+                StructureData data = farmlandSite.getData().getStructure("barn");
+
+                switch (data.getState()) {
+
+                    case LOCKED -> {
+                        boolean success = farmlandSite.purchaseStructure(barn, p);
+
+                        if (success) {
+                            p.sendMessage("§aBarn construction started!");
+                        } else {
+                            p.sendMessage("§cYou cannot build the barn yet.");
+                        }
+                    }
+
+                    case BUILDING -> {
+                        long remaining = data.getRemainingMillis();
+                        p.sendMessage("§eBarn is under construction.");
+                        p.sendMessage("§7Time remaining: §6" + ChatUtils.formatDuration(remaining));
+                    }
+
+                    case BUILT -> {
+                        p.sendMessage("§aThe barn is already built!");
+                    }
+                }
+            }
+        });
 
         open(builder.build(), "§8Farmland Menu");
     }

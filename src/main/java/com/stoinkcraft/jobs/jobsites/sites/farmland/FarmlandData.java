@@ -8,7 +8,7 @@ import com.stoinkcraft.jobs.jobsites.resourcegenerators.generators.PassiveMobGen
 public class FarmlandData extends JobSiteData {
 
     @Expose
-    private int farmerJoeNpcId;
+    private int farmerJoeNpcId = -1;
     @Expose
     private CropGenerator.CropGeneratorType currentType = CropGenerator.CropGeneratorType.WHEAT;
     @Expose
