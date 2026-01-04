@@ -5,9 +5,10 @@ import com.stoinkcraft.enterprise.Enterprise;
 import com.stoinkcraft.jobs.jobsites.JobSite;
 import com.stoinkcraft.jobs.jobsites.JobSiteType;
 import com.stoinkcraft.jobs.jobsites.JobSiteUpgrade;
-import com.stoinkcraft.jobs.jobsites.resourcegenerators.generators.CropGenerator;
-import com.stoinkcraft.jobs.jobsites.resourcegenerators.generators.PassiveMobGenerator;
-import com.stoinkcraft.jobs.jobsites.sites.farmland.structures.BarnStructure;
+import com.stoinkcraft.jobs.jobsites.components.JobSiteHologram;
+import com.stoinkcraft.jobs.jobsites.components.generators.CropGenerator;
+import com.stoinkcraft.jobs.jobsites.components.generators.PassiveMobGenerator;
+import com.stoinkcraft.jobs.jobsites.components.structures.BarnStructure;
 import com.stoinkcraft.utils.RegionUtils;
 import eu.decentsoftware.holograms.api.DHAPI;
 import net.citizensnpcs.api.CitizensAPI;
@@ -29,7 +30,7 @@ public class FarmlandSite extends JobSite {
     /**
      * Holograms
      */
-    private String welcomeHologramName;
+    private String welcomeHologramId;
     public static Vector welcomeHologramOffset = new Vector(-3.5, 3, 0.5);
 
     /**
@@ -54,15 +55,21 @@ public class FarmlandSite extends JobSite {
     public static Vector mobGenCorner1Offset = new Vector(-47, -1, 7);
     public static Vector mobGenCorner2Offset = new Vector(-51, 5, 3);
 
+    /**
+     * Barn
+     */
+
+    private BarnStructure barnStructure;
+
 
     public FarmlandSite(Enterprise enterprise, Location spawnPoint, FarmlandData data) {
         super(enterprise, JobSiteType.FARMLAND, spawnPoint,
                 new File(StoinkCore.getInstance().getDataFolder(), "/schematics/farmland.schem"),
                 data, data.isBuilt());
 
-        welcomeHologramName = enterprise.getID() + "_" + JobSiteType.FARMLAND.name() + "_welcome";
-        cropRegionID = enterprise.getID() + "_" + JobSiteType.FARMLAND.name() + "_crops";
+        welcomeHologramId = enterprise.getID() + "_" + JobSiteType.FARMLAND.name() + "_welcome";
 
+        cropRegionID = enterprise.getID() + "_" + JobSiteType.FARMLAND.name() + "_crops";
         cropGenerator = new CropGenerator(spawnPoint.clone().add(cropGenCorner1Offset),
                 spawnPoint.clone().add(cropGenCorner2Offset), this, cropRegionID);
 
@@ -84,8 +91,24 @@ public class FarmlandSite extends JobSite {
             }
         }
 
+        barnStructure = new BarnStructure(this);
+
         registerUpgrades();
-        registerStructures();
+        registerComponents();
+    }
+
+    private void registerComponents(){
+        List<String> welcomeHologramLines = new ArrayList<>();
+        welcomeHologramLines.add(ChatColor.AQUA + "" + ChatColor.BOLD + "Welcome to the Farmland");
+        welcomeHologramLines.add(ChatColor.WHITE + "Here you will harvest crops and butcher meat");
+        welcomeHologramLines.add(ChatColor.WHITE + "to complete resource collection contracts!");
+        welcomeHologramLines.add(ChatColor.WHITE + "Chat with Farmer Joe to upgrade your farmland's");
+        welcomeHologramLines.add(ChatColor.WHITE + "crop grow speed and unlock new crops and animals!");
+        addComponent(new JobSiteHologram(this, welcomeHologramId, welcomeHologramOffset, welcomeHologramLines));
+
+        addComponent(cropGenerator);
+        addComponent(mobGenerator);
+        addComponent(barnStructure);
     }
 
     private void registerUpgrades() {
@@ -203,38 +226,18 @@ public class FarmlandSite extends JobSite {
         ));
     }
 
-    private void registerStructures() {
-        structures.add(new BarnStructure());
-    }
-
     @Override
     public void tick() {
-        cropGenerator.tick();
-        mobGenerator.tick();
-        tickStructures();
+        super.tick();
     }
 
     @Override
-    public void initializeBuild() {
-        List<String> entryHoloGramLines = new ArrayList<>();
-        entryHoloGramLines.add(ChatColor.AQUA + "" + ChatColor.BOLD + "Welcome to the Farmland");
-        entryHoloGramLines.add(ChatColor.WHITE + "Here you will harvest crops and butcher meat");
-        entryHoloGramLines.add(ChatColor.WHITE + "to complete resource collection contracts!");
-        entryHoloGramLines.add(ChatColor.WHITE + "Chat with Farmer Joe to upgrade your farmland's");
-        entryHoloGramLines.add(ChatColor.WHITE + "crop grow speed and unlock new crops and animals!");
-        Location holoLoc = spawnPoint.clone().add(welcomeHologramOffset);
-        initializeHologram(welcomeHologramName, entryHoloGramLines, holoLoc);
-
-        cropGenerator.init();
-        cropGenerator.regenerateCrops();
+    public void build() {
+        super.build();
 
         if (farmerJoeNPC == null) {
             createFarmerJoeNPC();
         }
-
-        mobGenerator.init();
-
-        getData().setBuilt(true);
     }
 
     @Override
@@ -242,12 +245,8 @@ public class FarmlandSite extends JobSite {
         super.disband();
         RegionUtils.removeProtectedRegion(spawnPoint.getWorld(), cropGenerator.getRegionName());
 
-        mobGenerator.clearAllMobs();
+       // mobGenerator.clearAllMobs();
 
-        try {
-            if (DHAPI.getHologram(welcomeHologramName) != null)
-                DHAPI.getHologram(welcomeHologramName).delete();
-        } catch (IllegalArgumentException e) {}
         removeFarmerJoeNPC();
     }
 
@@ -304,5 +303,9 @@ public class FarmlandSite extends JobSite {
 
     public CropGenerator getCropGenerator() {
         return cropGenerator;
+    }
+
+    public BarnStructure getBarnStructure() {
+        return barnStructure;
     }
 }

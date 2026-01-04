@@ -1,6 +1,8 @@
 package com.stoinkcraft.enterprise.commands.serverenterprisecmd;
 
 import com.stoinkcraft.StoinkCore;
+import com.stoinkcraft.jobs.jobsites.JobsiteLevelHelper;
+import com.stoinkcraft.jobs.jobsites.sites.farmland.FarmlandData;
 import com.stoinkcraft.jobs.jobsites.sites.farmland.FarmlandGui;
 import com.stoinkcraft.jobs.boosters.BoosterItemHelper;
 import com.stoinkcraft.enterprise.Enterprise;
@@ -116,6 +118,16 @@ public class ServerEntCMD implements CommandExecutor {
                        enterprise.getJobSiteManager().getQuarrySite().rebuild();
                        enterprise.getJobSiteManager().getFarmlandSite().rebuild();
                        ChatUtils.sendMessage(player, "Rebuilt jobsites for " + enterprise.getName());
+                   }
+               }
+           }
+           if(args[0].equalsIgnoreCase("levelup")) {
+               if (args.length >= 2) {
+                   String enterpriseName = args[1];
+                   Enterprise enterprise = StoinkCore.getInstance().getEnterpriseManager().getEnterpriseByName(enterpriseName);
+                   if (enterprise != null) {
+                       FarmlandData data = enterprise.getJobSiteManager().getFarmlandData();
+                       data.incrementXp(JobsiteLevelHelper.getXpToNextLevel(data.getXp()));
                    }
                }
            }

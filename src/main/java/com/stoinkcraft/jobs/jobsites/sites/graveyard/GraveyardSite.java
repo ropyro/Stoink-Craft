@@ -14,7 +14,7 @@ public class GraveyardSite extends JobSite {
     }
 
     @Override
-    public void initializeBuild() {
+    public void build() {
 
     }
 

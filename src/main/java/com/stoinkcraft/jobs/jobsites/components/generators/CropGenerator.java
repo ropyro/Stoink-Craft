@@ -1,4 +1,4 @@
-package com.stoinkcraft.jobs.jobsites.resourcegenerators.generators;
+package com.stoinkcraft.jobs.jobsites.components.generators;
 
 import com.fastasyncworldedit.core.FaweAPI;
 import com.fastasyncworldedit.core.registry.state.PropertyKey;
@@ -14,7 +14,7 @@ import com.sk89q.worldguard.protection.flags.Flags;
 import com.sk89q.worldguard.protection.flags.StateFlag;
 import com.stoinkcraft.StoinkCore;
 import com.stoinkcraft.jobs.jobsites.JobSite;
-import com.stoinkcraft.jobs.jobsites.resourcegenerators.ResourceGenerator;
+import com.stoinkcraft.jobs.jobsites.components.JobSiteGenerator;
 import com.stoinkcraft.jobs.jobsites.sites.farmland.FarmlandData;
 import com.stoinkcraft.jobs.jobsites.sites.farmland.FarmlandSite;
 import com.stoinkcraft.utils.RegionUtils;
@@ -25,7 +25,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-public class CropGenerator extends ResourceGenerator {
+public class CropGenerator extends JobSiteGenerator {
 
     private final Location corner1;
     private final Location corner2;
@@ -58,14 +58,16 @@ public class CropGenerator extends ResourceGenerator {
     }
 
     @Override
-    protected void onTick() {
+    public void tick() {
+        super.tick();
         if (TimeUtils.isDay(getParent().getSpawnPoint().getWorld())) {
             increaseGrowthSpeed();
         }
     }
 
     @Override
-    public void init() {
+    public void build() {
+        super.build();
         Map<StateFlag, StateFlag.State> flags = new HashMap<>();
         flags.put(Flags.BLOCK_BREAK, StateFlag.State.ALLOW);
         flags.put(Flags.INTERACT, StateFlag.State.ALLOW);
@@ -79,6 +81,8 @@ public class CropGenerator extends ResourceGenerator {
                 flags,
                 10
         );
+
+        regenerateCrops();
     }
 
     /**

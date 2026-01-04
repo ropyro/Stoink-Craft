@@ -26,7 +26,7 @@ public class SkyriseSite extends JobSite {
     }
 
     @Override
-    public void initializeBuild() {
+    public void build() {
         initializeEntryHologram();
     }
 

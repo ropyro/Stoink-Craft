@@ -4,7 +4,7 @@ import com.stoinkcraft.StoinkCore;
 import com.stoinkcraft.enterprise.Enterprise;
 import com.stoinkcraft.jobs.jobsites.JobSite;
 import com.stoinkcraft.jobs.jobsites.JobSiteType;
-import com.stoinkcraft.jobs.jobsites.resourcegenerators.generators.MineGenerator;
+import com.stoinkcraft.jobs.jobsites.components.generators.MineGenerator;
 import eu.decentsoftware.holograms.api.DHAPI;
 import eu.decentsoftware.holograms.api.holograms.Hologram;
 import org.bukkit.ChatColor;
@@ -36,7 +36,7 @@ public class QuarrySite extends JobSite {
     }
 
     @Override
-    public void initializeBuild() {
+    public void build() {
         List<String> entryHoloGramLines = new ArrayList<>();
         entryHoloGramLines.add(ChatColor.AQUA + "" + ChatColor.BOLD + "Welcome to the Quarry");
         entryHoloGramLines.add(ChatColor.WHITE + "Here you will mine ores and stones");
@@ -47,8 +47,8 @@ public class QuarrySite extends JobSite {
         Location holoLoc = spawnPoint.clone().add(data.getEntryHologramOffset());
         initializeHologram(welcomeHologramName, entryHoloGramLines, holoLoc);
 
-        mineGenerator.init();
-        mineGenerator.regenerateMine();
+//        mineGenerator.init();
+//        mineGenerator.regenerateMine();
 
         data.setBuilt(true);
     }

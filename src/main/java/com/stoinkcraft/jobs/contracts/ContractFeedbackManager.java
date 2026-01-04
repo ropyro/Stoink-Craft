@@ -128,7 +128,7 @@ public class ContractFeedbackManager {
         int afterLevel = site.getLevel();
         double afterXp = site.getData().getXp();
 
-        sendEnterpriseMessage(enterprise,
+        enterprise.sendEnterpriseMessage(
                 "§6§lContract Complete!",
                 "§e" + def.displayName(),
                 "",
@@ -139,20 +139,20 @@ public class ContractFeedbackManager {
             OfflinePlayer player = Bukkit.getOfflinePlayer(uuid);
             double percent = contract.getContributionPercentages().get(uuid) * 100;
 
-            sendEnterpriseMessage(enterprise,
+            enterprise.sendEnterpriseMessage(
                     " §f- " + player.getName() + ": " +
                             amount + " §7(" + (int) percent + "%)"
             );
         });
 
-        sendEnterpriseMessage(enterprise,
+        enterprise.sendEnterpriseMessage(
                 "",
                 "§6Rewards:"
         );
 
         appendRewardLore(enterprise, def.reward());
 
-        sendEnterpriseMessage(enterprise,
+        enterprise.sendEnterpriseMessage(
                 "",
                 "§aJobsite Progress:",
                 " §fXP: " + format(beforeXp) + " → " + format(afterXp),
@@ -170,17 +170,8 @@ public class ContractFeedbackManager {
 
         if (reward instanceof DescribableReward describable) {
             describable.getLore().forEach(line ->
-                    sendEnterpriseMessage(enterprise, " §f- " + line));
+                    enterprise.sendEnterpriseMessage(" §f- " + line));
         }
-    }
-
-    private void sendEnterpriseMessage(Enterprise enterprise, String... lines) {
-        List<Player> players = enterprise.getOnlineMembers();
-        players.forEach(player -> {
-            for (String line : lines) {
-                player.sendMessage(line);
-            }
-        });
     }
 
     private String format(double value) {

@@ -26,8 +26,8 @@ public class QuarryData extends JobSiteData {
 
     public QuarryData(boolean isBuilt, Vector entryHologramOffset,
                       Vector mineCorner1Offset, Vector mineCorner2Offset,
-                      long regenIntervalSeconds, long tickCounter) {
-        super(isBuilt);
+                      long regenIntervalSeconds, long tickCounter, QuarrySite parent) {
+        super(isBuilt, parent);
         this.entryHologramOffset = entryHologramOffset;
         this.mineCorner1Offset = mineCorner1Offset;
         this.mineCorner2Offset = mineCorner2Offset;

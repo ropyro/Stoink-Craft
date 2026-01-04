@@ -1,11 +1,11 @@
-package com.stoinkcraft.jobs.jobsites.resourcegenerators.generators;
+package com.stoinkcraft.jobs.jobsites.components.generators;
 
 import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldguard.protection.flags.Flags;
 import com.sk89q.worldguard.protection.flags.StateFlag;
 import com.stoinkcraft.StoinkCore;
 import com.stoinkcraft.jobs.jobsites.JobSite;
-import com.stoinkcraft.jobs.jobsites.resourcegenerators.ResourceGenerator;
+import com.stoinkcraft.jobs.jobsites.components.JobSiteGenerator;
 import com.stoinkcraft.jobs.jobsites.sites.farmland.FarmlandSite;
 import com.stoinkcraft.utils.RegionUtils;
 import com.stoinkcraft.utils.TimeUtils;
@@ -15,19 +15,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.bukkit.attribute.Attribute;
-import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.*;
 import org.bukkit.Location;
 import org.bukkit.World;
-import com.sk89q.worldedit.math.BlockVector3;
-import com.sk89q.worldedit.regions.CuboidRegion;
-import com.sk89q.worldguard.protection.flags.Flags;
-import com.sk89q.worldguard.protection.flags.StateFlag;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
-public class PassiveMobGenerator extends ResourceGenerator {
+public class PassiveMobGenerator extends JobSiteGenerator {
 
     private final Location corner1;
     private final Location corner2;
@@ -59,9 +53,10 @@ public class PassiveMobGenerator extends ResourceGenerator {
     }
 
     @Override
-    protected void onTick() {
-        cleanupDeadMobs();
+    public void tick() {
+        super.tick();
 
+        cleanupDeadMobs();
         if (!TimeUtils.isDay(getParent().getSpawnPoint().getWorld())) return;
 
         ticksSinceLastSpawn++;
@@ -73,7 +68,7 @@ public class PassiveMobGenerator extends ResourceGenerator {
     }
 
     @Override
-    public void init() {
+    public void build() {
         Map<StateFlag, StateFlag.State> flags = new HashMap<>();
         flags.put(Flags.BLOCK_BREAK, StateFlag.State.DENY);
         flags.put(Flags.INTERACT, StateFlag.State.ALLOW);
@@ -90,6 +85,11 @@ public class PassiveMobGenerator extends ResourceGenerator {
                 flags,
                 10
         );
+    }
+
+    @Override
+    public void disband(){
+        clearAllMobs();
     }
 
     // --------------------------------------------------

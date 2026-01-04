@@ -1,8 +1,8 @@
-package com.stoinkcraft.jobs.jobsites.resourcegenerators.generators;
+package com.stoinkcraft.jobs.jobsites.components.generators;
 
 import com.stoinkcraft.StoinkCore;
 import com.stoinkcraft.jobs.jobsites.JobSite;
-import com.stoinkcraft.jobs.jobsites.resourcegenerators.ResourceGenerator;
+import com.stoinkcraft.jobs.jobsites.components.JobSiteGenerator;
 import com.stoinkcraft.utils.SchematicUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -11,7 +11,7 @@ import org.bukkit.block.Block;
 
 import java.io.File;
 
-public class TreeResourceGenerator extends ResourceGenerator {
+public class TreeResourceGenerator extends JobSiteGenerator {
 
     private final Location baseLocation;   // where the tree is planted
     private long regenDelayTicks;           // how long to wait before replanting
@@ -24,7 +24,7 @@ public class TreeResourceGenerator extends ResourceGenerator {
     }
 
     @Override
-    protected void onTick() {
+    public void tick() {
         Block base = baseLocation.getBlock();
 
         // If tree stump is gone and regen timer not started
@@ -42,7 +42,7 @@ public class TreeResourceGenerator extends ResourceGenerator {
     }
 
     @Override
-    public void init() {
+    public void build() {
 
     }
 

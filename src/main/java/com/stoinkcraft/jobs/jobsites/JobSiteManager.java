@@ -5,7 +5,6 @@ import com.stoinkcraft.enterprise.Enterprise;
 import com.stoinkcraft.jobs.jobsites.sites.farmland.FarmlandData;
 import com.stoinkcraft.jobs.jobsites.sites.quarry.QuarryData;
 import com.stoinkcraft.jobs.jobsites.sites.skyrise.SkyriseData;
-import com.stoinkcraft.jobs.jobsites.resourcegenerators.generators.CropGenerator;
 import com.stoinkcraft.jobs.jobsites.sites.farmland.FarmlandSite;
 import com.stoinkcraft.jobs.jobsites.sites.quarry.QuarrySite;
 import com.stoinkcraft.jobs.jobsites.sites.skyrise.SkyriseSite;
@@ -75,7 +74,7 @@ public class JobSiteManager {
 
     // Default data factories
     private SkyriseData createDefaultSkyriseData() {
-        return new SkyriseData(false, new Vector(-5.5, 4, 0.5));
+        return new SkyriseData(false, new Vector(-5.5, 4, 0.5), skyriseSite);
     }
 
     private QuarryData createDefaultQuarryData() {
@@ -85,12 +84,13 @@ public class JobSiteManager {
                 new Vector(-4, -1, -4),
                 new Vector(-25, -21, 17),
                 300L,
-                0L
+                0L,
+                quarrySite
         );
     }
 
     private FarmlandData createDefaultFarmlandData(){
-        return new FarmlandData(false);
+        return new FarmlandData(false, farmlandSite);
     }
 
     // Getters for serialization

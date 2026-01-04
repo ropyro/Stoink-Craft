@@ -7,6 +7,7 @@ import java.util.Map;
 
 public class JobSiteData {
 
+    private JobSite parent;
     @Expose
     private boolean isBuilt;
     @Expose
@@ -14,13 +15,14 @@ public class JobSiteData {
     @Expose
     private final Map<String, StructureData> structures;
     @Expose
-    private long xp;
+    private int xp;
 
-    public JobSiteData(boolean isBuilt){
+    public JobSiteData(boolean isBuilt, JobSite parent){
         this.isBuilt = isBuilt;
         this.upgrades = new HashMap<>();
         this.structures = new HashMap<>();
         this.xp = 0;
+        this.parent = parent;
     }
 
     public StructureData getStructure(String id) {
@@ -46,15 +48,26 @@ public class JobSiteData {
         isBuilt = built;
     }
 
-    public long getXp() {
+    public int getXp() {
         return xp;
     }
 
-    public void setXp(long xp) {
+    public void setXp(int xp) {
         this.xp = xp;
     }
 
-    public void incrementXp(long increment){
+    public void incrementXp(int increment){
+        if(JobsiteLevelHelper.getLevelFromXp(xp + increment) > JobsiteLevelHelper.getLevelFromXp(xp) ){
+            getParent().levelUp();
+        }
         xp += increment;
+    }
+
+    private JobSite getParent(){
+        return this.parent;
+    }
+
+    public void setParent(JobSite parent){
+        this.parent = parent;
     }
 }

@@ -38,6 +38,7 @@ public class EnterpriseStorageJson {
                 .registerTypeAdapter(Vector.class, new VectorAdapter())
                 .registerTypeAdapter(Enterprise.class, new EnterpriseTypeAdapter())
                 .setPrettyPrinting()
+                .excludeFieldsWithoutExposeAnnotation()
                 .create();
 
         jobSiteStorage = new JobSiteStorage(gson);

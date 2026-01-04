@@ -1,6 +1,7 @@
 package com.stoinkcraft.jobs.jobsites;
 
 import com.google.gson.annotations.Expose;
+import com.stoinkcraft.jobs.jobsites.components.JobSiteStructure;
 
 public class StructureData {
 

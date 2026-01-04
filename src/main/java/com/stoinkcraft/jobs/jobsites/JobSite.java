@@ -1,7 +1,6 @@
 package com.stoinkcraft.jobs.jobsites;
 
 import com.fastasyncworldedit.core.FaweAPI;
-import com.google.gson.annotations.Expose;
 import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldguard.WorldGuard;
 import com.sk89q.worldguard.protection.managers.RegionManager;
@@ -9,7 +8,8 @@ import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import com.sk89q.worldguard.protection.regions.RegionContainer;
 import com.stoinkcraft.StoinkCore;
 import com.stoinkcraft.enterprise.Enterprise;
-import com.stoinkcraft.jobs.jobsites.sites.farmland.FarmlandData;
+import com.stoinkcraft.jobs.jobsites.components.JobSiteComponent;
+import com.stoinkcraft.jobs.jobsites.components.JobSiteStructure;
 import com.stoinkcraft.utils.RegionUtils;
 import com.stoinkcraft.utils.SchematicUtils;
 import eu.decentsoftware.holograms.api.DHAPI;
@@ -19,14 +19,11 @@ import org.bukkit.entity.Player;
 import javax.annotation.Nullable;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public abstract class JobSite {
     protected final Enterprise enterprise;
     protected final JobSiteType type;
-
     protected final JobSiteData data;
     protected final Region region;
     protected final Location spawnPoint;
@@ -34,9 +31,9 @@ public abstract class JobSite {
     protected boolean isBuilt;
     protected String protectionRegionID;
     protected ProtectedRegion protectedRegion;
-
     protected final List<JobSiteUpgrade> upgrades = new ArrayList<>();
-    protected final List<JobSiteStructure> structures = new ArrayList<>();
+
+    protected final List<JobSiteComponent> components = new ArrayList<>();
 
     public JobSite(Enterprise enterprise, JobSiteType type, Location spawnPoint, File schematic, JobSiteData data, boolean isBuilt) {
         this.enterprise = enterprise;
@@ -47,9 +44,8 @@ public abstract class JobSite {
         this.data = data;
         this.isBuilt = isBuilt;
         this.protectionRegionID = "enterprise_" + enterprise.getID() + "_" + type.name();
+        data.setParent(this);
     }
-
-    public abstract void initializeBuild();
 
     public JobSiteData getData(){
         return data;
@@ -57,12 +53,10 @@ public abstract class JobSite {
     public List<JobSiteUpgrade> getUpgrades() {
         return upgrades;
     }
-    public List<JobSiteStructure> getStructures() {
-        return structures;
-    }
     public @Nullable JobSiteStructure getStructure(String structureId) {
-        return structures.stream()
-                .filter(s -> s.getId().equalsIgnoreCase(structureId))
+        return (JobSiteStructure) components.stream()
+                .filter(component -> component instanceof JobSiteStructure)
+                .filter(s -> ((JobSiteStructure) s).getId().equalsIgnoreCase(structureId))
                 .findFirst()
                 .orElse(null);
     }
@@ -70,6 +64,8 @@ public abstract class JobSite {
         RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
         RegionManager manager = container.get(FaweAPI.getWorld(spawnPoint.getWorld().getName()));
         manager.removeRegion(protectionRegionID);
+
+        components.stream().forEach(c -> c.disband());
     }
 
     public boolean isBuilt(){
@@ -122,28 +118,17 @@ public abstract class JobSite {
 
         SchematicUtils.pasteSchematic(schematic, spawnPoint, true);
         protectRegion();
-        initializeBuild();
+        components.stream().forEach(c -> c.build());
+
         isBuilt = true;
+        getData().setBuilt(true);
         StoinkCore.getInstance().getLogger().info("Built " + type + " job site for " + enterprise.getName() + " at " + spawnPoint);
     }
 
-    public abstract void tick();
-
-    public void tickStructures() {
-        for (JobSiteStructure structure : structures) {
-            StructureData data = getData().getStructure(structure.getId());
-
-            if (data.getState() == JobSiteStructure.StructureState.BUILDING) {
-
-                structure.onBuildTick(this, data.getRemainingMillis());
-
-                if (data.isFinished()) {
-                    data.markBuilt();
-                    structure.onBuildComplete(this);
-                }
-            }
-        }
+    public void tick(){
+        components.stream().forEach(c -> c.tick());
     }
+
     public boolean contains(Location loc) {
         return region.contains(RegionUtils.toBlockVector3(loc));
     }
@@ -185,7 +170,7 @@ public abstract class JobSite {
         StoinkCore.getEconomy().withdrawPlayer(player, cost);
 
         data.startBuilding(structure.getBuildTimeMillis());
-        structure.onBuildStart(this);
+        structure.onConstructionStart();
 
         return true;
     }
@@ -194,4 +179,16 @@ public abstract class JobSite {
         return JobsiteLevelHelper.getLevelFromXp((int)getData().getXp());
     }
 
+    public void levelUp(){
+        components.stream().forEach(c -> c.levelUp());
+        getEnterprise().sendEnterpriseMessage("Farmland leveled up to, " + JobsiteLevelHelper.getLevelFromXp(getData().getXp()));
+    }
+
+    public void addComponent(JobSiteComponent component){
+        this.components.add(component);
+    }
+
+    public Enterprise getEnterprise(){
+        return this.enterprise;
+    }
 }

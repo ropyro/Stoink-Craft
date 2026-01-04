@@ -1,30 +1,44 @@
-package com.stoinkcraft.jobs.jobsites.resourcegenerators;
+package com.stoinkcraft.jobs.jobsites.components;
 
 import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.regions.CuboidRegion;
 import com.stoinkcraft.jobs.jobsites.JobSite;
 import org.bukkit.Location;
 
-public abstract class ResourceGenerator {
+public class JobSiteGenerator implements JobSiteComponent{
 
     private JobSite parent;
     private long tickCounter = 0;
-
     private boolean enabled;
 
-    public ResourceGenerator(JobSite parent){
+    public JobSiteGenerator(JobSite parent){
         this.parent = parent;
         enabled = true;
     }
-    public ResourceGenerator(JobSite parent, boolean enabled){
+    public JobSiteGenerator(JobSite parent, boolean enabled){
         this.parent = parent;
         this.enabled = enabled;
     }
 
+    @Override
     public void tick() {
         if(!enabled) return;
         tickCounter++;
-        onTick();
+    }
+
+    @Override
+    public void build() {
+
+    }
+
+    @Override
+    public void disband() {
+
+    }
+
+    @Override
+    public void levelUp() {
+
     }
 
     public boolean isEnabled(){
@@ -46,10 +60,6 @@ public abstract class ResourceGenerator {
     public void setTickCounter(long ticks){
         this.tickCounter = ticks;
     }
-
-    protected abstract void onTick();
-
-    public abstract void init();
 
     public CuboidRegion getRegion(Location corner1, Location corner2) {
         BlockVector3 min = BlockVector3.at(

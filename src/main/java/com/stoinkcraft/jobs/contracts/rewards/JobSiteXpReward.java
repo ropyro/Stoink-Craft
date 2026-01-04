@@ -9,9 +9,9 @@ import java.util.List;
 public class JobSiteXpReward implements DescribableReward {
 
     private final JobSiteType jobSiteType;
-    private final long xp;
+    private final int xp;
 
-    public JobSiteXpReward(JobSiteType jobSiteType, long xp) {
+    public JobSiteXpReward(JobSiteType jobSiteType, int xp) {
         this.jobSiteType = jobSiteType;
         this.xp = xp;
     }

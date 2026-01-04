@@ -286,4 +286,12 @@ public class Enterprise {
         if(activeEnterpriseChat.contains(member))
             this.activeEnterpriseChat.remove(member);
     }
+
+    public void sendEnterpriseMessage(String... lines) {
+        getOnlineMembers().forEach(player -> {
+            for (String line : lines) {
+                player.sendMessage(line);
+            }
+        });
+    }
 }

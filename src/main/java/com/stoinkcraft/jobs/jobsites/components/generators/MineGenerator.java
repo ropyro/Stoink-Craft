@@ -1,9 +1,8 @@
-package com.stoinkcraft.jobs.jobsites.resourcegenerators.generators;
+package com.stoinkcraft.jobs.jobsites.components.generators;
 
 import com.fastasyncworldedit.core.FaweAPI;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.WorldEdit;
-import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldedit.function.pattern.RandomPattern;
 import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.regions.CuboidRegion;
@@ -12,7 +11,7 @@ import com.sk89q.worldedit.world.block.BlockTypes;
 import com.sk89q.worldguard.protection.flags.Flags;
 import com.sk89q.worldguard.protection.flags.StateFlag;
 import com.stoinkcraft.jobs.jobsites.JobSite;
-import com.stoinkcraft.jobs.jobsites.resourcegenerators.ResourceGenerator;
+import com.stoinkcraft.jobs.jobsites.components.JobSiteGenerator;
 import com.stoinkcraft.utils.ChatUtils;
 import com.stoinkcraft.utils.RegionUtils;
 import org.bukkit.Bukkit;
@@ -24,7 +23,7 @@ import org.bukkit.entity.Player;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MineGenerator extends ResourceGenerator {
+public class MineGenerator extends JobSiteGenerator {
 
     private final Location corner1;
     private final Location corner2;
@@ -44,14 +43,14 @@ public class MineGenerator extends ResourceGenerator {
     }
 
     @Override
-    protected void onTick() {
+    public void tick() {
         if (getTickCounter() % regenIntervalSeconds == 0) {
             regenerateMine();
         }
     }
 
     @Override
-    public void init() {
+    public void build() {
         Map<StateFlag, StateFlag.State> flags = new HashMap<>();
         flags.put(Flags.BLOCK_BREAK, StateFlag.State.ALLOW);
         flags.put(Flags.INTERACT, StateFlag.State.ALLOW);
@@ -65,6 +64,8 @@ public class MineGenerator extends ResourceGenerator {
                 regionName,
                 flags,
                 10);
+
+        regenerateMine();
     }
 
     public long remainingTicks() {

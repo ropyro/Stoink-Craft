@@ -1,9 +1,10 @@
 package com.stoinkcraft.jobs.jobsites.sites.farmland;
 
 import com.google.gson.annotations.Expose;
+import com.stoinkcraft.jobs.jobsites.JobSite;
 import com.stoinkcraft.jobs.jobsites.JobSiteData;
-import com.stoinkcraft.jobs.jobsites.resourcegenerators.generators.CropGenerator;
-import com.stoinkcraft.jobs.jobsites.resourcegenerators.generators.PassiveMobGenerator;
+import com.stoinkcraft.jobs.jobsites.components.generators.CropGenerator;
+import com.stoinkcraft.jobs.jobsites.components.generators.PassiveMobGenerator;
 
 public class FarmlandData extends JobSiteData {
 
@@ -14,8 +15,8 @@ public class FarmlandData extends JobSiteData {
     @Expose
     private PassiveMobGenerator.PassiveMobType currentMobType = PassiveMobGenerator.PassiveMobType.COW;
 
-    public FarmlandData(boolean isBuilt) {
-        super(isBuilt);
+    public FarmlandData(boolean isBuilt, JobSite parent) {
+        super(isBuilt, parent);
     }
 
     public PassiveMobGenerator.PassiveMobType getCurrentMobType() {
