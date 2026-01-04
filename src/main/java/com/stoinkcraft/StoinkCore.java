@@ -119,9 +119,9 @@ public class StoinkCore extends JavaPlugin {
         hookLibraries();
         initManagers();
         initFilesAndResources();
-        ensureServerEnterprises();
         registerCommands();
         registerListeners();
+        ensureServerEnterprises();
         startTasks();
 
         getLogger().info("StoinkCore loaded.");
@@ -182,8 +182,6 @@ public class StoinkCore extends JavaPlugin {
     private void createDefaultServerEnterprise(EnterpriseManager mgr, String name) {
         ServerEnterprise ent = new ServerEnterprise(name);
         mgr.createEnterprise(ent);
-        ent.initializeJobSiteManager();
-        ent.getJobSiteManager().initializeJobSites();
     }
 
     private void registerCommands(){

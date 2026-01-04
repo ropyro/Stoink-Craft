@@ -124,6 +124,8 @@ public class EnterpriseManager {
 
     public boolean createEnterprise(Enterprise enterprise){
         if(getEnterpriseByMember(enterprise.getCeo()) == null){
+            enterprise.initializeJobSiteManager();
+            enterprise.getJobSiteManager().initializeJobSites();
             enterpriseList.add(enterprise);
             StoinkCore.getInstance().getContractManager().generateContracts(enterprise, false); // daily
             StoinkCore.getInstance().getContractManager().generateContracts(enterprise, true);  // weekly
@@ -138,6 +140,8 @@ public class EnterpriseManager {
 
     public void createEnterprise(ServerEnterprise enterprise){
         enterpriseList.add(enterprise);
+        enterprise.initializeJobSiteManager();
+        enterprise.getJobSiteManager().initializeJobSites();
         StoinkCore.getInstance().getContractManager().generateContracts(enterprise, false); // daily
         StoinkCore.getInstance().getContractManager().generateContracts(enterprise, true);  // weekly
     }
