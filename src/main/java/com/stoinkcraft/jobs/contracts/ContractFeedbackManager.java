@@ -69,6 +69,13 @@ public class ContractFeedbackManager {
     }
 
     /**
+     * Clears all active boss bars
+     */
+    public void clearAll(){
+        activeBars.keySet().stream().forEach(uuid -> activeBars.remove(uuid).removeAll());
+    }
+
+    /**
      * Clears the bar if the contract is done or expired.
      */
     public void clearIfFinished(Player player, ActiveContract contract) {

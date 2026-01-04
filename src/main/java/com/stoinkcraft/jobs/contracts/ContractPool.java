@@ -8,6 +8,7 @@ import com.stoinkcraft.jobs.jobsites.JobsiteLevelHelper;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Stream;
 
 public class ContractPool {
 
@@ -53,5 +54,12 @@ public class ContractPool {
             }
         }
         return true;
+    }
+
+    public ContractDefinition getById(String id) {
+        return Stream.concat(dailyContracts.stream(), weeklyContracts.stream())
+                .filter(def -> def.id().equals(id))
+                .findFirst()
+                .orElse(null);
     }
 }

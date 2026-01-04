@@ -2,7 +2,7 @@ package com.stoinkcraft.enterprise.commands.serverenterprisecmd;
 
 import com.stoinkcraft.StoinkCore;
 import com.stoinkcraft.jobs.jobsites.sites.farmland.FarmlandGui;
-import com.stoinkcraft.market.boosters.BoosterItemHelper;
+import com.stoinkcraft.jobs.boosters.BoosterItemHelper;
 import com.stoinkcraft.enterprise.Enterprise;
 import com.stoinkcraft.enterprise.EnterpriseManager;
 import com.stoinkcraft.enterprise.ServerEnterprise;

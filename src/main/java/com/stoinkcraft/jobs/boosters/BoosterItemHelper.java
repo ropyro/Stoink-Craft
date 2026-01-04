@@ -1,4 +1,4 @@
-package com.stoinkcraft.market.boosters;
+package com.stoinkcraft.jobs.boosters;
 
 import org.bukkit.inventory.ItemStack;
 

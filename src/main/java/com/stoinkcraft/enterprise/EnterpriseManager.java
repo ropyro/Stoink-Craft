@@ -2,7 +2,7 @@ package com.stoinkcraft.enterprise;
 
 import com.stoinkcraft.StoinkCore;
 import com.stoinkcraft.jobs.jobsites.JobSiteManager;
-import com.stoinkcraft.market.boosters.Booster;
+import com.stoinkcraft.jobs.boosters.Booster;
 import com.stoinkcraft.serialization.EnterpriseStorageJson;
 import com.stoinkcraft.shares.ShareManager;
 import com.stoinkcraft.utils.ChatUtils;

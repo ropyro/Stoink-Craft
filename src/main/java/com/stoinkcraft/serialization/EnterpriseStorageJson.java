@@ -5,6 +5,10 @@ import com.google.gson.GsonBuilder;
 import com.stoinkcraft.StoinkCore;
 import com.stoinkcraft.enterprise.Enterprise;
 import com.stoinkcraft.enterprise.EnterpriseManager;
+import com.stoinkcraft.jobs.contracts.ActiveContract;
+import com.stoinkcraft.jobs.contracts.ContractLoader;
+import com.stoinkcraft.jobs.contracts.ContractManager;
+import com.stoinkcraft.jobs.contracts.ContractPool;
 import com.stoinkcraft.jobs.jobsites.sites.farmland.FarmlandData;
 import com.stoinkcraft.jobs.jobsites.sites.quarry.QuarryData;
 import com.stoinkcraft.jobs.jobsites.sites.skyrise.SkyriseData;
@@ -16,6 +20,7 @@ import org.bukkit.util.Vector;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
 
@@ -24,6 +29,7 @@ public class EnterpriseStorageJson {
     private static final File ENTERPRISES_DIR = new File(StoinkCore.getInstance().getDataFolder(), "Enterprises");
     private static Gson gson;
     private static JobSiteStorage jobSiteStorage;
+    private static ContractStorage contractStorage;
 
     static {
         gson = new GsonBuilder()
@@ -35,6 +41,7 @@ public class EnterpriseStorageJson {
                 .create();
 
         jobSiteStorage = new JobSiteStorage(gson);
+        contractStorage = new ContractStorage(gson);
     }
 
     // ======= SAVE =======
@@ -87,6 +94,9 @@ public class EnterpriseStorageJson {
             // Save job site data separately
             saveJobSites(enterprise);
 
+            //save contracts
+            saveContracts(enterprise);
+
             return true;
 
         } catch (IOException e) {
@@ -114,6 +124,10 @@ public class EnterpriseStorageJson {
         FarmlandData farmlandData = enterprise.getJobSiteManager().getFarmlandData();
 
         jobSiteStorage.saveJobSites(enterprise.getID(), skyriseData, quarryData, farmlandData);
+    }
+
+    private static void saveContracts(Enterprise enterprise){
+        contractStorage.saveContracts(enterprise.getID(), StoinkCore.getInstance().getContractManager().getContracts(enterprise));
     }
 
     // ======= LOAD =======
@@ -156,6 +170,8 @@ public class EnterpriseStorageJson {
                 if (enterprise != null) {
                     // Load job sites
                     loadJobSites(enterprise);
+                    // Load contracts
+                    loadContracts(enterprise);
 
                     manager.loadEnterprise(enterprise);
                     loaded++;
@@ -174,6 +190,7 @@ public class EnterpriseStorageJson {
                         Enterprise enterprise = loadEnterprise(backupFile);
                         if (enterprise != null) {
                             loadJobSites(enterprise);
+                            loadContracts(enterprise);
                             manager.loadEnterprise(enterprise);
                             loaded++;
                             failed--;
@@ -218,6 +235,19 @@ public class EnterpriseStorageJson {
         enterprise.getJobSiteManager().initializeJobSites(skyriseData, quarryData, farmlandData);
     }
 
+    private static void loadContracts(Enterprise enterprise){
+        ContractManager contractManager =
+                StoinkCore.getInstance().getContractManager();
+
+        List<ActiveContract> loaded =
+                contractStorage.loadContracts(
+                        enterprise.getID(),
+                        contractManager.getContractPool()
+                );
+
+        contractManager.setContracts(enterprise, loaded);
+    }
+
     // ======= DELETE =======
 
     public static void disband(Enterprise enterprise) {
@@ -258,5 +288,9 @@ public class EnterpriseStorageJson {
 
     public static JobSiteStorage getJobSiteStorage() {
         return jobSiteStorage;
+    }
+
+    public static ContractStorage getContractStorage(){
+        return contractStorage;
     }
 }

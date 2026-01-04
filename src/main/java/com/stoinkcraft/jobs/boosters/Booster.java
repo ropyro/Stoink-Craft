@@ -1,9 +1,4 @@
-package com.stoinkcraft.market.boosters;
-
-import org.bukkit.scheduler.BukkitRunnable;
-
-import java.time.Instant;
-import java.util.Date;
+package com.stoinkcraft.jobs.boosters;
 
 public class Booster {
 

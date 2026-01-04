@@ -11,7 +11,7 @@ import com.stoinkcraft.jobs.listeners.CreatureSpawnListener;
 import com.stoinkcraft.jobs.listeners.EntityDeathListener;
 import com.stoinkcraft.misc.daily.DailyCMD;
 import com.stoinkcraft.misc.daily.DailyManager;
-import com.stoinkcraft.market.boosters.BoostNoteInteractionListener;
+import com.stoinkcraft.jobs.boosters.BoostNoteInteractionListener;
 import com.stoinkcraft.market.MarketCMD;
 import com.stoinkcraft.enterprise.commands.TopCeoCMD;
 import com.stoinkcraft.enterprise.commands.enterprisecmd.EnterpriseCMD;
@@ -35,7 +35,6 @@ import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.trait.SkinTrait;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.*;
-import org.bukkit.event.Listener;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -100,6 +99,8 @@ public class StoinkCore extends JavaPlugin {
     public void onDisable() {
         getLogger().info("Disabling StoinkCore...");
 
+        cfm.clearAll();
+
         EnterpriseStorageJson.saveAllEnterprises();
 
         try {
@@ -163,20 +164,8 @@ public class StoinkCore extends JavaPlugin {
         saveResourceFolder("schematics", false);
 
         MarketManager.loadMarketPrices(marketFile);
-        MarketManager.startRotatingBoosts(this);
-
 
         EnterpriseStorageJson.loadAllEnterprises();
-
-        // Periodic autosave (every 5 minutes):
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                EnterpriseStorageJson.saveAllEnterprisesAsync();
-            }
-        }.runTaskTimerAsynchronously(this, 20L * 60 * 5, 20L * 60 * 5);
-
-        em.startDailyTaxes(this);
 
         ShareStorage.loadShares();
     }
@@ -201,7 +190,6 @@ public class StoinkCore extends JavaPlugin {
         EnterpriseCMD enterpriseCMD = new EnterpriseCMD(this);
         getCommand("enterprise").setExecutor(enterpriseCMD);
         getCommand("enterprise").setTabCompleter(new EnterpriseTabCompleter(enterpriseCMD.getSubcommands()));
-        getCommand("market").setExecutor(new MarketCMD());
         getCommand("serverenterprise").setExecutor(new ServerEntCMD());
         getCommand("serverenterprise").setTabCompleter(new ServerEntTabCompleter());
         getCommand("topceo").setExecutor(new TopCeoCMD());
@@ -233,6 +221,17 @@ public class StoinkCore extends JavaPlugin {
         startAutoTopCEOUpdate();
         startContractResetTask();
         cfm.startCleanupTask(this);
+
+        MarketManager.startRotatingBoosts(this);
+        // Periodic autosave (every 5 minutes):
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                EnterpriseStorageJson.saveAllEnterprisesAsync();
+            }
+        }.runTaskTimerAsynchronously(this, 20L * 60 * 20, 20L * 60 * 20);
+
+        em.startDailyTaxes(this);
     }
 
     public static StoinkCore getInstance() {

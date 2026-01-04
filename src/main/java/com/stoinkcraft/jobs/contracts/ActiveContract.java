@@ -19,13 +19,44 @@ public class ActiveContract {
     private final long expirationTime;
     private boolean completed;
 
-    private final Map<UUID, Integer> contributions = new HashMap<>();
+    private final Map<UUID, Integer> contributions;
 
     public ActiveContract(UUID enterpriseId, ContractDefinition definition, long expirationTime) {
         this.contractId = UUID.randomUUID();
         this.enterpriseId = enterpriseId;
         this.definition = definition;
         this.expirationTime = expirationTime;
+        contributions = new HashMap<>();
+    }
+
+    public ActiveContract(
+            UUID contractId,
+            UUID enterpriseId,
+            ContractDefinition definition,
+            long expirationTime,
+            int progress,
+            boolean completed,
+            Map<UUID, Integer> contributions
+    ) {
+        this.contractId = contractId;
+        this.enterpriseId = enterpriseId;
+        this.definition = definition;
+        this.expirationTime = expirationTime;
+        this.progress = progress;
+        this.completed = completed;
+        this.contributions = new HashMap<>(contributions);
+    }
+
+    public ContractSaveData toSaveData() {
+        ContractSaveData data = new ContractSaveData();
+        data.contractId = contractId;
+        data.enterpriseId = enterpriseId;
+        data.definitionId = definition.id();
+        data.progress = progress;
+        data.expirationTime = expirationTime;
+        data.completed = completed;
+        data.contributions = new HashMap<>(contributions);
+        return data;
     }
 
     public boolean canProgress() {
@@ -41,7 +72,6 @@ public class ActiveContract {
         if (progress >= definition.targetAmount()) {
             progress = definition.targetAmount();
             completed = true;
-            reward();
             onCompleted();
         }
     }
@@ -82,7 +112,7 @@ public class ActiveContract {
                 .getEnterpriseByID(enterpriseId);
 
         // Apply rewards
-        definition.reward().apply(enterprise, this);
+        reward();
 
         // Announce completion
         StoinkCore.getInstance()

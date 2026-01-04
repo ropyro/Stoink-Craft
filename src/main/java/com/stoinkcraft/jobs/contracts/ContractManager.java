@@ -122,4 +122,12 @@ public class ContractManager {
                     });
         }
     }
+
+    public ContractPool getContractPool() {
+        return contractPool;
+    }
+
+    public void setContracts(Enterprise enterprise, List<ActiveContract> activeContracts){
+        this.contracts.put(enterprise.getID(), new ArrayList<>(activeContracts));
+    }
 }

@@ -3,14 +3,12 @@ package com.stoinkcraft.enterprise;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.stoinkcraft.jobs.jobsites.JobSiteManager;
-import com.stoinkcraft.market.boosters.Booster;
+import com.stoinkcraft.jobs.boosters.Booster;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Enterprise {
 
