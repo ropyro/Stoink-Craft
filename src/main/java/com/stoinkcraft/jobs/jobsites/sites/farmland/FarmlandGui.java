@@ -11,6 +11,7 @@ import com.stoinkcraft.jobs.jobsites.*;
 import com.stoinkcraft.jobs.jobsites.components.JobSiteStructure;
 import com.stoinkcraft.jobs.jobsites.components.generators.CropGenerator;
 import com.stoinkcraft.jobs.jobsites.components.generators.PassiveMobGenerator;
+import com.stoinkcraft.jobs.jobsites.components.structures.StructureData;
 import com.stoinkcraft.utils.ChatUtils;
 import com.stoinkcraft.utils.SCConstants;
 import org.bukkit.Material;
@@ -53,7 +54,7 @@ public class FarmlandGui {
                 "# # # # ? # # # #",
                 "# # # F A B # # #",
                 "# # # # # # # # #",
-                "# . . 1 . . # C #",
+                "# 1 2 . . . # C #",
                 "# # # # # # # # #"
 
                 );
@@ -184,6 +185,93 @@ public class FarmlandGui {
 
                     case BUILT -> {
                         p.sendMessage("§aThe barn is already built!");
+                    }
+                }
+            }
+        });
+
+        builder.addIngredient('2', new AbstractItem() {
+
+            @Override
+            public ItemProvider getItemProvider() {
+                ItemBuilder item = new ItemBuilder(Material.BEEHIVE);
+
+                JobSiteStructure beehive = farmlandSite.getStructure("beehive");
+                StructureData data = farmlandSite.getData().getStructure("beehive");
+
+                int jobsiteLevel = JobsiteLevelHelper.getLevelFromXp(
+                        (int) farmlandSite.getData().getXp()
+                );
+
+                item.setDisplayName("§6Bee Hives");
+                item.addLoreLines("§7Unlocks honey production");
+                item.addLoreLines("§7Provides passive resources");
+                item.addLoreLines(" ");
+
+                switch (data.getState()) {
+
+                    case LOCKED -> {
+                        item.addLoreLines("§7Cost: §6$" + beehive.getCost());
+                        item.addLoreLines("§7Required Level: §e" + beehive.getRequiredJobsiteLevel());
+
+                        if (jobsiteLevel < beehive.getRequiredJobsiteLevel()) {
+                            item.addLoreLines("§c✖ You are level " + jobsiteLevel);
+                        } else if (!beehive.canUnlock(farmlandSite)) {
+                            item.addLoreLines("§c✖ Requirements not met");
+                        } else {
+                            item.addLoreLines("§a✔ Ready to build");
+                        }
+
+                        item.addLoreLines(" ");
+                        item.addLoreLines("§eClick to start construction");
+                    }
+
+                    case BUILDING -> {
+                        long remaining = data.getRemainingMillis();
+                        item.setMaterial(Material.SCAFFOLDING);
+                        item.addLoreLines("§eUnder Construction");
+                        item.addLoreLines(" ");
+                        item.addLoreLines("§7Time Remaining:");
+                        item.addLoreLines("§6" + ChatUtils.formatDuration(remaining));
+                    }
+
+                    case BUILT -> {
+                        item.setMaterial(Material.BEE_NEST);
+                        item.addLoreLines("§a✔ Built");
+                        item.addLoreLines(" ");
+                        item.addLoreLines("§7Bee hives are operational");
+                    }
+                }
+
+                return item;
+            }
+
+            @Override
+            public void handleClick(ClickType click, Player p, InventoryClickEvent e) {
+
+                JobSiteStructure beehive = farmlandSite.getStructure("beehive");
+                StructureData data = farmlandSite.getData().getStructure("beehive");
+
+                switch (data.getState()) {
+
+                    case LOCKED -> {
+                        boolean success = farmlandSite.purchaseStructure(beehive, p);
+
+                        if (success) {
+                            p.sendMessage("§aBee Hive construction started!");
+                        } else {
+                            p.sendMessage("§cYou cannot build the bee hives yet.");
+                        }
+                    }
+
+                    case BUILDING -> {
+                        long remaining = data.getRemainingMillis();
+                        p.sendMessage("§eBee Hives are under construction.");
+                        p.sendMessage("§7Time remaining: §6" + ChatUtils.formatDuration(remaining));
+                    }
+
+                    case BUILT -> {
+                        p.sendMessage("§aBee Hives are already built!");
                     }
                 }
             }

@@ -3,22 +3,26 @@ package com.stoinkcraft.jobs.jobsites;
 import com.stoinkcraft.StoinkCore;
 import com.stoinkcraft.enterprise.Enterprise;
 import com.stoinkcraft.jobs.jobsites.sites.farmland.FarmlandData;
+import com.stoinkcraft.jobs.jobsites.sites.graveyard.GraveyardData;
+import com.stoinkcraft.jobs.jobsites.sites.graveyard.GraveyardSite;
 import com.stoinkcraft.jobs.jobsites.sites.quarry.QuarryData;
 import com.stoinkcraft.jobs.jobsites.sites.skyrise.SkyriseData;
 import com.stoinkcraft.jobs.jobsites.sites.farmland.FarmlandSite;
 import com.stoinkcraft.jobs.jobsites.sites.quarry.QuarrySite;
 import com.stoinkcraft.jobs.jobsites.sites.skyrise.SkyriseSite;
 import org.bukkit.Location;
-import org.bukkit.util.Vector;
 
 import java.util.Map;
 
 public class JobSiteManager {
 
     private Enterprise enterprise;
+
     private SkyriseSite skyriseSite;
     private QuarrySite quarrySite;
     private FarmlandSite farmlandSite;
+    private GraveyardSite graveyardSite;
+
     private Map<JobSiteType, Location> plots;
     private int plotIndex;
 
@@ -27,16 +31,17 @@ public class JobSiteManager {
         this.plotIndex = plotIndex;
     }
 
-    public void onEnterpriseDisband() {
+    public void disbandJobSites() {
         if (skyriseSite != null) skyriseSite.disband();
         if (quarrySite != null) quarrySite.disband();
         if (farmlandSite != null) farmlandSite.disband();
+        if (graveyardSite != null) graveyardSite.disband();
     }
 
     /**
      * Initialize job sites with provided data (from JSON load)
      */
-    public void initializeJobSites(SkyriseData skyriseData, QuarryData quarryData, FarmlandData farmlandData) {
+    public void initializeJobSites(SkyriseData skyriseData, QuarryData quarryData, FarmlandData farmlandData, GraveyardData graveyardData) {
         if (plotIndex == -1) {
             plotIndex = StoinkCore.getInstance().getEnterprisePlotManager().getNextAvailablePlotIndex();
             enterprise.setPlotIndex(plotIndex);
@@ -50,6 +55,13 @@ public class JobSiteManager {
         }
         skyriseSite = new SkyriseSite(enterprise, skyriseLoc, skyriseData);
 
+        //Initialize Farmland
+        Location farmlandLoc = plots.get(JobSiteType.FARMLAND);
+        if(farmlandData == null){
+            farmlandData = createDefaultFarmlandData();
+        }
+        farmlandSite = new FarmlandSite(enterprise, farmlandLoc, farmlandData);
+
         // Initialize Quarry
         Location quarryLoc = plots.get(JobSiteType.QUARRY);
         if (quarryData == null) {
@@ -57,41 +69,36 @@ public class JobSiteManager {
         }
         quarrySite = new QuarrySite(enterprise, quarryLoc, quarryData);
 
-        //Initialize Farmland
-        Location farmlandLoc = plots.get(JobSiteType.FARMLAND);
-        if(farmlandData == null){
-            farmlandData = createDefaultFarmlandData();
+        //Initialize Graveyard
+        Location graveyardLoc = plots.get(JobSiteType.GRAVEYARD);
+        if(graveyardData == null){
+            graveyardData = createDefaultGraveyardData();
         }
-        farmlandSite = new FarmlandSite(enterprise, farmlandLoc, farmlandData);
+        graveyardSite = new GraveyardSite(enterprise, graveyardLoc, graveyardData);
+
     }
 
     /**
      * Initialize with default values (new enterprise)
      */
     public void initializeJobSites() {
-        initializeJobSites(null, null, null);
+        initializeJobSites(null, null, null, null);
     }
 
     // Default data factories
     private SkyriseData createDefaultSkyriseData() {
-        return new SkyriseData(false, new Vector(-5.5, 4, 0.5), skyriseSite);
+        return new SkyriseData(false, skyriseSite);
     }
 
     private QuarryData createDefaultQuarryData() {
-        return new QuarryData(
-                false,
-                new Vector(-3.5, 3, 0.5),
-                new Vector(-4, -1, -4),
-                new Vector(-25, -21, 17),
-                300L,
-                0L,
-                quarrySite
-        );
+        return new QuarryData(false, quarrySite);
     }
 
     private FarmlandData createDefaultFarmlandData(){
         return new FarmlandData(false, farmlandSite);
     }
+
+    private GraveyardData createDefaultGraveyardData() {return new GraveyardData(false, graveyardSite);}
 
     // Getters for serialization
     public SkyriseData getSkyriseData() {
@@ -109,6 +116,11 @@ public class JobSiteManager {
         return farmlandSite.getData();
     }
 
+    public GraveyardData getGraveyardData(){
+        if(graveyardSite == null) return null;
+        return graveyardSite.getData();
+    }
+
     public SkyriseSite getSkyriseSite() {
         return skyriseSite;
     }
@@ -121,6 +133,8 @@ public class JobSiteManager {
         return farmlandSite;
     }
 
+    public GraveyardSite getGraveyardSite() {return graveyardSite;}
+
     public JobSite getJobSite(JobSiteType jobSiteType){
         switch (jobSiteType){
             case FARMLAND -> {
@@ -132,30 +146,30 @@ public class JobSiteManager {
             case SKYRISE -> {
                 return skyriseSite;
             }
+            case GRAVEYARD -> {
+                return graveyardSite;
+            }
         }
         return null;
     }
 
     public JobSiteType resolveJobsite(Location location) {
-
-        // FARMLAND
         if (getFarmlandSite() != null &&
                 getFarmlandSite().contains(location)) {
             return JobSiteType.FARMLAND;
         }
-
-        // QUARRY (future)
-        // if (manager.getQuarrySite() != null &&
-        //         manager.getQuarrySite().contains(location)) {
-        //     return JobSiteType.QUARRY;
-        // }
-
-        // SKYRISE (future)
-        // if (manager.getSkyriseSite() != null &&
-        //         manager.getSkyriseSite().contains(location)) {
-        //     return JobSiteType.SKYRISE;
-        // }
-
+         if (getQuarrySite() != null &&
+                 getQuarrySite().contains(location)) {
+             return JobSiteType.QUARRY;
+         }
+         if (getSkyriseSite() != null &&
+                 getSkyriseSite().contains(location)) {
+             return JobSiteType.SKYRISE;
+         }
+         if(getGraveyardSite() != null &&
+                 getGraveyardSite().contains(location)){
+             return JobSiteType.GRAVEYARD;
+         }
         return null;
     }
 

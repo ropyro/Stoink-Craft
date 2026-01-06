@@ -1,4 +1,4 @@
-package com.stoinkcraft.jobs.jobsites;
+package com.stoinkcraft.jobs.jobsites.components.structures;
 
 import com.google.gson.annotations.Expose;
 import com.stoinkcraft.jobs.jobsites.components.JobSiteStructure;

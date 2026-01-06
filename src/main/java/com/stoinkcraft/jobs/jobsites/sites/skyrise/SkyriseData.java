@@ -9,19 +9,8 @@ import org.bukkit.util.Vector;
  * Serializable data for SkyriseSite
  */
 public class SkyriseData extends JobSiteData {
-    @Expose
-    private Vector entryHologramOffset;
 
-    public SkyriseData(boolean isBuilt, Vector entryHologramOffset, SkyriseSite parent) {
+    public SkyriseData(boolean isBuilt, SkyriseSite parent) {
         super(isBuilt, parent);
-        this.entryHologramOffset = entryHologramOffset;
-    }
-
-    public Vector getEntryHologramOffset() {
-        return entryHologramOffset;
-    }
-
-    public void setEntryHologramOffset(Vector entryHologramOffset) {
-        this.entryHologramOffset = entryHologramOffset;
     }
 }

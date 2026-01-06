@@ -9,8 +9,6 @@ import com.stoinkcraft.jobs.jobsites.components.generators.PassiveMobGenerator;
 public class FarmlandData extends JobSiteData {
 
     @Expose
-    private int farmerJoeNpcId = -1;
-    @Expose
     private CropGenerator.CropGeneratorType currentType = CropGenerator.CropGeneratorType.WHEAT;
     @Expose
     private PassiveMobGenerator.PassiveMobType currentMobType = PassiveMobGenerator.PassiveMobType.COW;
@@ -25,14 +23,6 @@ public class FarmlandData extends JobSiteData {
 
     public void setCurrentMobType(PassiveMobGenerator.PassiveMobType currentMobType) {
         this.currentMobType = currentMobType;
-    }
-
-    public int getFarmerJoeNpcId() {
-        return farmerJoeNpcId;
-    }
-
-    public void setFarmerJoeNpcId(int farmerJoeNpcId) {
-        this.farmerJoeNpcId = farmerJoeNpcId;
     }
 
     public CropGenerator.CropGeneratorType getCurrentCropType() {

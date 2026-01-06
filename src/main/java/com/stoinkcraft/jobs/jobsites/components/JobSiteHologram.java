@@ -62,6 +62,16 @@ public class JobSiteHologram implements JobSiteComponent{
         DHAPI.createHologram(id, loc, true, lines);
     }
 
+    public void setLines(int pageIndex, List<String> lines){
+        try{
+            Hologram hologram = DHAPI.getHologram(id);
+            if(hologram != null)
+                DHAPI.setHologramLines(hologram, pageIndex, lines);
+            else
+                setHologram(lines);
+        }catch (IllegalArgumentException e){}
+    }
+
     public void setLine(int pageIndex, int lineIndex, String line){
         try{
             Hologram hologram = DHAPI.getHologram(id);
@@ -77,5 +87,13 @@ public class JobSiteHologram implements JobSiteComponent{
             if(DHAPI.getHologram(id) != null)
                 DHAPI.getHologram(id).delete();
         }catch (IllegalArgumentException e){}
+    }
+
+    public Hologram getHologram(){
+        try{
+            if(DHAPI.getHologram(id) != null)
+                return DHAPI.getHologram(id);
+        }catch (IllegalArgumentException e){}
+        return null;
     }
 }

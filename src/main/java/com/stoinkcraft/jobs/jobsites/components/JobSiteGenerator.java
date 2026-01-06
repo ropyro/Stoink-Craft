@@ -8,7 +8,6 @@ import org.bukkit.Location;
 public class JobSiteGenerator implements JobSiteComponent{
 
     private JobSite parent;
-    private long tickCounter = 0;
     private boolean enabled;
 
     public JobSiteGenerator(JobSite parent){
@@ -23,7 +22,6 @@ public class JobSiteGenerator implements JobSiteComponent{
     @Override
     public void tick() {
         if(!enabled) return;
-        tickCounter++;
     }
 
     @Override
@@ -51,14 +49,6 @@ public class JobSiteGenerator implements JobSiteComponent{
 
     public JobSite getParent(){
         return parent;
-    }
-
-    public long getTickCounter() {
-        return tickCounter;
-    }
-
-    public void setTickCounter(long ticks){
-        this.tickCounter = ticks;
     }
 
     public CuboidRegion getRegion(Location corner1, Location corner2) {

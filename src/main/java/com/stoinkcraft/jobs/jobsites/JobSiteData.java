@@ -1,6 +1,7 @@
 package com.stoinkcraft.jobs.jobsites;
 
 import com.google.gson.annotations.Expose;
+import com.stoinkcraft.jobs.jobsites.components.structures.StructureData;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -15,18 +16,27 @@ public class JobSiteData {
     @Expose
     private final Map<String, StructureData> structures;
     @Expose
+    private final Map<String, Integer> npcs;
+    @Expose
     private int xp;
 
     public JobSiteData(boolean isBuilt, JobSite parent){
         this.isBuilt = isBuilt;
         this.upgrades = new HashMap<>();
         this.structures = new HashMap<>();
+        npcs = new HashMap<>();
         this.xp = 0;
         this.parent = parent;
     }
 
     public StructureData getStructure(String id) {
         return structures.computeIfAbsent(id, k -> new StructureData());
+    }
+    public int getNpcId(String name){
+        return npcs.getOrDefault(name, -1);
+    }
+    public void setNpc(String name, int id){
+        npcs.put(name, id);
     }
     public int getLevel(String upgradeId) {
         return upgrades.getOrDefault(upgradeId, 0);

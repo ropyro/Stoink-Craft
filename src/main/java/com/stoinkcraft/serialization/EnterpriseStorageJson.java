@@ -10,6 +10,7 @@ import com.stoinkcraft.jobs.contracts.ContractLoader;
 import com.stoinkcraft.jobs.contracts.ContractManager;
 import com.stoinkcraft.jobs.contracts.ContractPool;
 import com.stoinkcraft.jobs.jobsites.sites.farmland.FarmlandData;
+import com.stoinkcraft.jobs.jobsites.sites.graveyard.GraveyardData;
 import com.stoinkcraft.jobs.jobsites.sites.quarry.QuarryData;
 import com.stoinkcraft.jobs.jobsites.sites.skyrise.SkyriseData;
 import org.bukkit.Bukkit;
@@ -123,8 +124,9 @@ public class EnterpriseStorageJson {
         SkyriseData skyriseData = enterprise.getJobSiteManager().getSkyriseData();
         QuarryData quarryData = enterprise.getJobSiteManager().getQuarryData();
         FarmlandData farmlandData = enterprise.getJobSiteManager().getFarmlandData();
+        GraveyardData graveyardData = enterprise.getJobSiteManager().getGraveyardData();
 
-        jobSiteStorage.saveJobSites(enterprise.getID(), skyriseData, quarryData, farmlandData);
+        jobSiteStorage.saveJobSites(enterprise.getID(), skyriseData, quarryData, farmlandData, graveyardData);
     }
 
     private static void saveContracts(Enterprise enterprise){
@@ -231,9 +233,10 @@ public class EnterpriseStorageJson {
         SkyriseData skyriseData = jobSiteStorage.loadSkyriseData(enterprise.getID());
         QuarryData quarryData = jobSiteStorage.loadQuarryData(enterprise.getID());
         FarmlandData farmlandData = jobSiteStorage.loadFarmlandData(enterprise.getID());
+        GraveyardData graveyardData = jobSiteStorage.loadGraveyardData(enterprise.getID());
 
         // Initialize job sites with loaded data (or defaults if null)
-        enterprise.getJobSiteManager().initializeJobSites(skyriseData, quarryData, farmlandData);
+        enterprise.getJobSiteManager().initializeJobSites(skyriseData, quarryData, farmlandData, graveyardData);
     }
 
     private static void loadContracts(Enterprise enterprise){

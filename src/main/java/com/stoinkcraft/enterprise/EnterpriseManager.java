@@ -88,6 +88,8 @@ public class EnterpriseManager {
 
         EnterpriseStorageJson.disband(enterprise);
 
+        enterprise.getJobSiteManager().disbandJobSites();
+
         // Optional: log to console
         Bukkit.getLogger().info("[StoinkCore] Disbanded enterprise: " + enterprise.getName());
     }

@@ -8,6 +8,8 @@ import com.stoinkcraft.jobs.boosters.BoosterItemHelper;
 import com.stoinkcraft.enterprise.Enterprise;
 import com.stoinkcraft.enterprise.EnterpriseManager;
 import com.stoinkcraft.enterprise.ServerEnterprise;
+import com.stoinkcraft.jobs.jobsites.sites.graveyard.GraveyardData;
+import com.stoinkcraft.jobs.jobsites.sites.quarry.QuarryData;
 import com.stoinkcraft.serialization.EnterpriseMigration;
 import com.stoinkcraft.serialization.EnterpriseStorageJson;
 import com.stoinkcraft.shares.ShareStorage;
@@ -128,6 +130,10 @@ public class ServerEntCMD implements CommandExecutor {
                    if (enterprise != null) {
                        FarmlandData data = enterprise.getJobSiteManager().getFarmlandData();
                        data.incrementXp(JobsiteLevelHelper.getXpToNextLevel(data.getXp()));
+                       GraveyardData data2 = enterprise.getJobSiteManager().getGraveyardData();
+                       data2.incrementXp(JobsiteLevelHelper.getXpToNextLevel(data2.getXp()));
+                       QuarryData data3 = enterprise.getJobSiteManager().getQuarryData();
+                       data3.incrementXp(JobsiteLevelHelper.getXpToNextLevel(data3.getXp()));
                    }
                }
            }

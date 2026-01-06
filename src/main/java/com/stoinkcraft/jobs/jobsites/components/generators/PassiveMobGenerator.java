@@ -90,6 +90,7 @@ public class PassiveMobGenerator extends JobSiteGenerator {
     @Override
     public void disband(){
         clearAllMobs();
+        RegionUtils.removeProtectedRegion(getParent().getSpawnPoint().getWorld(), regionName);
     }
 
     // --------------------------------------------------

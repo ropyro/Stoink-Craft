@@ -1,7 +1,7 @@
 package com.stoinkcraft.jobs.jobsites.components;
 
 import com.stoinkcraft.jobs.jobsites.JobSite;
-import com.stoinkcraft.jobs.jobsites.StructureData;
+import com.stoinkcraft.jobs.jobsites.components.structures.StructureData;
 
 import java.util.function.IntSupplier;
 import java.util.function.Predicate;
@@ -56,7 +56,9 @@ public class JobSiteStructure implements JobSiteComponent{
     public void onConstructionStart() {}
 
     /** Called when timer finishes */
-    public void onConstructionComplete(){}
+    public void onConstructionComplete(){
+        getJobSite().getData().getStructure(getId()).markBuilt();
+    }
 
     /** Called every tick while BUILDING */
     public void onConstructionTick(long millisRemaining) {}

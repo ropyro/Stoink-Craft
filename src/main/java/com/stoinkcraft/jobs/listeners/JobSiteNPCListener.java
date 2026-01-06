@@ -1,10 +1,11 @@
-package com.stoinkcraft.jobs.jobsites.sites.farmland;
+package com.stoinkcraft.jobs.listeners;
 
 import com.stoinkcraft.StoinkCore;
 import com.stoinkcraft.enterprise.Enterprise;
+import com.stoinkcraft.jobs.jobsites.JobSite;
 import com.stoinkcraft.jobs.jobsites.JobSiteType;
+import com.stoinkcraft.jobs.jobsites.components.JobSiteNPC;
 import com.stoinkcraft.utils.ChatUtils;
-import com.stoinkcraft.utils.TimeUtils;
 import net.citizensnpcs.api.event.NPCRightClickEvent;
 import net.citizensnpcs.api.npc.NPC;
 import org.bukkit.ChatColor;
@@ -14,11 +15,11 @@ import org.bukkit.event.Listener;
 
 import java.util.UUID;
 
-public class FarmerJoeListener implements Listener {
+public class JobSiteNPCListener implements Listener {
 
     private final StoinkCore plugin;
 
-    public FarmerJoeListener(StoinkCore plugin) {
+    public JobSiteNPCListener(StoinkCore plugin) {
         this.plugin = plugin;
     }
 
@@ -31,7 +32,7 @@ public class FarmerJoeListener implements Listener {
         String enterpriseID = npc.data().get("ENTERPRISE_ID");
         String jobSiteType = npc.data().get("JOBSITE_TYPE");
 
-        if (enterpriseID == null || !JobSiteType.FARMLAND.name().equals(jobSiteType)) {
+        if (enterpriseID == null) {
             return;
         }
 
@@ -49,23 +50,19 @@ public class FarmerJoeListener implements Listener {
         }
 
         // Get the farmland site
-        FarmlandSite farmlandSite = enterprise.getJobSiteManager().getFarmlandSite();
-        if (farmlandSite == null) {
-            ChatUtils.sendMessage(player,ChatColor.RED + "Could not find farmland site!");
+        JobSite jobSite = enterprise.getJobSiteManager().getJobSite(JobSiteType.valueOf(jobSiteType));
+        if(jobSite == null){
+            ChatUtils.sendMessage(player,ChatColor.RED + "Could not find jobsite!");
             return;
         }
 
-        // Open your upgrade GUI
-        if(TimeUtils.isDay(farmlandSite.getSpawnPoint().getWorld())){
-            openFarmlandUpgradeGUI(player, farmlandSite);
-        }else{
-            ChatUtils.sendMessage(player,ChatColor.RED + "It's night time silly the crops are sleeping...");
-        }
-    }
+        JobSiteNPC jobSiteNPC = (JobSiteNPC) jobSite.getComponents().stream()
+                .filter(component -> component instanceof JobSiteNPC)
+                .filter(n -> ((JobSiteNPC) n).getNpc().getId() == event.getNPC().getId())
+                .findFirst()
+                .orElse(null);
 
-    private void openFarmlandUpgradeGUI(Player player, FarmlandSite farmlandSite) {
-        // Your GUI opening code here
-        new FarmlandGui(farmlandSite, player).openWindow();
-        ChatUtils.sendMessage(player,ChatColor.GREEN + "Opening Farmland Upgrades...");
+        if(jobSiteNPC != null)
+            jobSiteNPC.onRightClick(event);
     }
 }

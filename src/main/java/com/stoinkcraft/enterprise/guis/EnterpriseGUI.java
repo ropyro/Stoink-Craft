@@ -158,14 +158,14 @@ public class EnterpriseGUI {
                         ItemStack item = new ItemStack(Material.SKELETON_SKULL);
 
                         ItemBuilder openerhead = new ItemBuilder(item)
-                                .setDisplayName("§aGraveyard Coming soon...");
+                                .setDisplayName("§aTeleport to Graveyard");
 
                         return openerhead;
                     }
 
                     @Override
                     public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull InventoryClickEvent inventoryClickEvent) {
-                        //enterprise.getJobSiteManager().getFarmlandSite().teleportPlayer(player);
+                        enterprise.getJobSiteManager().getGraveyardSite().teleportPlayer(player);
                     }
                 })
                 .addIngredient('F', new AbstractItem() {

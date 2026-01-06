@@ -1,7 +1,12 @@
 package com.stoinkcraft.jobs.jobsites;
 
 import com.fastasyncworldedit.core.FaweAPI;
+import com.fastasyncworldedit.core.registry.state.PropertyKey;
+import com.sk89q.worldedit.EditSession;
+import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.regions.Region;
+import com.sk89q.worldedit.world.block.BlockState;
+import com.sk89q.worldedit.world.block.BlockTypes;
 import com.sk89q.worldguard.WorldGuard;
 import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
@@ -10,6 +15,7 @@ import com.stoinkcraft.StoinkCore;
 import com.stoinkcraft.enterprise.Enterprise;
 import com.stoinkcraft.jobs.jobsites.components.JobSiteComponent;
 import com.stoinkcraft.jobs.jobsites.components.JobSiteStructure;
+import com.stoinkcraft.jobs.jobsites.components.structures.StructureData;
 import com.stoinkcraft.utils.RegionUtils;
 import com.stoinkcraft.utils.SchematicUtils;
 import eu.decentsoftware.holograms.api.DHAPI;
@@ -64,8 +70,25 @@ public abstract class JobSite {
         RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
         RegionManager manager = container.get(FaweAPI.getWorld(spawnPoint.getWorld().getName()));
         manager.removeRegion(protectionRegionID);
-
         components.stream().forEach(c -> c.disband());
+
+        removeBuild();
+    }
+
+    private void removeBuild() {
+        com.sk89q.worldedit.world.World weWorld =
+                FaweAPI.getWorld(getSpawnPoint().getWorld().getName());
+
+        try (EditSession session = WorldEdit.getInstance().newEditSession(weWorld)) {
+
+            session.setBlocks(
+                    region,
+                    BlockTypes.AIR.getDefaultState()
+            );
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public boolean isBuilt(){
@@ -90,14 +113,6 @@ public abstract class JobSite {
         RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
         RegionManager manager = container.get(FaweAPI.getWorld(spawnPoint.getWorld().getName()));
         protectedRegion = manager.getRegion(protectionRegionID);
-    }
-
-    public void initializeHologram(String name, List<String> lines, Location loc){
-        try{
-            if(DHAPI.getHologram(name) != null)
-                DHAPI.getHologram(name).delete();
-        }catch (IllegalArgumentException e){}
-        DHAPI.createHologram(name, loc, true, lines);
     }
 
     public void teleportPlayer(Player player, boolean ignoreBuilt){
@@ -176,7 +191,7 @@ public abstract class JobSite {
     }
 
     public int getLevel(){
-        return JobsiteLevelHelper.getLevelFromXp((int)getData().getXp());
+        return JobsiteLevelHelper.getLevelFromXp(getData().getXp());
     }
 
     public void levelUp(){
@@ -188,7 +203,15 @@ public abstract class JobSite {
         this.components.add(component);
     }
 
+    public List<JobSiteComponent> getComponents() {
+        return components;
+    }
+
     public Enterprise getEnterprise(){
         return this.enterprise;
+    }
+
+    public JobSiteType getType() {
+        return type;
     }
 }

@@ -3,6 +3,7 @@ package com.stoinkcraft.serialization;
 import com.google.gson.Gson;
 import com.stoinkcraft.StoinkCore;
 import com.stoinkcraft.jobs.jobsites.sites.farmland.FarmlandData;
+import com.stoinkcraft.jobs.jobsites.sites.graveyard.GraveyardData;
 import com.stoinkcraft.jobs.jobsites.sites.quarry.QuarryData;
 import com.stoinkcraft.jobs.jobsites.sites.skyrise.SkyriseData;
 import org.bukkit.Bukkit;
@@ -27,7 +28,7 @@ public class JobSiteStorage {
     /**
      * Save all job site data for an enterprise
      */
-    public boolean saveJobSites(UUID enterpriseID, SkyriseData skyriseData, QuarryData quarryData, FarmlandData farmlandData) {
+    public boolean saveJobSites(UUID enterpriseID, SkyriseData skyriseData, QuarryData quarryData, FarmlandData farmlandData, GraveyardData graveyardData) {
         File jobSitesDir = getJobSitesDirectory(enterpriseID);
         if (!jobSitesDir.exists()) {
             jobSitesDir.mkdirs();
@@ -45,6 +46,10 @@ public class JobSiteStorage {
 
         if(farmlandData != null){
             success &= saveJobSite(jobSitesDir, "farmland.json", farmlandData, FarmlandData.class);
+        }
+
+        if(graveyardData != null){
+            success &= saveJobSite(jobSitesDir, "graveyard.json", graveyardData, GraveyardData.class);
         }
 
         return success;
@@ -166,6 +171,33 @@ public class JobSiteStorage {
                 try {
                     Bukkit.getLogger().info("Attempting to load from backup...");
                     return loadJobSite(backupFile, FarmlandData.class);
+                } catch (Exception ex) {
+                    Bukkit.getLogger().log(Level.SEVERE, "Backup also failed!", ex);
+                }
+            }
+            return null;
+        }
+    }
+
+    public GraveyardData loadGraveyardData(UUID enterpriseID) {
+        File jobSitesDir = getJobSitesDirectory(enterpriseID);
+        File jsonFile = new File(jobSitesDir, "graveyard.json");
+
+        if (!jsonFile.exists()) {
+            return null; // Will use defaults
+        }
+
+        try {
+            return loadJobSite(jsonFile, GraveyardData.class);
+        } catch (Exception e) {
+            Bukkit.getLogger().log(Level.SEVERE, "Failed to load graveyard data for: " + enterpriseID, e);
+
+            // Try backup
+            File backupFile = new File(jobSitesDir, "graveyard.json.backup");
+            if (backupFile.exists()) {
+                try {
+                    Bukkit.getLogger().info("Attempting to load from backup...");
+                    return loadJobSite(backupFile, GraveyardData.class);
                 } catch (Exception ex) {
                     Bukkit.getLogger().log(Level.SEVERE, "Backup also failed!", ex);
                 }

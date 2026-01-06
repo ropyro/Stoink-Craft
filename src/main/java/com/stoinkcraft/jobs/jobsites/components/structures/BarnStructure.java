@@ -7,8 +7,6 @@ import com.stoinkcraft.jobs.jobsites.components.JobSiteStructure;
 import com.stoinkcraft.jobs.jobsites.JobSiteType;
 import com.stoinkcraft.utils.ChatUtils;
 import com.stoinkcraft.utils.SchematicUtils;
-import eu.decentsoftware.holograms.api.DHAPI;
-import eu.decentsoftware.holograms.api.holograms.Hologram;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.util.Vector;
@@ -42,18 +40,24 @@ public class BarnStructure extends JobSiteStructure {
         constructionHologram =  getJobSite().getEnterprise().getID() + "_" + JobSiteType.FARMLAND.name() + "_barn";
         hologram = getHologram();
         getJobSite().addComponent(hologram);
+
     }
 
     @Override
     public void build() {
         super.build();
-        if(getJobSite().getData().getStructure(getId()).getState().equals(StructureState.BUILT)) hologram.delete();
+        if(getJobSite().getData().getStructure(getId()).getState().equals(StructureState.BUILT)){
+            hologram.delete();
+            JobSite site = getJobSite();
+            Location pasteLoc = site.getSpawnPoint();
+            SchematicUtils.pasteSchematic(SCHEMATIC, pasteLoc, false);
+        }
     }
 
     @Override
     public void onConstructionStart() {
         List<String> entryHoloGramLines = new ArrayList<>();
-        entryHoloGramLines.add(ChatColor.BLUE + "" + ChatColor.BOLD + "Barn Under Construction");
+        entryHoloGramLines.add(ChatColor.GOLD + "" + ChatColor.BOLD + "Barn Under Construction");
         entryHoloGramLines.add(ChatColor.WHITE + "The barn unlocks new animals and more contracts!");
         entryHoloGramLines.add(ChatColor.WHITE + "It also gives a considerable amount of xp when built.");
         entryHoloGramLines.add(" ");
@@ -63,12 +67,13 @@ public class BarnStructure extends JobSiteStructure {
 
     @Override
     public void onConstructionTick(long remainingMillis) {
-        String timeRemainingLine = ChatColor.WHITE + "Time Remaining: " + ChatColor.GREEN + ChatUtils.formatDuration(getBuildTimeMillis());
+        String timeRemainingLine = ChatColor.WHITE + "Time Remaining: " + ChatColor.GREEN + ChatUtils.formatDuration(remainingMillis);
         hologram.setLine(0, 4, timeRemainingLine);
     }
 
     @Override
     public void onConstructionComplete() {
+        super.onConstructionComplete();
         JobSite site = getJobSite();
         Location pasteLoc = site.getSpawnPoint();
         SchematicUtils.pasteSchematic(SCHEMATIC, pasteLoc, true);

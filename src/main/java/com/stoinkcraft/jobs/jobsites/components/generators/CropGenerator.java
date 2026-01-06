@@ -85,6 +85,12 @@ public class CropGenerator extends JobSiteGenerator {
         regenerateCrops();
     }
 
+    @Override
+    public void disband() {
+        super.disband();
+        RegionUtils.removeProtectedRegion(getParent().getSpawnPoint().getWorld(), regionName);
+    }
+
     /**
      * Applies artificial growth based on upgrade level.
      */

@@ -6,20 +6,21 @@ import com.stoinkcraft.jobs.jobsites.JobSite;
 import com.stoinkcraft.jobs.jobsites.JobSiteType;
 import com.stoinkcraft.jobs.jobsites.JobSiteUpgrade;
 import com.stoinkcraft.jobs.jobsites.components.JobSiteHologram;
+import com.stoinkcraft.jobs.jobsites.components.JobSiteNPC;
+import com.stoinkcraft.jobs.jobsites.components.JobSiteStructure;
 import com.stoinkcraft.jobs.jobsites.components.generators.CropGenerator;
+import com.stoinkcraft.jobs.jobsites.components.generators.HoneyGenerator;
 import com.stoinkcraft.jobs.jobsites.components.generators.PassiveMobGenerator;
 import com.stoinkcraft.jobs.jobsites.components.structures.BarnStructure;
-import com.stoinkcraft.utils.RegionUtils;
-import eu.decentsoftware.holograms.api.DHAPI;
-import net.citizensnpcs.api.CitizensAPI;
-import net.citizensnpcs.api.npc.NPC;
-import net.citizensnpcs.api.npc.NPCRegistry;
-import net.citizensnpcs.trait.LookClose;
-import net.citizensnpcs.trait.SkinTrait;
+import com.stoinkcraft.jobs.jobsites.components.structures.BeeHiveStructure;
+import com.stoinkcraft.utils.ChatUtils;
+import com.stoinkcraft.utils.TimeUtils;
+import net.citizensnpcs.api.event.NPCRightClickEvent;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
-import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
+import org.checkerframework.checker.units.qual.A;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -36,7 +37,9 @@ public class FarmlandSite extends JobSite {
     /**
      * Farmer Joe NPC
      */
-    private NPC farmerJoeNPC;
+    private JobSiteNPC farmerJoe;
+    private String farmerJoeTexture = "ewogICJ0aW1lc3RhbXAiIDogMTc0NDA5MzMxMTMxMCwKICAicHJvZmlsZUlkIiA6ICJiOWIzY2RlZmIyZmQ0YWY1ODQxMGViZWZjY2ZmYTBhYiIsCiAgInByb2ZpbGVOYW1lIiA6ICJpbnRlcnNlY2F0byIsCiAgInNpZ25hdHVyZVJlcXVpcmVkIiA6IHRydWUsCiAgInRleHR1cmVzIiA6IHsKICAgICJTS0lOIiA6IHsKICAgICAgInVybCIgOiAiaHR0cDovL3RleHR1cmVzLm1pbmVjcmFmdC5uZXQvdGV4dHVyZS9kY2Y1Mzk3YmEwNTc5ZTI3NGMxZDJhN2I4M2ExMmU1MDQ0NDBjYjQzOTgzODZkNTI4MTk5NmQ0MWMwNjc3N2M1IgogICAgfQogIH0KfQ==";
+    private String farmerJoeSignature = "k+SC0/ie439qZpjQQXSiYWRP4MWW4RLOsPdhc0KB/YBmJZGs1K/KhVtRrn1KFFV263foaBjEQtE/yoX9L5VYKmgJmTxscpDlX0KwnTVpZgDOwTU0rGUxg0VElmyqxRt49FH7UzJeuFs880jzHDBxuoRw28gHOMkaiE2WtdSDOXF6KcfwyZbZ/IlybI6ydcgzsVe6L8OXJuVEFStEuaPoE27qzz4OZX5wrYpW4FtmGIkISVXIEgh4Cd+R/toaXBLV7Egz/IuWrueihUv48QXv3lbPSncCuOcpqIjfJ+JSR1CcvkypbqhKdBMko7hTH77libQrz1k79Ghtppjw7cC6/tRdPAqOtNSAPk82nHbogctI7X7RBv+5ETtKK2nw8ckTyuqikgICYwjbmDNhhuSZHodb16pQy9LaGPXqi5ti4TgMFxsY98+Yys4N1Fz0WuMl1UDm44mjmH4o1aqsjeZKem/cqZbh3rppzLGZ/4lhmooTChGfPIONGCPdpgDh1yxzw8k96RNpG0bDJo5VzQB5LzuENiHgi1vBxFXdAQii5o7XZd6SPexmmwz4BNGymebjhnQ/VSj8PfTpF/SBBEYoJF3T7WR6Y/8UpbqDCbUQJhHxRSGu+qTg5CX2nkq1hw4bhKklOGRRlC0retK7oYGJhE3aJSY8m+wLQeJGL19+A8Y=";
     public static Vector farmerJoeOffset = new Vector(-27, 0, -14); // Adjust as needed
 
     /**
@@ -56,11 +59,55 @@ public class FarmlandSite extends JobSite {
     public static Vector mobGenCorner2Offset = new Vector(-51, 5, 3);
 
     /**
+     * Honey Generators
+     */
+    private List<HoneyGenerator> honeyGenerators = new ArrayList<>();
+    public static final List<Vector> HONEY_HIVE_OFFSETS = List.of(
+            new Vector(-10, 1, -37),
+            new Vector(-9, 1, -38),
+            new Vector(-9, 1, -37),
+            new Vector(-10, 1, -38),
+
+            new Vector(-10, 1, -42),
+            new Vector(-10, 1, -43),
+            new Vector(-9, 1, -42),
+            new Vector(-9, 1, -43),
+
+            new Vector(-6, 1, -37),
+            new Vector(-5, 1, -37),
+            new Vector(-4, 1, -37),
+            new Vector(-6, 1, -38),
+            new Vector(-5, 1, -38),
+            new Vector(-4, 1, -38),
+
+            new Vector(-6, 1, -42),
+            new Vector(-5, 1, -42),
+            new Vector(-4, 1, -42),
+            new Vector(-6, 1, -43),
+            new Vector(-5, 1, -43),
+            new Vector(-4, 1, -43),
+
+            new Vector(-1, 1, -37),
+            new Vector(0, 1, -37),
+            new Vector(-1, 1, -38),
+            new Vector(0, 1, -38),
+
+            new Vector(-1, 1, -42),
+            new Vector(0, 1, -42),
+            new Vector(-1, 1, -43),
+            new Vector(0, 1, -43)
+            // add more as needed
+    );
+
+    /**
      * Barn
      */
-
     private BarnStructure barnStructure;
 
+    /**
+     * Bee Hives
+     */
+    private BeeHiveStructure beeHiveStructure;
 
     public FarmlandSite(Enterprise enterprise, Location spawnPoint, FarmlandData data) {
         super(enterprise, JobSiteType.FARMLAND, spawnPoint,
@@ -81,17 +128,15 @@ public class FarmlandSite extends JobSite {
                 mobRegionID
         );
 
-        if (data.getFarmerJoeNpcId() != -1) {
-            NPCRegistry registry = CitizensAPI.getNPCRegistry();
-            farmerJoeNPC = registry.getById(data.getFarmerJoeNpcId());
-
-            // If NPC was deleted externally, reset the ID
-            if (farmerJoeNPC == null) {
-                getData().setFarmerJoeNpcId(-1);
-            }
-        }
+        farmerJoe = createFarmerJoe(this);
 
         barnStructure = new BarnStructure(this);
+
+        beeHiveStructure = new BeeHiveStructure(this);
+        for (Vector offset : HONEY_HIVE_OFFSETS) {
+            Location hiveLoc = spawnPoint.clone().add(offset);
+            honeyGenerators.add(new HoneyGenerator(hiveLoc, this));
+        }
 
         registerUpgrades();
         registerComponents();
@@ -108,7 +153,11 @@ public class FarmlandSite extends JobSite {
 
         addComponent(cropGenerator);
         addComponent(mobGenerator);
+        addComponent(farmerJoe);
         addComponent(barnStructure);
+        addComponent(beeHiveStructure);
+
+        honeyGenerators.forEach(gen -> addComponent(gen));
     }
 
     private void registerUpgrades() {
@@ -224,6 +273,36 @@ public class FarmlandSite extends JobSite {
                 site -> site.getData().getLevel("unlock_chicken") > 0,
                 (site, lvl) -> {}
         ));
+
+        //Bee hive upgrade
+        upgrades.add(new JobSiteUpgrade(
+                "honey_speed",
+                "Honey Generation Speed",
+                10,
+                5,
+                lvl -> 5000 * lvl,
+                site -> true,
+                (site, lvl) -> {}
+        ));
+    }
+
+    private JobSiteNPC createFarmerJoe(FarmlandSite farmlandSite){
+        return new JobSiteNPC(this,
+                ChatColor.GREEN + "Farmer Joe",
+                farmerJoeOffset,
+                farmerJoeTexture, farmerJoeSignature){
+            @Override
+            public void onRightClick(NPCRightClickEvent event) {
+                super.onRightClick(event);
+                Player player = event.getClicker();
+                if(TimeUtils.isDay(getSpawnPoint().getWorld())){
+                    new FarmlandGui(farmlandSite, player).openWindow();
+                    ChatUtils.sendMessage(player,ChatColor.GREEN + "Opening Farmland Upgrades...");
+                }else{
+                    ChatUtils.sendMessage(player,ChatColor.RED + "It's night time silly the crops are sleeping...");
+                }
+            }
+        };
     }
 
     @Override
@@ -234,20 +313,11 @@ public class FarmlandSite extends JobSite {
     @Override
     public void build() {
         super.build();
-
-        if (farmerJoeNPC == null) {
-            createFarmerJoeNPC();
-        }
     }
 
     @Override
     public void disband() {
         super.disband();
-        RegionUtils.removeProtectedRegion(spawnPoint.getWorld(), cropGenerator.getRegionName());
-
-       // mobGenerator.clearAllMobs();
-
-        removeFarmerJoeNPC();
     }
 
     @Override
@@ -255,57 +325,28 @@ public class FarmlandSite extends JobSite {
         return (FarmlandData)super.getData();
     }
 
-    private void createFarmerJoeNPC() {
-        NPCRegistry registry = CitizensAPI.getNPCRegistry();
-
-        // Create the NPC
-        farmerJoeNPC = registry.createNPC(EntityType.PLAYER, ChatColor.GREEN + "Farmer Joe");
-
-        // Spawn at the desired location
-        Location npcLocation = spawnPoint.clone().add(farmerJoeOffset);
-        farmerJoeNPC.spawn(npcLocation);
-
-        // Optional: Set skin (requires a valid Minecraft username or texture data)
-        String texture = "ewogICJ0aW1lc3RhbXAiIDogMTc0NDA5MzMxMTMxMCwKICAicHJvZmlsZUlkIiA6ICJiOWIzY2RlZmIyZmQ0YWY1ODQxMGViZWZjY2ZmYTBhYiIsCiAgInByb2ZpbGVOYW1lIiA6ICJpbnRlcnNlY2F0byIsCiAgInNpZ25hdHVyZVJlcXVpcmVkIiA6IHRydWUsCiAgInRleHR1cmVzIiA6IHsKICAgICJTS0lOIiA6IHsKICAgICAgInVybCIgOiAiaHR0cDovL3RleHR1cmVzLm1pbmVjcmFmdC5uZXQvdGV4dHVyZS9kY2Y1Mzk3YmEwNTc5ZTI3NGMxZDJhN2I4M2ExMmU1MDQ0NDBjYjQzOTgzODZkNTI4MTk5NmQ0MWMwNjc3N2M1IgogICAgfQogIH0KfQ==";
-        String signature = "k+SC0/ie439qZpjQQXSiYWRP4MWW4RLOsPdhc0KB/YBmJZGs1K/KhVtRrn1KFFV263foaBjEQtE/yoX9L5VYKmgJmTxscpDlX0KwnTVpZgDOwTU0rGUxg0VElmyqxRt49FH7UzJeuFs880jzHDBxuoRw28gHOMkaiE2WtdSDOXF6KcfwyZbZ/IlybI6ydcgzsVe6L8OXJuVEFStEuaPoE27qzz4OZX5wrYpW4FtmGIkISVXIEgh4Cd+R/toaXBLV7Egz/IuWrueihUv48QXv3lbPSncCuOcpqIjfJ+JSR1CcvkypbqhKdBMko7hTH77libQrz1k79Ghtppjw7cC6/tRdPAqOtNSAPk82nHbogctI7X7RBv+5ETtKK2nw8ckTyuqikgICYwjbmDNhhuSZHodb16pQy9LaGPXqi5ti4TgMFxsY98+Yys4N1Fz0WuMl1UDm44mjmH4o1aqsjeZKem/cqZbh3rppzLGZ/4lhmooTChGfPIONGCPdpgDh1yxzw8k96RNpG0bDJo5VzQB5LzuENiHgi1vBxFXdAQii5o7XZd6SPexmmwz4BNGymebjhnQ/VSj8PfTpF/SBBEYoJF3T7WR6Y/8UpbqDCbUQJhHxRSGu+qTg5CX2nkq1hw4bhKklOGRRlC0retK7oYGJhE3aJSY8m+wLQeJGL19+A8Y=";
-        farmerJoeNPC.getOrAddTrait(SkinTrait.class).setSkinPersistent("FarmerJoe", signature, texture);
-
-        farmerJoeNPC.getNavigator().getDefaultParameters().stationaryTicks(Integer.MAX_VALUE);
-        farmerJoeNPC.getOrAddTrait(LookClose.class).toggle();
-
-        // Store reference to this job site in NPC's data
-        farmerJoeNPC.data().setPersistent(NPC.Metadata.NAMEPLATE_VISIBLE, true);
-        farmerJoeNPC.data().setPersistent("ENTERPRISE_ID", enterprise.getID().toString());
-        farmerJoeNPC.data().setPersistent("JOBSITE_TYPE", JobSiteType.FARMLAND.name());
-
-        getData().setFarmerJoeNpcId(farmerJoeNPC.getId());
-    }
-
-    private void removeFarmerJoeNPC() {
-        NPCRegistry registry = CitizensAPI.getNPCRegistry();
-
-        int id = getData().getFarmerJoeNpcId();
-        if (id == -1) return;
-
-        NPC npc = registry.getById(id);
-        if (npc != null) {
-            npc.despawn();
-            npc.destroy();
-        }
-
-        getData().setFarmerJoeNpcId(-1);
-        farmerJoeNPC = null;
+    public boolean areBeeHivesBuilt() {
+        return getData()
+                .getStructure("beehive")
+                .getState().equals(JobSiteStructure.StructureState.BUILT);
     }
 
     public PassiveMobGenerator getMobGenerator() {
         return mobGenerator;
     }
-
     public CropGenerator getCropGenerator() {
         return cropGenerator;
     }
-
     public BarnStructure getBarnStructure() {
         return barnStructure;
+    }
+    public BeeHiveStructure getBeeHiveStructure(){
+        return beeHiveStructure;
+    }
+    public List<HoneyGenerator> getHoneyGenerators() {
+        return honeyGenerators;
+    }
+    public JobSiteNPC getFarmerJoe() {
+        return farmerJoe;
     }
 }

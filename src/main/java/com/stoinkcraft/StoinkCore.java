@@ -5,14 +5,10 @@ import com.stoinkcraft.enterprise.listeners.*;
 import com.stoinkcraft.jobs.contracts.ContractFeedbackManager;
 import com.stoinkcraft.jobs.contracts.ContractLoader;
 import com.stoinkcraft.jobs.contracts.ContractManager;
-import com.stoinkcraft.jobs.jobsites.sites.farmland.FarmerJoeListener;
-import com.stoinkcraft.jobs.listeners.BlockBreakListener;
-import com.stoinkcraft.jobs.listeners.CreatureSpawnListener;
-import com.stoinkcraft.jobs.listeners.EntityDeathListener;
+import com.stoinkcraft.jobs.listeners.*;
 import com.stoinkcraft.misc.daily.DailyCMD;
 import com.stoinkcraft.misc.daily.DailyManager;
 import com.stoinkcraft.jobs.boosters.BoostNoteInteractionListener;
-import com.stoinkcraft.market.MarketCMD;
 import com.stoinkcraft.enterprise.commands.TopCeoCMD;
 import com.stoinkcraft.enterprise.commands.enterprisecmd.EnterpriseCMD;
 import com.stoinkcraft.enterprise.commands.enterprisecmd.EnterpriseTabCompleter;
@@ -209,8 +205,9 @@ public class StoinkCore extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new CreatureSpawnListener(ewm.getWorld()), this);
         getServer().getPluginManager().registerEvents(new BlockBreakListener(), this);
         getServer().getPluginManager().registerEvents(new EntityDeathListener(), this);
+        getServer().getPluginManager().registerEvents(new PlayerInteractListener(), this);
         //Farmland
-        getServer().getPluginManager().registerEvents(new FarmerJoeListener(this), this);
+        getServer().getPluginManager().registerEvents(new JobSiteNPCListener(this), this);
     }
 
     private void startTasks(){
