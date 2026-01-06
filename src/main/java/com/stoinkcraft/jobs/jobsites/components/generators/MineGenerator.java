@@ -7,24 +7,26 @@ import com.sk89q.worldedit.function.pattern.RandomPattern;
 import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldedit.regions.Region;
+import com.sk89q.worldedit.world.block.BlockType;
 import com.sk89q.worldedit.world.block.BlockTypes;
 import com.sk89q.worldguard.protection.flags.Flags;
 import com.sk89q.worldguard.protection.flags.StateFlag;
 import com.stoinkcraft.jobs.jobsites.JobSite;
 import com.stoinkcraft.jobs.jobsites.JobSiteType;
 import com.stoinkcraft.jobs.jobsites.components.JobSiteGenerator;
+import com.stoinkcraft.jobs.jobsites.sites.quarry.OreSet;
 import com.stoinkcraft.jobs.jobsites.sites.quarry.QuarryData;
+import com.stoinkcraft.jobs.jobsites.sites.quarry.QuarrySite;
 import com.stoinkcraft.utils.ChatUtils;
 import com.stoinkcraft.utils.RegionUtils;
 import eu.decentsoftware.holograms.api.DHAPI;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.World;
+import org.bukkit.*;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 public class MineGenerator extends JobSiteGenerator {
 
@@ -35,17 +37,15 @@ public class MineGenerator extends JobSiteGenerator {
     private final CuboidRegion cuboidRegion;
     private final String regionName;
 
-    /** Seconds between regenerations */
-    private final long regenIntervalSeconds;
-
-    /** Seconds elapsed since last regen (persisted) */
-    private long elapsedSeconds;
+    // Geode settings
+    private static final double GEODE_SPAWN_CHANCE = 0.03; // 3% of blocks
+    private static final BlockType GEODE_BLOCK = BlockTypes.AMETHYST_BLOCK;
+    private static final BlockType GEODE_CLUSTER = BlockTypes.AMETHYST_CLUSTER;
 
     public MineGenerator(
             Location corner1,
             Location corner2,
             JobSite parent,
-            long regenIntervalSeconds,
             String regionName
     ) {
         super(parent);
@@ -54,14 +54,8 @@ public class MineGenerator extends JobSiteGenerator {
         this.corner2 = corner2.clone();
         this.bukkitWorld = corner1.getWorld();
         this.regionName = regionName;
-        this.regenIntervalSeconds = regenIntervalSeconds;
 
         this.cuboidRegion = createRegion(this.corner1, this.corner2);
-
-        // restore persisted value
-        if (parent.getData() instanceof QuarryData data) {
-            this.elapsedSeconds = data.getElapsedSeconds();
-        }
     }
 
     /* =========================
@@ -96,9 +90,10 @@ public class MineGenerator extends JobSiteGenerator {
     public void tick() {
         super.tick();
 
-        elapsedSeconds++;
+        QuarryData data = getQuarryData();
+        data.incrementElapsedSeconds();
 
-        if (elapsedSeconds >= regenIntervalSeconds) {
+        if (data.getElapsedSeconds() >= getRegenIntervalSeconds()) {
             regenerateMine();
         }
 
@@ -118,31 +113,57 @@ public class MineGenerator extends JobSiteGenerator {
        REGEN LOGIC
        ========================= */
 
-    private void regenerateMine() {
-        elapsedSeconds = 0;
-        persistElapsed();
+    public void regenerateMine() {
+        QuarryData data = getQuarryData();
+        data.setElapsedSeconds(0);
 
         teleportPlayersOutOfMine();
 
         com.sk89q.worldedit.world.World weWorld =
                 FaweAPI.getWorld(bukkitWorld.getName());
 
-        try (EditSession session = WorldEdit.getInstance().newEditSession(weWorld)) {
-            RandomPattern pattern = new RandomPattern();
-            pattern.add(BlockTypes.COBBLESTONE.getDefaultState(), 80);
-            pattern.add(BlockTypes.COAL_ORE.getDefaultState(), 10);
-            pattern.add(BlockTypes.IRON_ORE.getDefaultState(), 7);
-            pattern.add(BlockTypes.DIAMOND_ORE.getDefaultState(), 3);
+        OreSet oreSet = data.getCurrentOreSet();
 
+        try (EditSession session = WorldEdit.getInstance().newEditSession(weWorld)) {
+            // Main ore pattern
+            RandomPattern pattern = oreSet.toRandomPattern();
             session.setBlocks((Region) cuboidRegion, pattern);
         } catch (Exception e) {
             e.printStackTrace();
+        }
+
+        // Spawn geodes separately (after main generation)
+        spawnGeodes();
+    }
+
+    private void spawnGeodes() {
+        Random random = new Random();
+
+        BlockVector3 min = cuboidRegion.getMinimumPoint();
+        BlockVector3 max = cuboidRegion.getMaximumPoint();
+
+        for (int x = min.x(); x <= max.x(); x++) {
+            for (int y = min.y(); y <= max.y(); y++) {
+                for (int z = min.z(); z <= max.z(); z++) {
+                    if (random.nextDouble() < GEODE_SPAWN_CHANCE) {
+                        Location loc = new Location(bukkitWorld, x, y, z);
+                        Block block = loc.getBlock();
+
+                        // Randomly choose between amethyst block and cluster
+                        if (random.nextBoolean()) {
+                            block.setType(Material.AMETHYST_BLOCK);
+                        } else {
+                            block.setType(Material.AMETHYST_CLUSTER);
+                        }
+                    }
+                }
+            }
         }
     }
 
     private void teleportPlayersOutOfMine() {
         for (Player player : Bukkit.getOnlinePlayers()) {
-            if (getParent().contains(player.getLocation())) {
+            if (isInMineRegion(player.getLocation())) {
                 getParent().teleportPlayer(player, true);
                 ChatUtils.sendMessage(
                         player,
@@ -152,19 +173,20 @@ public class MineGenerator extends JobSiteGenerator {
         }
     }
 
+    public boolean isInMineRegion(Location loc) {
+        if (!loc.getWorld().equals(bukkitWorld)) return false;
+        BlockVector3 pos = BlockVector3.at(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
+        return cuboidRegion.contains(pos);
+    }
+
     /* =========================
        HOLOGRAM SYNC
        ========================= */
 
     private void updateHologram() {
-        long remaining = getRemainingSeconds();
-
-        long minutes = remaining / 60;
-        long seconds = remaining % 60;
-
         String line = ChatColor.GREEN +
                 "Regenerates In: " + ChatColor.WHITE +
-                minutes + "m " + seconds + "s";
+                ChatUtils.formatDuration(getRemainingSeconds());
 
         String hologramId =
                 getParent().getEnterprise().getID() + "_" +
@@ -181,17 +203,30 @@ public class MineGenerator extends JobSiteGenerator {
     }
 
     /* =========================
-       DATA PERSISTENCE
+       GETTERS
        ========================= */
 
-    private void persistElapsed() {
-        if (getParent().getData() instanceof QuarryData data) {
-            data.setElapsedSeconds(elapsedSeconds);
-        }
+    private QuarryData getQuarryData() {
+        return (QuarryData) getParent().getData();
+    }
+
+    public long getRegenIntervalSeconds() {
+        QuarryData data = getQuarryData();
+        int speedLevel = data.getLevel("regen_speed");
+
+        // Base 300 seconds (5 min), reduce by 30 seconds per level
+        long base = QuarrySite.DEFAULT_REGEN_INTERVAL_SECONDS;
+        long reduction = speedLevel * 30L;
+
+        return Math.max(60, base - reduction); // Minimum 60 seconds
     }
 
     public long getRemainingSeconds() {
-        return Math.max(0, regenIntervalSeconds - elapsedSeconds);
+        return Math.max(0, getRegenIntervalSeconds() - getQuarryData().getElapsedSeconds());
+    }
+
+    public OreSet getCurrentOreSet() {
+        return getQuarryData().getCurrentOreSet();
     }
 
     /* =========================

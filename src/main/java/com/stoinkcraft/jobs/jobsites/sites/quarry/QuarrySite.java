@@ -4,11 +4,12 @@ import com.stoinkcraft.StoinkCore;
 import com.stoinkcraft.enterprise.Enterprise;
 import com.stoinkcraft.jobs.jobsites.JobSite;
 import com.stoinkcraft.jobs.jobsites.JobSiteType;
+import com.stoinkcraft.jobs.jobsites.JobSiteUpgrade;
 import com.stoinkcraft.jobs.jobsites.components.JobSiteHologram;
 import com.stoinkcraft.jobs.jobsites.components.JobSiteNPC;
 import com.stoinkcraft.jobs.jobsites.components.generators.MineGenerator;
 import com.stoinkcraft.jobs.jobsites.components.structures.PowerCellStructure;
-import com.stoinkcraft.utils.ChatUtils;
+import com.stoinkcraft.jobs.jobsites.components.unlockable.UnlockableState;
 import net.citizensnpcs.api.event.NPCRightClickEvent;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -29,11 +30,15 @@ public class QuarrySite extends JobSite {
             new Vector(-25, -21, 17);
 
     public static final Vector MINER_BOB_OFFSET =
-            new Vector(-0.5, 0, 4.5); // adjust as needed
+            new Vector(-0.5, 0, 4.5);
 
-    public static final long DEFAULT_REGEN_INTERVAL_SECONDS = 300L;
+    //8hr default regen time
+    public static final long DEFAULT_REGEN_INTERVAL_SECONDS = 30L;
 
-    private static final String MINER_BOB_TEXTURE = "ewogICJ0aW1lc3RhbXAiIDogMTY4MDE3NzE1NzgxMSwKICAicHJvZmlsZUlkIiA6ICJkOGNkMTNjZGRmNGU0Y2IzODJmYWZiYWIwOGIyNzQ4OSIsCiAgInByb2ZpbGVOYW1lIiA6ICJaYWNoeVphY2giLAogICJzaWduYXR1cmVSZXF1aXJlZCIgOiB0cnVlLAogICJ0ZXh0dXJlcyIgOiB7CiAgICAiU0tJTiIgOiB7CiAgICAgICJ1cmwiIDogImh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYTY5YmRmYmIzZGRiNTA3YThjYjZiZTUyMDU3MWU0YjZmMjExNjBjMzUwNTlkMTFmZGYzYTI5NjI5ZmU1N2Y1MCIKICAgIH0KICB9Cn0=";
+    // XP per geode block mined
+    public static final int GEODE_XP_REWARD = 25;
+
+    private static final String MINER_BOB_TEXTURE =  "ewogICJ0aW1lc3RhbXAiIDogMTY4MDE3NzE1NzgxMSwKICAicHJvZmlsZUlkIiA6ICJkOGNkMTNjZGRmNGU0Y2IzODJmYWZiYWIwOGIyNzQ4OSIsCiAgInByb2ZpbGVOYW1lIiA6ICJaYWNoeVphY2giLAogICJzaWduYXR1cmVSZXF1aXJlZCIgOiB0cnVlLAogICJ0ZXh0dXJlcyIgOiB7CiAgICAiU0tJTiIgOiB7CiAgICAgICJ1cmwiIDogImh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYTY5YmRmYmIzZGRiNTA3YThjYjZiZTUyMDU3MWU0YjZmMjExNjBjMzUwNTlkMTFmZGYzYTI5NjI5ZmU1N2Y1MCIKICAgIH0KICB9Cn0=";
     private static final String MINER_BOB_SIGNATURE = "FGpddwZXQZ8jfAyCYxXQg5k9u6xJBszvw/vsIHV8sPjnsyBJDChZwHKXfc5bo5Pro1mfQZwJ5oQqtFlRbR4Mp2hODJmj96C9HPMFIjYTMXXGHo0FcHQ8fJPz93/qnhMIZquDXdgqVzcFYz0ga+DwkPhsEUSiDx/qzka7nESev5Dd+/V1gpIT8a0MJL25xAov/yUXEZ71I2v01SeMa9nqhiDxCpiu8VhpIR2BLdDGPSMqQz4uL+rzYWXkzjByWZpoSRRLf5cMqWcBFaoRLlR6ILAhhOdNPBPll9UDcfRVUestDxo0xxfgPddgPWPAik8RbDG3sNooGFfjviAcI3XzSO5k/esE+QJ97WRR/FQ9da94Zn4dsS6nEWV4n6n6L3cqsRyoDeboT5n0Y6HXiyudsfmIHHho12uttY8jkPtx+/ZDC/aJWLMAW89n5TqWzhv6s6q9qdiidwmw2rIBwPUx9fiVnWHiDBsL0V3/c2QHlfaqJ2j3sP/BpXnS2chQGI9Ub40Igm1MJHH5J1zs/oNLblYQ0McWoEx57oXOVx5qSnc4TzL36zB5AqSf0NGjF68cS+FP0YD3YjWWBABdZ9E+C34C38Ps9OCDM42GuQHC2wADHh0heidDr4VAABYA1MqpP7cCNb0hzTwwJtgijjCQ9ni63zbBdHR1clcN/4bEhT8=";
 
     /* =========================
@@ -72,16 +77,14 @@ public class QuarrySite extends JobSite {
                 corner1,
                 corner2,
                 this,
-                (int) data.getRegenIntervalSeconds(),
                 mineRegionID
         );
 
         minerBob = createMinerBob(this);
-
         powerCell = new PowerCellStructure(this);
 
-        registerComponents();
         registerUpgrades();
+        registerComponents();
     }
 
     /* =========================
@@ -89,7 +92,6 @@ public class QuarrySite extends JobSite {
        ========================= */
 
     private void registerComponents() {
-
         List<String> lines = new ArrayList<>();
         lines.add(ChatColor.AQUA + "" + ChatColor.BOLD + "Welcome to the Quarry");
         lines.add(ChatColor.WHITE + "Here you will mine ores and stone");
@@ -97,6 +99,7 @@ public class QuarrySite extends JobSite {
         lines.add(ChatColor.WHITE + "Upgrade regen speed and unlock ores!");
         lines.add(" ");
         lines.add(ChatColor.GREEN + "Regenerates In: calculating...");
+
         addComponent(new JobSiteHologram(
                 this,
                 welcomeHologramId,
@@ -114,7 +117,119 @@ public class QuarrySite extends JobSite {
        ========================= */
 
     private void registerUpgrades() {
-        // add quarry upgrades later
+
+        // Regeneration Speed Upgrade
+        upgrades.add(new JobSiteUpgrade(
+                "regen_speed",
+                "Regeneration Speed",
+                8, // max level
+                2, // required jobsite level
+                lvl -> 10_000 * lvl,
+                site -> true,
+                (site, lvl) -> {} // Effect is read dynamically by MineGenerator
+        ));
+
+        // Power Cell Level Upgrade (requires power cell to be built)
+        upgrades.add(new JobSiteUpgrade(
+                "power_level",
+                "Power Cell Level",
+                3, // max level (Haste I, II, III)
+                10, // required jobsite level
+                lvl -> 50_000 * lvl,
+                site -> site.getData().getUnlockableState("powercell") == UnlockableState.UNLOCKED,
+                (site, lvl) -> {
+                    site.getEnterprise().sendEnterpriseMessage(
+                            "§6§lPower Cell upgraded to Level " + lvl + "!",
+                            "§eMiners now receive Haste " + toRoman(lvl) + "!"
+                    );
+                }
+        ));
+
+        // Ore Set Unlocks
+        upgrades.add(new JobSiteUpgrade(
+                "unlock_stone_varieties",
+                "Unlock Stone Varieties",
+                1,
+                OreSet.STONE_VARIETIES.getRequiredLevel(),
+                lvl -> 25_000,
+                site -> true,
+                (site, lvl) -> {}
+        ));
+
+        upgrades.add(new JobSiteUpgrade(
+                "unlock_copper_collection",
+                "Unlock Copper Collection",
+                1,
+                OreSet.COPPER_COLLECTION.getRequiredLevel(),
+                lvl -> 50_000,
+                site -> site.getData().getLevel("unlock_stone_varieties") > 0,
+                (site, lvl) -> {}
+        ));
+
+        upgrades.add(new JobSiteUpgrade(
+                "unlock_precious_metals",
+                "Unlock Precious Metals",
+                1,
+                OreSet.PRECIOUS_METALS.getRequiredLevel(),
+                lvl -> 100_000,
+                site -> site.getData().getLevel("unlock_copper_collection") > 0,
+                (site, lvl) -> {}
+        ));
+
+        upgrades.add(new JobSiteUpgrade(
+                "unlock_deep_minerals",
+                "Unlock Deep Minerals",
+                1,
+                OreSet.DEEP_MINERALS.getRequiredLevel(),
+                lvl -> 150_000,
+                site -> site.getData().getLevel("unlock_precious_metals") > 0,
+                (site, lvl) -> {}
+        ));
+
+        upgrades.add(new JobSiteUpgrade(
+                "unlock_nether_resources",
+                "Unlock Nether Resources",
+                1,
+                OreSet.NETHER_RESOURCES.getRequiredLevel(),
+                lvl -> 250_000,
+                site -> site.getData().getLevel("unlock_deep_minerals") > 0,
+                (site, lvl) -> {}
+        ));
+    }
+
+    private String toRoman(int num) {
+        return switch (num) {
+            case 1 -> "I";
+            case 2 -> "II";
+            case 3 -> "III";
+            default -> String.valueOf(num);
+        };
+    }
+
+    /* =========================
+       ORE SET HELPERS
+       ========================= */
+
+    public boolean isOreSetUnlocked(OreSet oreSet) {
+        return switch (oreSet) {
+            case MINING_BASICS -> true; // Always unlocked
+            case STONE_VARIETIES -> getData().getLevel("unlock_stone_varieties") > 0;
+            case COPPER_COLLECTION -> getData().getLevel("unlock_copper_collection") > 0;
+            case PRECIOUS_METALS -> getData().getLevel("unlock_precious_metals") > 0;
+            case DEEP_MINERALS -> getData().getLevel("unlock_deep_minerals") > 0;
+            case NETHER_RESOURCES -> getData().getLevel("unlock_nether_resources") > 0;
+        };
+    }
+
+    public String getUnlockUpgradeId(OreSet oreSet) {
+        return switch (oreSet) {
+            case MINING_BASICS -> null;
+            case STONE_VARIETIES -> "unlock_stone_varieties";
+            case COPPER_COLLECTION -> "unlock_copper_collection";
+            case PRECIOUS_METALS -> "unlock_precious_metals";
+            case DEEP_MINERALS -> "unlock_deep_minerals";
+            case NETHER_RESOURCES -> "unlock_nether_resources";
+        };
     }
 
     /* =========================
@@ -132,17 +247,8 @@ public class QuarrySite extends JobSite {
             @Override
             public void onRightClick(NPCRightClickEvent event) {
                 super.onRightClick(event);
-
                 Player player = event.getClicker();
-
-                // Placeholder interaction
-                ChatUtils.sendMessage(
-                        player,
-                        ChatColor.YELLOW + "Miner Bob says: \"Hard work pays off down here!\""
-                );
-
-                // Later:
-                // new QuarryGui(quarrySite, player).openWindow();
+                new QuarryGui(quarrySite, player).openWindow();
             }
         };
     }
@@ -167,5 +273,13 @@ public class QuarrySite extends JobSite {
 
     public JobSiteNPC getMinerBob() {
         return minerBob;
+    }
+
+    public PowerCellStructure getPowerCell() {
+        return powerCell;
+    }
+
+    public boolean isPowerCellBuilt() {
+        return powerCell.isUnlocked();
     }
 }

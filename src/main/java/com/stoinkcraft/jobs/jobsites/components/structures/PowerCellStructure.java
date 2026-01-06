@@ -7,12 +7,14 @@ import com.stoinkcraft.jobs.jobsites.components.JobSiteHologram;
 import com.stoinkcraft.jobs.jobsites.components.JobSiteStructure;
 import com.stoinkcraft.utils.ChatUtils;
 import com.stoinkcraft.utils.SchematicUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Location;
+import org.bukkit.entity.Player;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -21,103 +23,159 @@ public class PowerCellStructure extends JobSiteStructure {
     private static final File SCHEMATIC =
             new File(StoinkCore.getInstance().getDataFolder(), "/schematics/powercell.schem");
 
-    private String constructionHologram;
-    public static Vector constructionHologramOffset = new Vector(-27.5, 3, -0.5);
-    private JobSiteHologram hologram;
+    public static final Vector HOLOGRAM_OFFSET = new Vector(-25.5, 3, -0.5);
 
-    public PowerCellStructure(JobSite jobSite){
+    private JobSiteHologram hologram;
+    private final String hologramId;
+
+    // Haste effect settings
+    private static final int EFFECT_CHECK_INTERVAL = 3; // ticks (1 second)
+    private int tickCounter = 0;
+
+    public PowerCellStructure(JobSite jobSite) {
         super(
                 "powercell",
                 "Power Cell",
                 10,
-                TimeUnit.SECONDS.toMillis(10),
-                () -> 125000,
+                TimeUnit.SECONDS.toMillis(30),
+                () -> 125_000,
                 site -> true,
                 jobSite
         );
 
-        constructionHologram =  getJobSite().getEnterprise().getID() + "_" + JobSiteType.QUARRY.name() + "_" + getId();
-        hologram = getHologram();
+        this.hologramId = getJobSite().getEnterprise().getID() + "_" +
+                JobSiteType.QUARRY.name() + "_powercell";
+        this.hologram = createHologram();
         getJobSite().addComponent(hologram);
     }
 
     @Override
     public void build() {
         super.build();
-        if(getJobSite().getData().getStructure(getId()).getState().equals(StructureState.BUILT)){
+        if (isUnlocked()) {
             hologram.delete();
-            JobSite site = getJobSite();
-            Location pasteLoc = site.getSpawnPoint();
-            SchematicUtils.pasteSchematic(SCHEMATIC, pasteLoc, false);
+            pasteStructure();
         }
     }
 
     @Override
-    public void onConstructionStart() {
-        List<String> constructionHologramLines = new ArrayList<>();
-        constructionHologramLines.add(ChatColor.GOLD + "" + ChatColor.BOLD + "Power Cell Under Construction");
-        constructionHologramLines.add(ChatColor.WHITE + "The power cell unlocks potion effect buffs!");
-        constructionHologramLines.add(ChatColor.WHITE + "It also gives a considerable amount of xp when built.");
-        constructionHologramLines.add(" ");
-        constructionHologramLines.add(ChatColor.WHITE + "Time Remaining: " + ChatColor.GREEN + ChatUtils.formatDuration(getBuildTimeMillis()));
-        hologram.setLines(0, constructionHologramLines);
+    public void tick() {
+        super.tick();
+
+        // Apply haste effect to players in the quarry
+        if (isUnlocked()) {
+            tickCounter++;
+            if (tickCounter >= EFFECT_CHECK_INTERVAL) {
+                tickCounter = 0;
+                applyHasteToPlayers();
+            }
+        }
+    }
+
+    private void applyHasteToPlayers() {
+        int powerLevel = getPowerLevel();
+        if (powerLevel <= 0) return;
+
+        int hasteAmplifier = powerLevel - 1; // Haste I, II, or III (0-indexed)
+        int durationTicks = EFFECT_CHECK_INTERVAL*20 + 20; // Slightly longer than check interval
+
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            if (getJobSite().contains(player.getLocation())) {
+                player.addPotionEffect(new PotionEffect(
+                        PotionEffectType.HASTE,
+                        durationTicks,
+                        hasteAmplifier,
+                        true,  // ambient
+                        false, // no particles
+                        true   // show icon
+                ));
+            }
+        }
+    }
+
+    /**
+     * @return Power level 1-3 based on upgrade, or 0 if not upgraded
+     */
+    public int getPowerLevel() {
+        return getJobSite().getData().getLevel("power_level");
     }
 
     @Override
-    public void onConstructionTick(long remainingMillis) {
-        String timeRemainingLine = ChatColor.WHITE + "Time Remaining: " + ChatColor.GREEN + ChatUtils.formatDuration(remainingMillis);
-        hologram.setLine(0, 4, timeRemainingLine);
+    public void onUnlockStart() {
+        hologram.setLines(0, List.of(
+                ChatColor.GOLD + "" + ChatColor.BOLD + "Power Cell Under Construction",
+                ChatColor.WHITE + "The Power Cell provides Haste",
+                ChatColor.WHITE + "to all miners in the quarry!",
+                " ",
+                ChatColor.WHITE + "Time Remaining: " + ChatColor.GREEN +
+                        ChatUtils.formatDuration(getBuildTimeMillis())
+        ));
     }
 
     @Override
-    public void onConstructionComplete() {
-        super.onConstructionComplete();
-        JobSite site = getJobSite();
-        Location pasteLoc = site.getSpawnPoint();
-        SchematicUtils.pasteSchematic(SCHEMATIC, pasteLoc, false);
+    public void onUnlockTick(long remainingMillis) {
+        hologram.setLine(0, 4,
+                ChatColor.WHITE + "Time Remaining: " + ChatColor.GREEN +
+                        ChatUtils.formatDuration(remainingMillis));
+    }
 
-        //reward
-        site.getData().incrementXp(1000);
-        site.getEnterprise().sendEnterpriseMessage(                "§6§lPower Cell Construction Complete!",
+    @Override
+    public void onUnlockComplete() {
+        pasteStructure();
+
+        getJobSite().getData().incrementXp(500);
+        getJobSite().getEnterprise().sendEnterpriseMessage(
+                "§6§lPower Cell Construction Complete!",
                 "",
-                "§a+ 1000xp",
-                "");
+                "§a+ 500xp",
+                "§eMiners now receive Haste in the quarry!"
+        );
 
         hologram.delete();
     }
 
     @Override
-    public void disband() {
-    }
-
-    @Override
     public void levelUp() {
         super.levelUp();
-        List<String> constructionHologramLines = new ArrayList<>();
-        if(canUnlock(getJobSite()) && !getJobSite().getData().getStructure(getId()).getState().equals(StructureState.BUILT)){
-            constructionHologramLines.add(ChatColor.GREEN + "" + ChatColor.BOLD + "Power Cell Unlocked!");
-            constructionHologramLines.add(ChatColor.WHITE + "Talk to Miner Bob to start building the Power Cell.");
-            constructionHologramLines.add(" ");
-            constructionHologramLines.add(ChatColor.WHITE + "The power cell unlocks potion effect buffs!");
-            constructionHologramLines.add(ChatColor.WHITE + "It also gives a considerable amount of xp when built.");
-            hologram.setLines(0, constructionHologramLines);
+        if (!isUnlocked()) {
+            updateHologramForLevel();
         }
     }
 
-    private JobSiteHologram getHologram(){
-        List<String> constructionHologramLines = new ArrayList<>();
-        if(canUnlock(getJobSite())){
-            constructionHologramLines.add(ChatColor.GREEN + "" + ChatColor.BOLD + "Power Cell Unlocked!");
-            constructionHologramLines.add(ChatColor.WHITE + "Talk to Miner Bob to start building the Power Cell.");
-            constructionHologramLines.add(" ");
-            constructionHologramLines.add(ChatColor.WHITE + "The power cell unlocks potion effect buffs!");
-            constructionHologramLines.add(ChatColor.WHITE + "It also gives a considerable amount of xp when built.");
-        }else{
-            constructionHologramLines.add(ChatColor.RED + "" + ChatColor.BOLD + "Power Cell Unlocked at Level: " + getRequiredJobsiteLevel());
-            constructionHologramLines.add(ChatColor.WHITE + "The power cell unlocks potion effect buffs!");
-            constructionHologramLines.add(ChatColor.WHITE + "It also gives a considerable amount of xp when built.");
+    private void pasteStructure() {
+        SchematicUtils.pasteSchematic(SCHEMATIC, getJobSite().getSpawnPoint(), false);
+    }
+
+    private void updateHologramForLevel() {
+        if (canUnlock()) {
+            hologram.setLines(0, List.of(
+                    ChatColor.GREEN + "" + ChatColor.BOLD + "Power Cell Unlocked!",
+                    ChatColor.WHITE + "Talk to Miner Bob to start building.",
+                    " ",
+                    ChatColor.WHITE + "The Power Cell provides Haste",
+                    ChatColor.WHITE + "to all miners in the quarry!"
+            ));
         }
-        hologram = new JobSiteHologram(getJobSite(), constructionHologram, constructionHologramOffset, constructionHologramLines);
-        return hologram;
+    }
+
+    private JobSiteHologram createHologram() {
+        List<String> lines;
+        if (canUnlock()) {
+            lines = List.of(
+                    ChatColor.GREEN + "" + ChatColor.BOLD + "Power Cell Unlocked!",
+                    ChatColor.WHITE + "Talk to Miner Bob to start building.",
+                    " ",
+                    ChatColor.WHITE + "The Power Cell provides Haste",
+                    ChatColor.WHITE + "to all miners in the quarry!"
+            );
+        } else {
+            lines = List.of(
+                    ChatColor.RED + "" + ChatColor.BOLD + "Power Cell Unlocks at Level: " +
+                            getRequiredJobsiteLevel(),
+                    ChatColor.WHITE + "The Power Cell provides Haste",
+                    ChatColor.WHITE + "to all miners in the quarry!"
+            );
+        }
+        return new JobSiteHologram(getJobSite(), hologramId, HOLOGRAM_OFFSET, lines);
     }
 }

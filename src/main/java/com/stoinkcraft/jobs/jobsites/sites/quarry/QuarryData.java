@@ -11,23 +11,15 @@ import org.bukkit.util.Vector;
 public class QuarryData extends JobSiteData {
 
     @Expose
-    private long regenIntervalSeconds;
+    private long elapsedSeconds;
 
     @Expose
-    private long elapsedSeconds;
+    private String currentOreSet;
 
     public QuarryData(boolean isBuilt, JobSite parent) {
         super(isBuilt, parent);
-        this.regenIntervalSeconds = QuarrySite.DEFAULT_REGEN_INTERVAL_SECONDS;
         this.elapsedSeconds = 0L;
-    }
-
-    public long getRegenIntervalSeconds() {
-        return regenIntervalSeconds;
-    }
-
-    public void setRegenIntervalSeconds(long regenIntervalSeconds) {
-        this.regenIntervalSeconds = regenIntervalSeconds;
+        this.currentOreSet = OreSet.MINING_BASICS.name();
     }
 
     public long getElapsedSeconds() {
@@ -36,5 +28,21 @@ public class QuarryData extends JobSiteData {
 
     public void setElapsedSeconds(long elapsedSeconds) {
         this.elapsedSeconds = elapsedSeconds;
+    }
+
+    public void incrementElapsedSeconds() {
+        this.elapsedSeconds++;
+    }
+
+    public OreSet getCurrentOreSet() {
+        try {
+            return OreSet.valueOf(currentOreSet);
+        } catch (Exception e) {
+            return OreSet.MINING_BASICS;
+        }
+    }
+
+    public void setCurrentOreSet(OreSet oreSet) {
+        this.currentOreSet = oreSet.name();
     }
 }
