@@ -120,6 +120,7 @@ public class ContractStorage {
                 data.expirationTime,
                 data.progress,
                 data.completed,
+                data.weekly,
                 data.contributions
         );
     }

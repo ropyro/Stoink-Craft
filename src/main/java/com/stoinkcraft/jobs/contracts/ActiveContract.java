@@ -18,15 +18,21 @@ public class ActiveContract {
     private int progress;
     private final long expirationTime;
     private boolean completed;
+    private final boolean weekly;
 
     private final Map<UUID, Integer> contributions;
 
     public ActiveContract(UUID enterpriseId, ContractDefinition definition, long expirationTime) {
+        this(enterpriseId, definition, expirationTime, false);
+    }
+
+    public ActiveContract(UUID enterpriseId, ContractDefinition definition, long expirationTime, boolean weekly) {
         this.contractId = UUID.randomUUID();
         this.enterpriseId = enterpriseId;
         this.definition = definition;
         this.expirationTime = expirationTime;
-        contributions = new HashMap<>();
+        this.weekly = weekly;
+        this.contributions = new HashMap<>();
     }
 
     public ActiveContract(
@@ -36,6 +42,7 @@ public class ActiveContract {
             long expirationTime,
             int progress,
             boolean completed,
+            boolean weekly,
             Map<UUID, Integer> contributions
     ) {
         this.contractId = contractId;
@@ -44,6 +51,7 @@ public class ActiveContract {
         this.expirationTime = expirationTime;
         this.progress = progress;
         this.completed = completed;
+        this.weekly = weekly;
         this.contributions = new HashMap<>(contributions);
     }
 
@@ -55,6 +63,7 @@ public class ActiveContract {
         data.progress = progress;
         data.expirationTime = expirationTime;
         data.completed = completed;
+        data.weekly = weekly;
         data.contributions = new HashMap<>(contributions);
         return data;
     }
@@ -105,6 +114,10 @@ public class ActiveContract {
 
     public boolean isCompleted() {
         return completed;
+    }
+
+    public boolean isWeekly() {
+        return weekly;
     }
 
     private void onCompleted() {

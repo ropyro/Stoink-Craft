@@ -9,6 +9,7 @@ import com.stoinkcraft.jobs.jobsites.JobSiteType;
 import com.stoinkcraft.utils.ContractTimeUtil;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class ContractManager {
 
@@ -42,9 +43,7 @@ public class ContractManager {
     }
 
     public void handleContext(Enterprise enterprise, ContractContext context) {
-
         for (ActiveContract contract : getContracts(enterprise, context.getJobSiteType())) {
-
             if (!contract.canProgress()) continue;
 
             ContractTrigger trigger = contract.getDefinition().trigger();
@@ -54,6 +53,7 @@ public class ContractManager {
                     context.getPlayer().getUniqueId(),
                     trigger.getProgressIncrement(context)
             );
+
             ContractFeedbackManager feedbackManager = StoinkCore.getInstance().getContractFeedbackManager();
             feedbackManager.showBossBar(context.getPlayer(), contract);
             feedbackManager.clearIfFinished(context.getPlayer(), contract);
@@ -77,7 +77,6 @@ public class ContractManager {
     }
 
     public void removeExpiredContracts() {
-
         for (Iterator<Map.Entry<UUID, List<ActiveContract>>> it =
              contracts.entrySet().iterator(); it.hasNext(); ) {
 
@@ -93,32 +92,56 @@ public class ContractManager {
     }
 
     public void generateContracts(Enterprise enterprise, boolean weekly) {
-
         JobSiteManager jsm = enterprise.getJobSiteManager();
 
-        for (JobSiteType type : JobSiteType.values()) {
+        // Get or create the list directly - DO NOT call getContracts() to avoid recursion
+        List<ActiveContract> enterpriseContracts =
+                contracts.computeIfAbsent(enterprise.getID(), k -> new ArrayList<>());
 
+        for (JobSiteType type : JobSiteType.values()) {
             JobSite site = jsm.getJobSite(type);
             if (site == null) continue;
 
+            // Fixed count: 7 daily, 7 weekly
             int count = weekly
-                    ? ContractScaling.weeklyContractsForLevel(site.getLevel())
-                    : ContractScaling.dailyContractsForLevel(site.getLevel());
+                    ? ContractScaling.WEEKLY_CONTRACT_COUNT
+                    : ContractScaling.DAILY_CONTRACT_COUNT;
 
+            // Filter from local list - not through getContracts()
+            Set<String> activeContractIds = enterpriseContracts.stream()
+                    .filter(c -> c.getDefinition().jobSiteType() == type)
+                    .filter(c -> c.isWeekly() == weekly)
+                    .filter(c -> !c.isExpired())
+                    .map(c -> c.getDefinition().id())
+                    .collect(Collectors.toSet());
+
+            // Get available contracts excluding already active ones
             List<ContractDefinition> available =
-                    new ArrayList<>(contractPool.getAvailableContracts(enterprise, type, weekly));
+                    contractPool.getAvailableContracts(enterprise, type, weekly).stream()
+                            .filter(def -> !activeContractIds.contains(def.id()))
+                            .collect(Collectors.toCollection(ArrayList::new));
 
             Collections.shuffle(available);
 
+            // Calculate current count from local list
+            int currentCount = (int) enterpriseContracts.stream()
+                    .filter(c -> c.getDefinition().jobSiteType() == type)
+                    .filter(c -> c.isWeekly() == weekly)
+                    .filter(c -> !c.isExpired())
+                    .count();
+
+            int needed = Math.max(0, count - currentCount);
+
             available.stream()
-                    .limit(count)
+                    .limit(needed)
                     .forEach(def -> {
                         long expiry = weekly
                                 ? ContractTimeUtil.nextWeek()
                                 : ContractTimeUtil.nextDay();
 
-                        addContract(enterprise,
-                                new ActiveContract(enterprise.getID(), def, expiry));
+                        // Add directly to the list
+                        enterpriseContracts.add(
+                                new ActiveContract(enterprise.getID(), def, expiry, weekly));
                     });
         }
     }
@@ -127,7 +150,7 @@ public class ContractManager {
         return contractPool;
     }
 
-    public void setContracts(Enterprise enterprise, List<ActiveContract> activeContracts){
+    public void setContracts(Enterprise enterprise, List<ActiveContract> activeContracts) {
         this.contracts.put(enterprise.getID(), new ArrayList<>(activeContracts));
     }
 }

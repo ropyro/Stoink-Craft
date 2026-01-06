@@ -1,0 +1,1020 @@
+package com.stoinkcraft.jobs.contracts;
+
+import com.stoinkcraft.jobs.contracts.rewards.CompositeReward;
+import com.stoinkcraft.jobs.contracts.rewards.JobSiteXpReward;
+import com.stoinkcraft.jobs.contracts.rewards.MoneyReward;
+import com.stoinkcraft.jobs.contracts.triggers.BlockMineTrigger;
+import com.stoinkcraft.jobs.contracts.triggers.CropHarvestTrigger;
+import com.stoinkcraft.jobs.contracts.triggers.GeodeMineTrigger;
+import com.stoinkcraft.jobs.contracts.triggers.MobKillTrigger;
+import com.stoinkcraft.jobs.jobsites.JobSiteType;
+import org.bukkit.Material;
+import org.bukkit.entity.EntityType;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+public class ContractPoolLoader {
+
+    public static ContractPool load() {
+
+        List<ContractDefinition> daily = new ArrayList<>();
+        List<ContractDefinition> weekly = new ArrayList<>();
+
+        loadFarmlandContracts(daily, weekly);
+        loadQuarryContracts(daily, weekly);
+
+        return new ContractPool(daily, weekly);
+    }
+
+    // ==================== FARMLAND CONTRACTS ====================
+
+    private static void loadFarmlandContracts(List<ContractDefinition> daily, List<ContractDefinition> weekly) {
+
+        /*
+         * =========================
+         * FARMLAND – CROPS (DAILY)
+         * =========================
+         */
+
+        daily.add(new ContractDefinition(
+                "farmland_wheat_basic",
+                new CropHarvestTrigger(Material.WHEAT),
+                JobSiteType.FARMLAND,
+                1,
+                64,
+                Map.of(),
+                new CompositeReward(List.of(
+                        new MoneyReward(500, 0.4),
+                        new JobSiteXpReward(JobSiteType.FARMLAND, 25)
+                )),
+                Material.WHEAT,
+                "Harvest Wheat",
+                List.of("Harvest wheat grown in your farmland.")
+        ));
+
+        daily.add(new ContractDefinition(
+                "farmland_wheat_medium",
+                new CropHarvestTrigger(Material.WHEAT),
+                JobSiteType.FARMLAND,
+                5,
+                192,
+                Map.of(),
+                new CompositeReward(List.of(
+                        new MoneyReward(1200, 0.4),
+                        new JobSiteXpReward(JobSiteType.FARMLAND, 60)
+                )),
+                Material.WHEAT,
+                "Wheat Harvest",
+                List.of("Harvest a large amount of wheat.")
+        ));
+
+        daily.add(new ContractDefinition(
+                "farmland_carrot_basic",
+                new CropHarvestTrigger(Material.CARROTS),
+                JobSiteType.FARMLAND,
+                5,
+                64,
+                Map.of("unlock_carrot", 1),
+                new CompositeReward(List.of(
+                        new MoneyReward(750, 0.4),
+                        new JobSiteXpReward(JobSiteType.FARMLAND, 35)
+                )),
+                Material.CARROT,
+                "Harvest Carrots",
+                List.of("Harvest carrots in your farmland.")
+        ));
+
+        daily.add(new ContractDefinition(
+                "farmland_carrot_medium",
+                new CropHarvestTrigger(Material.CARROTS),
+                JobSiteType.FARMLAND,
+                10,
+                192,
+                Map.of("unlock_carrot", 1),
+                new CompositeReward(List.of(
+                        new MoneyReward(1800, 0.4),
+                        new JobSiteXpReward(JobSiteType.FARMLAND, 85)
+                )),
+                Material.CARROT,
+                "Carrot Harvest",
+                List.of("Harvest a large amount of carrots.")
+        ));
+
+        daily.add(new ContractDefinition(
+                "farmland_potato_basic",
+                new CropHarvestTrigger(Material.POTATOES),
+                JobSiteType.FARMLAND,
+                20,
+                96,
+                Map.of("unlock_potato", 1),
+                new CompositeReward(List.of(
+                        new MoneyReward(1200, 0.4),
+                        new JobSiteXpReward(JobSiteType.FARMLAND, 50)
+                )),
+                Material.POTATO,
+                "Harvest Potatoes",
+                List.of("Harvest potatoes in your farmland.")
+        ));
+
+        daily.add(new ContractDefinition(
+                "farmland_beetroot_basic",
+                new CropHarvestTrigger(Material.BEETROOTS),
+                JobSiteType.FARMLAND,
+                30,
+                128,
+                Map.of("unlock_beetroot", 1),
+                new CompositeReward(List.of(
+                        new MoneyReward(2000, 0.4),
+                        new JobSiteXpReward(JobSiteType.FARMLAND, 75)
+                )),
+                Material.BEETROOT,
+                "Harvest Beetroots",
+                List.of("Harvest beetroots in your farmland.")
+        ));
+
+        /*
+         * =========================
+         * FARMLAND – MOBS (DAILY)
+         * =========================
+         */
+
+        daily.add(new ContractDefinition(
+                "farmland_cow_basic",
+                new MobKillTrigger(EntityType.COW),
+                JobSiteType.FARMLAND,
+                1,
+                5,
+                Map.of(),
+                new CompositeReward(List.of(
+                        new MoneyReward(600, 0.4),
+                        new JobSiteXpReward(JobSiteType.FARMLAND, 30)
+                )),
+                Material.COW_SPAWN_EGG,
+                "Cull Cows",
+                List.of("Cull cows within your farmland.")
+        ));
+
+        daily.add(new ContractDefinition(
+                "farmland_cow_medium",
+                new MobKillTrigger(EntityType.COW),
+                JobSiteType.FARMLAND,
+                8,
+                15,
+                Map.of(),
+                new CompositeReward(List.of(
+                        new MoneyReward(1500, 0.4),
+                        new JobSiteXpReward(JobSiteType.FARMLAND, 70)
+                )),
+                Material.COW_SPAWN_EGG,
+                "Cattle Culling",
+                List.of("Cull many cows within your farmland.")
+        ));
+
+        daily.add(new ContractDefinition(
+                "farmland_sheep_basic",
+                new MobKillTrigger(EntityType.SHEEP),
+                JobSiteType.FARMLAND,
+                3,
+                25,
+                Map.of("unlock_sheep", 1),
+                new CompositeReward(List.of(
+                        new MoneyReward(800, 0.4),
+                        new JobSiteXpReward(JobSiteType.FARMLAND, 40)
+                )),
+                Material.SHEEP_SPAWN_EGG,
+                "Cull Sheep",
+                List.of("Cull sheep within your farmland.")
+        ));
+
+        daily.add(new ContractDefinition(
+                "farmland_pig_basic",
+                new MobKillTrigger(EntityType.PIG),
+                JobSiteType.FARMLAND,
+                6,
+                30,
+                Map.of("unlock_pig", 1),
+                new CompositeReward(List.of(
+                        new MoneyReward(1000, 0.4),
+                        new JobSiteXpReward(JobSiteType.FARMLAND, 55)
+                )),
+                Material.PIG_SPAWN_EGG,
+                "Cull Pigs",
+                List.of("Cull pigs within your farmland.")
+        ));
+
+        daily.add(new ContractDefinition(
+                "farmland_chicken_basic",
+                new MobKillTrigger(EntityType.CHICKEN),
+                JobSiteType.FARMLAND,
+                10,
+                40,
+                Map.of("unlock_chicken", 1),
+                new CompositeReward(List.of(
+                        new MoneyReward(1400, 0.4),
+                        new JobSiteXpReward(JobSiteType.FARMLAND, 70)
+                )),
+                Material.CHICKEN_SPAWN_EGG,
+                "Cull Chickens",
+                List.of("Cull chickens within your farmland.")
+        ));
+
+        daily.add(new ContractDefinition(
+                "farmland_horse_basic",
+                new MobKillTrigger(EntityType.HORSE),
+                JobSiteType.FARMLAND,
+                18,
+                10,
+                Map.of("unlock_horse", 1),
+                new CompositeReward(List.of(
+                        new MoneyReward(3000, 0.4),
+                        new JobSiteXpReward(JobSiteType.FARMLAND, 120)
+                )),
+                Material.HORSE_SPAWN_EGG,
+                "Cull Horses",
+                List.of("Cull horses within your farmland.")
+        ));
+
+        /*
+         * =========================
+         * FARMLAND – WEEKLY
+         * =========================
+         */
+
+        weekly.add(new ContractDefinition(
+                "farmland_wheat_weekly",
+                new CropHarvestTrigger(Material.WHEAT),
+                JobSiteType.FARMLAND,
+                1,
+                500,
+                Map.of(),
+                new CompositeReward(List.of(
+                        new MoneyReward(5000, 0.4),
+                        new JobSiteXpReward(JobSiteType.FARMLAND, 200)
+                )),
+                Material.HAY_BLOCK,
+                "Wheat Master",
+                List.of("Harvest massive amounts of wheat.")
+        ));
+
+        weekly.add(new ContractDefinition(
+                "farmland_carrot_weekly",
+                new CropHarvestTrigger(Material.CARROTS),
+                JobSiteType.FARMLAND,
+                5,
+                500,
+                Map.of("unlock_carrot", 1),
+                new CompositeReward(List.of(
+                        new MoneyReward(6000, 0.4),
+                        new JobSiteXpReward(JobSiteType.FARMLAND, 250)
+                )),
+                Material.GOLDEN_CARROT,
+                "Carrot Master",
+                List.of("Harvest massive amounts of carrots.")
+        ));
+
+        weekly.add(new ContractDefinition(
+                "farmland_potato_weekly",
+                new CropHarvestTrigger(Material.POTATOES),
+                JobSiteType.FARMLAND,
+                20,
+                500,
+                Map.of("unlock_potato", 1),
+                new CompositeReward(List.of(
+                        new MoneyReward(7500, 0.4),
+                        new JobSiteXpReward(JobSiteType.FARMLAND, 300)
+                )),
+                Material.BAKED_POTATO,
+                "Potato Master",
+                List.of("Harvest massive amounts of potatoes.")
+        ));
+
+        weekly.add(new ContractDefinition(
+                "farmland_beetroot_weekly",
+                new CropHarvestTrigger(Material.BEETROOTS),
+                JobSiteType.FARMLAND,
+                30,
+                500,
+                Map.of("unlock_beetroot", 1),
+                new CompositeReward(List.of(
+                        new MoneyReward(10000, 0.4),
+                        new JobSiteXpReward(JobSiteType.FARMLAND, 400)
+                )),
+                Material.BEETROOT_SOUP,
+                "Beetroot Master",
+                List.of("Harvest massive amounts of beetroots.")
+        ));
+
+        weekly.add(new ContractDefinition(
+                "farmland_cow_weekly",
+                new MobKillTrigger(EntityType.COW),
+                JobSiteType.FARMLAND,
+                1,
+                50,
+                Map.of(),
+                new CompositeReward(List.of(
+                        new MoneyReward(6000, 0.4),
+                        new JobSiteXpReward(JobSiteType.FARMLAND, 250)
+                )),
+                Material.BEEF,
+                "Cattle Baron",
+                List.of("Cull many cows throughout the week.")
+        ));
+
+        weekly.add(new ContractDefinition(
+                "farmland_sheep_weekly",
+                new MobKillTrigger(EntityType.SHEEP),
+                JobSiteType.FARMLAND,
+                3,
+                75,
+                Map.of("unlock_sheep", 1),
+                new CompositeReward(List.of(
+                        new MoneyReward(7000, 0.4),
+                        new JobSiteXpReward(JobSiteType.FARMLAND, 300)
+                )),
+                Material.WHITE_WOOL,
+                "Wool Tycoon",
+                List.of("Cull many sheep throughout the week.")
+        ));
+
+        weekly.add(new ContractDefinition(
+                "farmland_pig_weekly",
+                new MobKillTrigger(EntityType.PIG),
+                JobSiteType.FARMLAND,
+                6,
+                75,
+                Map.of("unlock_pig", 1),
+                new CompositeReward(List.of(
+                        new MoneyReward(8000, 0.4),
+                        new JobSiteXpReward(JobSiteType.FARMLAND, 350)
+                )),
+                Material.COOKED_PORKCHOP,
+                "Pork Producer",
+                List.of("Cull many pigs throughout the week.")
+        ));
+
+        weekly.add(new ContractDefinition(
+                "farmland_chicken_weekly",
+                new MobKillTrigger(EntityType.CHICKEN),
+                JobSiteType.FARMLAND,
+                10,
+                100,
+                Map.of("unlock_chicken", 1),
+                new CompositeReward(List.of(
+                        new MoneyReward(9000, 0.4),
+                        new JobSiteXpReward(JobSiteType.FARMLAND, 400)
+                )),
+                Material.FEATHER,
+                "Poultry King",
+                List.of("Cull many chickens throughout the week.")
+        ));
+
+        weekly.add(new ContractDefinition(
+                "farmland_mixed_weekly",
+                new MobKillTrigger(EntityType.COW, EntityType.SHEEP, EntityType.PIG, EntityType.CHICKEN),
+                JobSiteType.FARMLAND,
+                15,
+                200,
+                Map.of("unlock_sheep", 1),
+                new CompositeReward(List.of(
+                        new MoneyReward(15000, 0.4),
+                        new JobSiteXpReward(JobSiteType.FARMLAND, 600)
+                )),
+                Material.DIAMOND_SWORD,
+                "Livestock Control",
+                List.of("Cull any livestock across your farmland.")
+        ));
+    }
+
+    // ==================== QUARRY CONTRACTS ====================
+
+    private static void loadQuarryContracts(List<ContractDefinition> daily, List<ContractDefinition> weekly) {
+
+        /*
+         * =========================
+         * QUARRY – BASIC ORES (DAILY)
+         * =========================
+         */
+
+        // Cobblestone - always available
+        daily.add(new ContractDefinition(
+                "quarry_cobblestone_basic",
+                new BlockMineTrigger(Material.COBBLESTONE),
+                JobSiteType.QUARRY,
+                1,
+                128,
+                Map.of(),
+                new CompositeReward(List.of(
+                        new MoneyReward(400, 0.4),
+                        new JobSiteXpReward(JobSiteType.QUARRY, 20)
+                )),
+                Material.COBBLESTONE,
+                "Stone Collector",
+                List.of("Mine cobblestone in the quarry.")
+        ));
+
+        daily.add(new ContractDefinition(
+                "quarry_cobblestone_medium",
+                new BlockMineTrigger(Material.COBBLESTONE),
+                JobSiteType.QUARRY,
+                5,
+                384,
+                Map.of(),
+                new CompositeReward(List.of(
+                        new MoneyReward(1000, 0.4),
+                        new JobSiteXpReward(JobSiteType.QUARRY, 50)
+                )),
+                Material.COBBLESTONE,
+                "Stone Hauler",
+                List.of("Mine a large amount of cobblestone.")
+        ));
+
+        // Coal - always available
+        daily.add(new ContractDefinition(
+                "quarry_coal_basic",
+                new BlockMineTrigger(Material.COAL_ORE, Material.DEEPSLATE_COAL_ORE),
+                JobSiteType.QUARRY,
+                1,
+                32,
+                Map.of(),
+                new CompositeReward(List.of(
+                        new MoneyReward(600, 0.4),
+                        new JobSiteXpReward(JobSiteType.QUARRY, 30)
+                )),
+                Material.COAL,
+                "Coal Miner",
+                List.of("Mine coal ore in the quarry.")
+        ));
+
+        daily.add(new ContractDefinition(
+                "quarry_coal_medium",
+                new BlockMineTrigger(Material.COAL_ORE, Material.DEEPSLATE_COAL_ORE),
+                JobSiteType.QUARRY,
+                8,
+                96,
+                Map.of(),
+                new CompositeReward(List.of(
+                        new MoneyReward(1500, 0.4),
+                        new JobSiteXpReward(JobSiteType.QUARRY, 75)
+                )),
+                Material.COAL_BLOCK,
+                "Coal Collector",
+                List.of("Mine a large amount of coal ore.")
+        ));
+
+        // Iron - always available
+        daily.add(new ContractDefinition(
+                "quarry_iron_basic",
+                new BlockMineTrigger(Material.IRON_ORE, Material.DEEPSLATE_IRON_ORE),
+                JobSiteType.QUARRY,
+                1,
+                24,
+                Map.of(),
+                new CompositeReward(List.of(
+                        new MoneyReward(800, 0.4),
+                        new JobSiteXpReward(JobSiteType.QUARRY, 40)
+                )),
+                Material.RAW_IRON,
+                "Iron Miner",
+                List.of("Mine iron ore in the quarry.")
+        ));
+
+        daily.add(new ContractDefinition(
+                "quarry_iron_medium",
+                new BlockMineTrigger(Material.IRON_ORE, Material.DEEPSLATE_IRON_ORE),
+                JobSiteType.QUARRY,
+                10,
+                64,
+                Map.of(),
+                new CompositeReward(List.of(
+                        new MoneyReward(2000, 0.4),
+                        new JobSiteXpReward(JobSiteType.QUARRY, 100)
+                )),
+                Material.IRON_BLOCK,
+                "Iron Collector",
+                List.of("Mine a large amount of iron ore.")
+        ));
+
+        // Diamond - always available but rare in mine
+        daily.add(new ContractDefinition(
+                "quarry_diamond_basic",
+                new BlockMineTrigger(Material.DIAMOND_ORE, Material.DEEPSLATE_DIAMOND_ORE),
+                JobSiteType.QUARRY,
+                1,
+                8,
+                Map.of(),
+                new CompositeReward(List.of(
+                        new MoneyReward(1500, 0.4),
+                        new JobSiteXpReward(JobSiteType.QUARRY, 75)
+                )),
+                Material.DIAMOND,
+                "Diamond Hunter",
+                List.of("Mine diamond ore in the quarry.")
+        ));
+
+        daily.add(new ContractDefinition(
+                "quarry_diamond_medium",
+                new BlockMineTrigger(Material.DIAMOND_ORE, Material.DEEPSLATE_DIAMOND_ORE),
+                JobSiteType.QUARRY,
+                15,
+                24,
+                Map.of(),
+                new CompositeReward(List.of(
+                        new MoneyReward(4000, 0.4),
+                        new JobSiteXpReward(JobSiteType.QUARRY, 180)
+                )),
+                Material.DIAMOND_BLOCK,
+                "Diamond Collector",
+                List.of("Mine a large amount of diamond ore.")
+        ));
+
+        /*
+         * =========================
+         * QUARRY – STONE VARIETIES (DAILY)
+         * =========================
+         */
+
+        daily.add(new ContractDefinition(
+                "quarry_granite_basic",
+                new BlockMineTrigger(Material.GRANITE),
+                JobSiteType.QUARRY,
+                5,
+                64,
+                Map.of("unlock_stone_varieties", 1),
+                new CompositeReward(List.of(
+                        new MoneyReward(500, 0.4),
+                        new JobSiteXpReward(JobSiteType.QUARRY, 25)
+                )),
+                Material.GRANITE,
+                "Granite Gatherer",
+                List.of("Mine granite in the quarry.")
+        ));
+
+        daily.add(new ContractDefinition(
+                "quarry_diorite_basic",
+                new BlockMineTrigger(Material.DIORITE),
+                JobSiteType.QUARRY,
+                5,
+                64,
+                Map.of("unlock_stone_varieties", 1),
+                new CompositeReward(List.of(
+                        new MoneyReward(500, 0.4),
+                        new JobSiteXpReward(JobSiteType.QUARRY, 25)
+                )),
+                Material.DIORITE,
+                "Diorite Gatherer",
+                List.of("Mine diorite in the quarry.")
+        ));
+
+        daily.add(new ContractDefinition(
+                "quarry_andesite_basic",
+                new BlockMineTrigger(Material.ANDESITE),
+                JobSiteType.QUARRY,
+                5,
+                64,
+                Map.of("unlock_stone_varieties", 1),
+                new CompositeReward(List.of(
+                        new MoneyReward(500, 0.4),
+                        new JobSiteXpReward(JobSiteType.QUARRY, 25)
+                )),
+                Material.ANDESITE,
+                "Andesite Gatherer",
+                List.of("Mine andesite in the quarry.")
+        ));
+
+        daily.add(new ContractDefinition(
+                "quarry_stone_mixed",
+                new BlockMineTrigger(Material.STONE, Material.GRANITE, Material.DIORITE, Material.ANDESITE),
+                JobSiteType.QUARRY,
+                8,
+                256,
+                Map.of("unlock_stone_varieties", 1),
+                new CompositeReward(List.of(
+                        new MoneyReward(1200, 0.4),
+                        new JobSiteXpReward(JobSiteType.QUARRY, 60)
+                )),
+                Material.STONE,
+                "Stone Mason",
+                List.of("Mine any decorative stone types.")
+        ));
+
+        /*
+         * =========================
+         * QUARRY – COPPER (DAILY)
+         * =========================
+         */
+
+        daily.add(new ContractDefinition(
+                "quarry_copper_basic",
+                new BlockMineTrigger(Material.COPPER_ORE, Material.DEEPSLATE_COPPER_ORE),
+                JobSiteType.QUARRY,
+                10,
+                48,
+                Map.of("unlock_copper_collection", 1),
+                new CompositeReward(List.of(
+                        new MoneyReward(900, 0.4),
+                        new JobSiteXpReward(JobSiteType.QUARRY, 45)
+                )),
+                Material.RAW_COPPER,
+                "Copper Miner",
+                List.of("Mine copper ore in the quarry.")
+        ));
+
+        daily.add(new ContractDefinition(
+                "quarry_copper_block",
+                new BlockMineTrigger(Material.COPPER_BLOCK, Material.RAW_COPPER_BLOCK),
+                JobSiteType.QUARRY,
+                12,
+                16,
+                Map.of("unlock_copper_collection", 1),
+                new CompositeReward(List.of(
+                        new MoneyReward(1400, 0.4),
+                        new JobSiteXpReward(JobSiteType.QUARRY, 70)
+                )),
+                Material.COPPER_BLOCK,
+                "Copper Block Hunter",
+                List.of("Mine copper blocks in the quarry.")
+        ));
+
+        /*
+         * =========================
+         * QUARRY – PRECIOUS METALS (DAILY)
+         * =========================
+         */
+
+        daily.add(new ContractDefinition(
+                "quarry_gold_basic",
+                new BlockMineTrigger(Material.GOLD_ORE, Material.DEEPSLATE_GOLD_ORE, Material.NETHER_GOLD_ORE),
+                JobSiteType.QUARRY,
+                15,
+                32,
+                Map.of("unlock_precious_metals", 1),
+                new CompositeReward(List.of(
+                        new MoneyReward(1200, 0.4),
+                        new JobSiteXpReward(JobSiteType.QUARRY, 60)
+                )),
+                Material.RAW_GOLD,
+                "Gold Miner",
+                List.of("Mine gold ore in the quarry.")
+        ));
+
+        daily.add(new ContractDefinition(
+                "quarry_emerald_basic",
+                new BlockMineTrigger(Material.EMERALD_ORE, Material.DEEPSLATE_EMERALD_ORE),
+                JobSiteType.QUARRY,
+                18,
+                16,
+                Map.of("unlock_precious_metals", 1),
+                new CompositeReward(List.of(
+                        new MoneyReward(2000, 0.4),
+                        new JobSiteXpReward(JobSiteType.QUARRY, 100)
+                )),
+                Material.EMERALD,
+                "Emerald Seeker",
+                List.of("Mine emerald ore in the quarry.")
+        ));
+
+        /*
+         * =========================
+         * QUARRY – DEEP MINERALS (DAILY)
+         * =========================
+         */
+
+        daily.add(new ContractDefinition(
+                "quarry_deepslate_basic",
+                new BlockMineTrigger(Material.DEEPSLATE, Material.COBBLED_DEEPSLATE),
+                JobSiteType.QUARRY,
+                20,
+                128,
+                Map.of("unlock_deep_minerals", 1),
+                new CompositeReward(List.of(
+                        new MoneyReward(800, 0.4),
+                        new JobSiteXpReward(JobSiteType.QUARRY, 40)
+                )),
+                Material.DEEPSLATE,
+                "Deepslate Miner",
+                List.of("Mine deepslate in the quarry.")
+        ));
+
+        daily.add(new ContractDefinition(
+                "quarry_lapis_basic",
+                new BlockMineTrigger(Material.LAPIS_ORE, Material.DEEPSLATE_LAPIS_ORE),
+                JobSiteType.QUARRY,
+                20,
+                24,
+                Map.of("unlock_deep_minerals", 1),
+                new CompositeReward(List.of(
+                        new MoneyReward(1100, 0.4),
+                        new JobSiteXpReward(JobSiteType.QUARRY, 55)
+                )),
+                Material.LAPIS_LAZULI,
+                "Lapis Hunter",
+                List.of("Mine lapis ore in the quarry.")
+        ));
+
+        daily.add(new ContractDefinition(
+                "quarry_deep_diamond",
+                new BlockMineTrigger(Material.DEEPSLATE_DIAMOND_ORE),
+                JobSiteType.QUARRY,
+                22,
+                16,
+                Map.of("unlock_deep_minerals", 1),
+                new CompositeReward(List.of(
+                        new MoneyReward(2500, 0.4),
+                        new JobSiteXpReward(JobSiteType.QUARRY, 125)
+                )),
+                Material.DEEPSLATE_DIAMOND_ORE,
+                "Deep Diamond Hunter",
+                List.of("Mine deepslate diamond ore.")
+        ));
+
+        /*
+         * =========================
+         * QUARRY – NETHER RESOURCES (DAILY)
+         * =========================
+         */
+
+        daily.add(new ContractDefinition(
+                "quarry_netherrack_basic",
+                new BlockMineTrigger(Material.NETHERRACK),
+                JobSiteType.QUARRY,
+                25,
+                128,
+                Map.of("unlock_nether_resources", 1),
+                new CompositeReward(List.of(
+                        new MoneyReward(700, 0.4),
+                        new JobSiteXpReward(JobSiteType.QUARRY, 35)
+                )),
+                Material.NETHERRACK,
+                "Nether Miner",
+                List.of("Mine netherrack in the quarry.")
+        ));
+
+        daily.add(new ContractDefinition(
+                "quarry_nether_gold",
+                new BlockMineTrigger(Material.NETHER_GOLD_ORE),
+                JobSiteType.QUARRY,
+                25,
+                48,
+                Map.of("unlock_nether_resources", 1),
+                new CompositeReward(List.of(
+                        new MoneyReward(1500, 0.4),
+                        new JobSiteXpReward(JobSiteType.QUARRY, 75)
+                )),
+                Material.NETHER_GOLD_ORE,
+                "Nether Gold Hunter",
+                List.of("Mine nether gold ore in the quarry.")
+        ));
+
+        daily.add(new ContractDefinition(
+                "quarry_quartz_basic",
+                new BlockMineTrigger(Material.NETHER_QUARTZ_ORE),
+                JobSiteType.QUARRY,
+                25,
+                48,
+                Map.of("unlock_nether_resources", 1),
+                new CompositeReward(List.of(
+                        new MoneyReward(1300, 0.4),
+                        new JobSiteXpReward(JobSiteType.QUARRY, 65)
+                )),
+                Material.QUARTZ,
+                "Quartz Collector",
+                List.of("Mine nether quartz ore in the quarry.")
+        ));
+
+        daily.add(new ContractDefinition(
+                "quarry_ancient_debris",
+                new BlockMineTrigger(Material.ANCIENT_DEBRIS),
+                JobSiteType.QUARRY,
+                28,
+                8,
+                Map.of("unlock_nether_resources", 1),
+                new CompositeReward(List.of(
+                        new MoneyReward(5000, 0.4),
+                        new JobSiteXpReward(JobSiteType.QUARRY, 250)
+                )),
+                Material.ANCIENT_DEBRIS,
+                "Debris Hunter",
+                List.of("Mine ancient debris in the quarry.")
+        ));
+
+        /*
+         * =========================
+         * QUARRY – GEODES (DAILY)
+         * =========================
+         */
+
+        daily.add(new ContractDefinition(
+                "quarry_geode_basic",
+                new GeodeMineTrigger(),
+                JobSiteType.QUARRY,
+                1,
+                10,
+                Map.of(),
+                new CompositeReward(List.of(
+                        new MoneyReward(1000, 0.4),
+                        new JobSiteXpReward(JobSiteType.QUARRY, 50)
+                )),
+                Material.AMETHYST_CLUSTER,
+                "Geode Hunter",
+                List.of("Find and mine geode crystals.")
+        ));
+
+        daily.add(new ContractDefinition(
+                "quarry_geode_medium",
+                new GeodeMineTrigger(),
+                JobSiteType.QUARRY,
+                10,
+                30,
+                Map.of(),
+                new CompositeReward(List.of(
+                        new MoneyReward(2500, 0.4),
+                        new JobSiteXpReward(JobSiteType.QUARRY, 125)
+                )),
+                Material.AMETHYST_BLOCK,
+                "Crystal Collector",
+                List.of("Find and mine many geode crystals.")
+        ));
+
+        /*
+         * =========================
+         * QUARRY – WEEKLY
+         * =========================
+         */
+
+        weekly.add(new ContractDefinition(
+                "quarry_cobblestone_weekly",
+                new BlockMineTrigger(Material.COBBLESTONE),
+                JobSiteType.QUARRY,
+                1,
+                1000,
+                Map.of(),
+                new CompositeReward(List.of(
+                        new MoneyReward(5000, 0.4),
+                        new JobSiteXpReward(JobSiteType.QUARRY, 200)
+                )),
+                Material.COBBLESTONE,
+                "Stone Hauler",
+                List.of("Mine massive amounts of cobblestone.")
+        ));
+
+        weekly.add(new ContractDefinition(
+                "quarry_coal_weekly",
+                new BlockMineTrigger(Material.COAL_ORE, Material.DEEPSLATE_COAL_ORE),
+                JobSiteType.QUARRY,
+                1,
+                200,
+                Map.of(),
+                new CompositeReward(List.of(
+                        new MoneyReward(6000, 0.4),
+                        new JobSiteXpReward(JobSiteType.QUARRY, 250)
+                )),
+                Material.COAL_BLOCK,
+                "Coal Baron",
+                List.of("Mine massive amounts of coal ore.")
+        ));
+
+        weekly.add(new ContractDefinition(
+                "quarry_iron_weekly",
+                new BlockMineTrigger(Material.IRON_ORE, Material.DEEPSLATE_IRON_ORE),
+                JobSiteType.QUARRY,
+                5,
+                150,
+                Map.of(),
+                new CompositeReward(List.of(
+                        new MoneyReward(8000, 0.4),
+                        new JobSiteXpReward(JobSiteType.QUARRY, 350)
+                )),
+                Material.IRON_BLOCK,
+                "Iron Tycoon",
+                List.of("Mine massive amounts of iron ore.")
+        ));
+
+        weekly.add(new ContractDefinition(
+                "quarry_diamond_weekly",
+                new BlockMineTrigger(Material.DIAMOND_ORE, Material.DEEPSLATE_DIAMOND_ORE),
+                JobSiteType.QUARRY,
+                10,
+                50,
+                Map.of(),
+                new CompositeReward(List.of(
+                        new MoneyReward(12000, 0.4),
+                        new JobSiteXpReward(JobSiteType.QUARRY, 500)
+                )),
+                Material.DIAMOND_BLOCK,
+                "Diamond Magnate",
+                List.of("Mine massive amounts of diamond ore.")
+        ));
+
+        weekly.add(new ContractDefinition(
+                "quarry_copper_weekly",
+                new BlockMineTrigger(Material.COPPER_ORE, Material.DEEPSLATE_COPPER_ORE, Material.COPPER_BLOCK, Material.RAW_COPPER_BLOCK),
+                JobSiteType.QUARRY,
+                10,
+                200,
+                Map.of("unlock_copper_collection", 1),
+                new CompositeReward(List.of(
+                        new MoneyReward(7000, 0.4),
+                        new JobSiteXpReward(JobSiteType.QUARRY, 300)
+                )),
+                Material.COPPER_BLOCK,
+                "Copper Kingpin",
+                List.of("Mine massive amounts of copper.")
+        ));
+
+        weekly.add(new ContractDefinition(
+                "quarry_gold_weekly",
+                new BlockMineTrigger(Material.GOLD_ORE, Material.DEEPSLATE_GOLD_ORE, Material.NETHER_GOLD_ORE),
+                JobSiteType.QUARRY,
+                15,
+                100,
+                Map.of("unlock_precious_metals", 1),
+                new CompositeReward(List.of(
+                        new MoneyReward(10000, 0.4),
+                        new JobSiteXpReward(JobSiteType.QUARRY, 400)
+                )),
+                Material.GOLD_BLOCK,
+                "Gold Tycoon",
+                List.of("Mine massive amounts of gold ore.")
+        ));
+
+        weekly.add(new ContractDefinition(
+                "quarry_deepslate_weekly",
+                new BlockMineTrigger(
+                        Material.DEEPSLATE, Material.COBBLED_DEEPSLATE,
+                        Material.DEEPSLATE_COAL_ORE, Material.DEEPSLATE_IRON_ORE,
+                        Material.DEEPSLATE_COPPER_ORE, Material.DEEPSLATE_GOLD_ORE,
+                        Material.DEEPSLATE_DIAMOND_ORE, Material.DEEPSLATE_LAPIS_ORE,
+                        Material.DEEPSLATE_EMERALD_ORE, Material.DEEPSLATE_REDSTONE_ORE
+                ),
+                JobSiteType.QUARRY,
+                20,
+                500,
+                Map.of("unlock_deep_minerals", 1),
+                new CompositeReward(List.of(
+                        new MoneyReward(9000, 0.4),
+                        new JobSiteXpReward(JobSiteType.QUARRY, 400)
+                )),
+                Material.DEEPSLATE,
+                "Deepslate Master",
+                List.of("Mine massive amounts of deepslate materials.")
+        ));
+
+        weekly.add(new ContractDefinition(
+                "quarry_nether_weekly",
+                new BlockMineTrigger(Material.NETHERRACK, Material.NETHER_GOLD_ORE, Material.NETHER_QUARTZ_ORE, Material.ANCIENT_DEBRIS),
+                JobSiteType.QUARRY,
+                25,
+                400,
+                Map.of("unlock_nether_resources", 1),
+                new CompositeReward(List.of(
+                        new MoneyReward(12000, 0.4),
+                        new JobSiteXpReward(JobSiteType.QUARRY, 500)
+                )),
+                Material.NETHERRACK,
+                "Nether Excavator",
+                List.of("Mine massive amounts of nether materials.")
+        ));
+
+        weekly.add(new ContractDefinition(
+                "quarry_geode_weekly",
+                new GeodeMineTrigger(),
+                JobSiteType.QUARRY,
+                5,
+                100,
+                Map.of(),
+                new CompositeReward(List.of(
+                        new MoneyReward(8000, 0.4),
+                        new JobSiteXpReward(JobSiteType.QUARRY, 350)
+                )),
+                Material.AMETHYST_BLOCK,
+                "Crystal Master",
+                List.of("Find and mine many geode crystals throughout the week.")
+        ));
+
+        weekly.add(new ContractDefinition(
+                "quarry_mixed_ores_weekly",
+                new BlockMineTrigger(
+                        Material.COAL_ORE, Material.IRON_ORE, Material.COPPER_ORE,
+                        Material.GOLD_ORE, Material.DIAMOND_ORE, Material.EMERALD_ORE,
+                        Material.LAPIS_ORE, Material.REDSTONE_ORE,
+                        Material.DEEPSLATE_COAL_ORE, Material.DEEPSLATE_IRON_ORE,
+                        Material.DEEPSLATE_COPPER_ORE, Material.DEEPSLATE_GOLD_ORE,
+                        Material.DEEPSLATE_DIAMOND_ORE, Material.DEEPSLATE_EMERALD_ORE,
+                        Material.DEEPSLATE_LAPIS_ORE, Material.DEEPSLATE_REDSTONE_ORE
+                ),
+                JobSiteType.QUARRY,
+                15,
+                300,
+                Map.of(),
+                new CompositeReward(List.of(
+                        new MoneyReward(15000, 0.4),
+                        new JobSiteXpReward(JobSiteType.QUARRY, 600)
+                )),
+                Material.DIAMOND_PICKAXE,
+                "Master Miner",
+                List.of("Mine any ore type in the quarry.")
+        ));
+    }
+}

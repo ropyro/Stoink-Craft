@@ -3,7 +3,7 @@ package com.stoinkcraft;
 import com.stoinkcraft.enterprise.*;
 import com.stoinkcraft.enterprise.listeners.*;
 import com.stoinkcraft.jobs.contracts.ContractFeedbackManager;
-import com.stoinkcraft.jobs.contracts.ContractLoader;
+import com.stoinkcraft.jobs.contracts.ContractPoolLoader;
 import com.stoinkcraft.jobs.contracts.ContractManager;
 import com.stoinkcraft.jobs.listeners.*;
 import com.stoinkcraft.misc.daily.DailyCMD;
@@ -147,7 +147,7 @@ public class StoinkCore extends JavaPlugin {
         sm = new ShareManager();
         ewm = new EnterpriseWorldManager();
         epm = new EnterprisePlotManager(ewm);
-        cm = new ContractManager(ContractLoader.load());
+        cm = new ContractManager(ContractPoolLoader.load());
         cfm = new ContractFeedbackManager();
     }
 
