@@ -5,11 +5,15 @@ import com.stoinkcraft.enterprise.Enterprise;
 import com.stoinkcraft.jobs.contracts.ContractContext;
 import com.stoinkcraft.jobs.jobsites.JobSiteManager;
 import com.stoinkcraft.jobs.jobsites.JobSiteType;
+import com.stoinkcraft.jobs.jobsites.sites.graveyard.GraveyardSite;
 import org.bukkit.Location;
+import org.bukkit.NamespacedKey;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.persistence.PersistentDataType;
 
 public class EntityDeathListener implements Listener {
 
@@ -23,11 +27,33 @@ public class EntityDeathListener implements Listener {
                 .getEnterpriseByMember(killer.getUniqueId());
         if (enterprise == null) return;
 
-        JobSiteType jobSiteType = enterprise.getJobSiteManager().resolveJobsite(
-                event.getEntity().getLocation());
+        LivingEntity entity = event.getEntity();
+        Location entityLocation = entity.getLocation();
+
+        JobSiteType jobSiteType = enterprise.getJobSiteManager().resolveJobsite(entityLocation);
 
         if (jobSiteType == null) return;
 
+        // ==================== Graveyard Special Handling ====================
+        if (jobSiteType == JobSiteType.GRAVEYARD) {
+            GraveyardSite graveyard = enterprise.getJobSiteManager().getGraveyardSite();
+
+            if (graveyard != null) {
+                // Check if it's a mausoleum spider
+                NamespacedKey spiderKey = new NamespacedKey(StoinkCore.getInstance(), "mausoleum_spider");
+                if (entity.getPersistentDataContainer().has(spiderKey, PersistentDataType.STRING)) {
+                    graveyard.getMausoleumStructure().onSpiderKilled(killer);
+                }
+
+                // Check if it's a graveyard mob (for soul drops)
+                NamespacedKey graveyardKey = new NamespacedKey(StoinkCore.getInstance(), "graveyard_mob");
+                if (entity.getPersistentDataContainer().has(graveyardKey, PersistentDataType.STRING)) {
+                    graveyard.onMobKilled(killer, entity.getType());
+                }
+            }
+        }
+
+        // ==================== Contract Progress ====================
         ContractContext context = new ContractContext(
                 killer,
                 jobSiteType,

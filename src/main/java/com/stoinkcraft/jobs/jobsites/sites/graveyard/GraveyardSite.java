@@ -1,31 +1,337 @@
 package com.stoinkcraft.jobs.jobsites.sites.graveyard;
 
+import com.fastasyncworldedit.core.FaweAPI;
+import com.google.gson.annotations.Expose;
+import com.sk89q.worldguard.WorldGuard;
+import com.sk89q.worldguard.protection.flags.Flags;
+import com.sk89q.worldguard.protection.flags.StateFlag;
+import com.sk89q.worldguard.protection.managers.RegionManager;
+import com.sk89q.worldguard.protection.regions.RegionContainer;
 import com.stoinkcraft.StoinkCore;
 import com.stoinkcraft.enterprise.Enterprise;
+import com.stoinkcraft.jobs.contracts.ContractContext;
 import com.stoinkcraft.jobs.jobsites.JobSite;
 import com.stoinkcraft.jobs.jobsites.JobSiteData;
 import com.stoinkcraft.jobs.jobsites.JobSiteType;
+import com.stoinkcraft.jobs.jobsites.JobSiteUpgrade;
 import com.stoinkcraft.jobs.jobsites.components.JobSiteHologram;
+import com.stoinkcraft.jobs.jobsites.components.JobSiteNPC;
+import com.stoinkcraft.jobs.jobsites.components.generators.TombstoneGenerator;
+import com.stoinkcraft.jobs.jobsites.components.structures.MausoleumStructure;
+import com.stoinkcraft.jobs.jobsites.components.unlockable.UnlockableState;
 import com.stoinkcraft.jobs.jobsites.sites.skyrise.SkyriseData;
+import com.stoinkcraft.utils.ChatUtils;
+import com.stoinkcraft.utils.RegionUtils;
+import net.citizensnpcs.api.event.NPCRightClickEvent;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class GraveyardSite extends JobSite {
 
-    private JobSiteHologram entryHologram;
+    /**
+     * Holograms
+     */
+    private String welcomeHologramId;
+    public static Vector welcomeHologramOffset = new Vector(-8.5, 3, 0);
+
+    /**
+     * Grave Keeper NPC
+     */
+    private JobSiteNPC graveKeeper;
+    private String graveKeeperTexture = "ewogICJ0aW1lc3RhbXAiIDogMTcxNTcyMTkyMzQ2OCwKICAicHJvZmlsZUlkIiA6ICJmNmYwNmE2NGQ1Yzg0MjIzOGE3NjIwYTUxNzczOWI0ZCIsCiAgInByb2ZpbGVOYW1lIiA6ICJBbmFEaWFtb25kIiwKICAic2lnbmF0dXJlUmVxdWlyZWQiIDogdHJ1ZSwKICAidGV4dHVyZXMiIDogewogICAgIlNLSU4iIDogewogICAgICAidXJsIiA6ICJodHRwOi8vdGV4dHVyZXMubWluZWNyYWZ0Lm5ldC90ZXh0dXJlLzJiYjZjNDhlOWFhNTJhNDU5YmY1NTA3MGI5MjRlYzJlOWVhMTUyODI2MzRlMzRmYjJjNzMxZjlhMzI3OTllOSIKICAgIH0KICB9Cn0="; // Add your skin texture
+    private String graveKeeperSignature = "cO+T+xl0LkrgVuygADGM8L+W5TmK8jef350p5tZLsoubfbNAE8CIMVsScwIbyAUa9wuUXOcQLTmduneS/O3uvzDYy3gAfBKauVVPGJF4pxUpH7zLb6SD4ATZTtJhsWcevB4jCHNbo3fb+4sTtMefMoEyejsu5MPRNCKhhrMIY5rNiIredQ36I7rnZmt2JVnXkCksSfYMqcZXChYDxKL+2+S7EURLHc3Bmry+2VyVArQrLX59wh+G6ziufZgQagSNtz2Rdtk5/TiscrDW5Ot0ibaoBGikAuCDeNyzWPQ0qbg62P/ue7a/KbGP97J099BFkxsvXB/7KeADZD/uuLPliWZLyj+Zq2WP+Oie/DlGDL7FnBSZaOOYEc8IRGZHvdpHWxzS5B+J5m7YXweoorAA8k1dmN7rdPl9MSXee7OU2obMm0QvQi8aK9fDU9w7os3yOsy/oM0FRYxQE4xfzZOsbwF76+Jggv5FNPGTo5/klX1bnCY4q3mcLXfuKF25ncr2TDrwRq0OP8Rgsn6lC46OqSLFmvNLEGuTngY9qvqTF7IhVoJ1lr2L26NX67EmrkO3oBWb6EPnfIN7y+/LlH1znJXSxI5Mt+D8SPB8ejWYZaW4J8qhnlrVSXbfulHclHgcRxLCCErtwtSgD4yEjFc7OBJc5Sr6T/eo3W/Qi1EFzTU="; // Add your skin signature
+    public static Vector graveKeeperOffset = new Vector(-2.5, 0, -1.5);
+
+    /**
+     * Tombstone Generators (30 total)
+     */
+    public static final int TOTAL_TOMBSTONES = 27;
+    public static final int STARTING_TOMBSTONES = 4;
+    private final List<TombstoneGenerator> tombstoneGenerators = new ArrayList<>();
+
+    // Tombstone locations - adjust these based on your schematic
+    public static final List<Vector> TOMBSTONE_OFFSETS = List.of(
+            // Row 1
+            new Vector(-9, 0.5, -4.5),
+            new Vector(-13, 0.5, -4.5),
+            new Vector(-17, 0.5, -4.5),
+            new Vector(-21, 0.5, -4.5),
+            new Vector(-25, 0.5, -4.5),
+            new Vector(-29, 0.5, -4.5),
+            new Vector(-33, 0.5, -4.5),
+            new Vector(-37, 0.5, -4.5),
+
+            // Row 2
+            new Vector(-9, 0.5, 5.5),
+            new Vector(-13, 0.5, 5.5),
+            new Vector(-17, 0.5, 5.5),
+            new Vector(-21, 0.5, 5.5),
+            new Vector(-25, 0.5, 5.5),
+            new Vector(-33, 0.5, 5.5),
+            new Vector(-37, 0.5, 5.5),
+
+            // Row 3
+            new Vector(-9, 0.5, 10.5),
+            new Vector(-13, 0.5, 10.5),
+            new Vector(-21, 0.5, 10.5),
+            new Vector(-25, 0.5, 10.5),
+
+            // Row 4
+            new Vector(-9, 0.5, 20),
+            new Vector(-13, 0.5, 20),
+
+            // Row 5
+            new Vector(-9, 0.5, 28.3),
+            new Vector(-17, 0.5, 28.3),
+            new Vector(-21, 0.5, 28.3),
+            new Vector(-29, 0.5, 28.3),
+            new Vector(-33, 0.5, 28.3),
+            new Vector(-37, 0.5, 28.3)
+//
+//            new Vector(-1, 30.5 -10),
+//            new Vector(1, 30.5 -10),
+//            new Vector(3, 30.5 -10),
+//            new Vector(5, 30.5 -10)
+    );
+
+    /**
+     * Mausoleum
+     */
+    private MausoleumStructure mausoleumStructure;
+    public static Vector mausoleumHordeSpawnOffset = new Vector(-24, -8, 14); // Adjust based on schematic
+
+    /**
+     * Tombstone Pricing
+     */
+    private static final int BASE_TOMBSTONE_COST = 1000;
+    private static final double TOMBSTONE_COST_MULTIPLIER = 1.15;
+
+    /**
+     * Soul drop chance (0.0 - 1.0)
+     */
+    public static final double SOUL_DROP_CHANCE = 0.3;
+
+    @Override
+    public void protectRegion() {
+        Map<StateFlag, StateFlag.State> flags = new HashMap<>();
+        flags.put(Flags.BLOCK_BREAK, StateFlag.State.ALLOW);
+        flags.put(Flags.INTERACT, StateFlag.State.ALLOW);
+        flags.put(Flags.USE, StateFlag.State.ALLOW);
+        flags.put(Flags.BLOCK_PLACE, StateFlag.State.DENY);
+        flags.put(Flags.MOB_SPAWNING, StateFlag.State.ALLOW);
+
+        RegionUtils.createProtectedRegion(
+                spawnPoint.getWorld(),
+                region,
+                protectionRegionID,
+                flags, 1);
+
+        RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
+        RegionManager manager = container.get(FaweAPI.getWorld(spawnPoint.getWorld().getName()));
+        protectedRegion = manager.getRegion(protectionRegionID);
+    }
 
     public GraveyardSite(Enterprise enterprise, Location spawnPoint, GraveyardData data) {
         super(enterprise, JobSiteType.GRAVEYARD, spawnPoint,
                 new File(StoinkCore.getInstance().getDataFolder(), "/schematics/graveyard.schem"),
                 data, data.isBuilt());
 
-        String entryHologramName = enterprise.getID() + "_" + JobSiteType.GRAVEYARD.name() + "_entryway";
-        entryHologram = new JobSiteHologram(this, entryHologramName, new Vector(-3.5, 3, 0.5), getEntryHoloLines());
+        welcomeHologramId = enterprise.getID() + "_" + JobSiteType.GRAVEYARD.name() + "_welcome";
+
+        // Create tombstone generators
+        for (int i = 0; i < TOTAL_TOMBSTONES && i < TOMBSTONE_OFFSETS.size(); i++) {
+            Vector offset = TOMBSTONE_OFFSETS.get(i);
+            Location tombstoneLoc = spawnPoint.clone().add(offset);
+            TombstoneGenerator generator = new TombstoneGenerator(tombstoneLoc, this, i);
+
+            // Enable if already purchased
+            if (i < data.getTombstonesPurchased()) {
+                generator.setEnabled(true);
+            }
+
+            tombstoneGenerators.add(generator);
+        }
+
+        graveKeeper = createGraveKeeper(this);
+
+        mausoleumStructure = new MausoleumStructure(this, mausoleumHordeSpawnOffset);
+
+        registerUpgrades();
+        registerComponents();
+    }
+
+    private void registerComponents() {
+        List<String> welcomeHologramLines = new ArrayList<>();
+        welcomeHologramLines.add(ChatColor.DARK_PURPLE + "" + ChatColor.BOLD + "Welcome to the Graveyard");
+        welcomeHologramLines.add(ChatColor.WHITE + "Here you will slay the undead");
+        welcomeHologramLines.add(ChatColor.WHITE + "to complete combat contracts!");
+        welcomeHologramLines.add(ChatColor.WHITE + "Chat with the Grave Keeper to purchase");
+        welcomeHologramLines.add(ChatColor.WHITE + "tombstones and upgrade your graveyard!");
+        addComponent(new JobSiteHologram(this, welcomeHologramId, welcomeHologramOffset, welcomeHologramLines));
+
+        tombstoneGenerators.forEach(this::addComponent);
+        addComponent(graveKeeper);
+        addComponent(mausoleumStructure);
+    }
+
+    private void registerUpgrades() {
+        // Spawn speed upgrade
+        upgrades.add(new JobSiteUpgrade(
+                "spawn_speed",
+                "Spawn Speed",
+                10,
+                2,
+                lvl -> 5000 * lvl,
+                site -> true,
+                (site, lvl) -> {}
+        ));
+
+        // Tombstone capacity upgrade
+        upgrades.add(new JobSiteUpgrade(
+                "tombstone_capacity",
+                "Tombstone Capacity",
+                10,
+                1,
+                lvl -> 10000 * lvl,
+                site -> true,
+                (site, lvl) -> {}
+        ));
+
+        // Mausoleum spawn speed
+        upgrades.add(new JobSiteUpgrade(
+                "mausoleum_spawn_speed",
+                "Horde Frequency",
+                10,
+                MausoleumStructure.REQUIRED_LEVEL,
+                lvl -> 15000 * lvl,
+                site -> site.getData().getUnlockableState("mausoleum") == UnlockableState.UNLOCKED,
+                (site, lvl) -> {}
+        ));
+
+        // Mausoleum horde size
+        upgrades.add(new JobSiteUpgrade(
+                "mausoleum_horde_size",
+                "Horde Size",
+                10,
+                MausoleumStructure.REQUIRED_LEVEL,
+                lvl -> 12000 * lvl,
+                site -> site.getData().getUnlockableState("mausoleum") == UnlockableState.UNLOCKED,
+                (site, lvl) -> {}
+        ));
+    }
+
+    private JobSiteNPC createGraveKeeper(GraveyardSite graveyardSite) {
+        return new JobSiteNPC(this,
+                ChatColor.DARK_PURPLE + "Grave Keeper",
+                graveKeeperOffset,
+                graveKeeperTexture, graveKeeperSignature) {
+            @Override
+            public void onRightClick(NPCRightClickEvent event) {
+                super.onRightClick(event);
+                Player player = event.getClicker();
+                new GraveyardGui(graveyardSite, player).openWindow();
+                ChatUtils.sendMessage(player, ChatColor.DARK_PURPLE + "Opening Graveyard Management...");
+            }
+        };
+    }
+
+    // ==================== Tombstone Management ====================
+
+    /**
+     * Get the maximum number of tombstones that can be purchased at current level
+     */
+    public int getMaxPurchasableTombstones() {
+        int level = getLevel();
+        int capacityLevel = getData().getLevel("tombstone_capacity");
+
+        // Base: Level 1 = 4, Level 30 = 30
+        // Linear scaling: roughly 1 per level
+        int baseCapacity = STARTING_TOMBSTONES + (int) ((level - 1) * (TOTAL_TOMBSTONES - STARTING_TOMBSTONES) / 29.0);
+
+        // Capacity upgrade adds extra slots
+        int bonusCapacity = capacityLevel * 2;
+
+        return Math.min(TOTAL_TOMBSTONES, baseCapacity + bonusCapacity);
+    }
+
+    /**
+     * Get the cost to purchase the next tombstone
+     */
+    public int getNextTombstoneCost() {
+        int owned = getData().getTombstonesPurchased();
+        return (int) (BASE_TOMBSTONE_COST * Math.pow(TOMBSTONE_COST_MULTIPLIER, owned - STARTING_TOMBSTONES));
+    }
+
+    /**
+     * Purchase the next tombstone
+     */
+    public boolean purchaseTombstone(Player player) {
+        GraveyardData data = getData();
+        int owned = data.getTombstonesPurchased();
+
+        if (owned >= getMaxPurchasableTombstones()) {
+            return false;
+        }
+
+        if (owned >= TOTAL_TOMBSTONES) {
+            return false;
+        }
+
+        int cost = getNextTombstoneCost();
+        if (!StoinkCore.getEconomy().has(player, cost)) {
+            return false;
+        }
+
+        StoinkCore.getEconomy().withdrawPlayer(player, cost);
+        data.incrementTombstonesPurchased();
+
+        // Enable the newly purchased tombstone
+        if (owned < tombstoneGenerators.size()) {
+            tombstoneGenerators.get(owned).setEnabled(true);
+        }
+
+        return true;
+    }
+
+    // ==================== Soul Handling ====================
+
+    /**
+     * Called when a graveyard mob is killed - handles soul drops
+     */
+    /**
+     * Called when a graveyard mob is killed - handles soul drops
+     */
+    public void onMobKilled(Player killer, EntityType entityType) {
+        if (Math.random() < SOUL_DROP_CHANCE) {
+            getData().addSouls(1);
+            ChatUtils.sendMessage(killer, ChatColor.LIGHT_PURPLE + "✦ +1 Soul");
+
+            // Fire soul contract context
+            ContractContext soulContext = new ContractContext(
+                    killer,
+                    JobSiteType.GRAVEYARD,
+                    "SOUL",
+                    1
+            );
+            StoinkCore.getInstance().getContractManager()
+                    .handleContext(enterprise, soulContext);
+        }
+    }
+
+    // ==================== Overrides ====================
+
+    @Override
+    public void tick() {
+        super.tick();
     }
 
     @Override
@@ -34,19 +340,30 @@ public class GraveyardSite extends JobSite {
     }
 
     @Override
-    public void tick() {
-        super.tick();
-    }
-
-    private List<String> getEntryHoloLines(){
-        List<String> entryHoloGramLines = new ArrayList<>();
-        entryHoloGramLines.add(ChatColor.AQUA + "" + ChatColor.BOLD + enterprise.getName() + "'s");
-        entryHoloGramLines.add(ChatColor.AQUA + "" + ChatColor.BOLD + "Graveyard");
-        return entryHoloGramLines;
+    public void disband() {
+        super.disband();
     }
 
     @Override
     public GraveyardData getData() {
         return (GraveyardData) super.getData();
+    }
+
+    // ==================== Getters ====================
+
+    public List<TombstoneGenerator> getTombstoneGenerators() {
+        return tombstoneGenerators;
+    }
+
+    public MausoleumStructure getMausoleumStructure() {
+        return mausoleumStructure;
+    }
+
+    public JobSiteNPC getGraveKeeper() {
+        return graveKeeper;
+    }
+
+    public int getActiveTombstoneCount() {
+        return (int) tombstoneGenerators.stream().filter(TombstoneGenerator::isEnabled).count();
     }
 }

@@ -1,6 +1,7 @@
 package com.stoinkcraft.enterprise.commands.serverenterprisecmd;
 
 import com.stoinkcraft.StoinkCore;
+import com.stoinkcraft.jobs.jobsites.JobSiteManager;
 import com.stoinkcraft.jobs.jobsites.JobsiteLevelHelper;
 import com.stoinkcraft.jobs.jobsites.sites.farmland.FarmlandData;
 import com.stoinkcraft.jobs.jobsites.sites.farmland.FarmlandGui;
@@ -17,10 +18,12 @@ import com.stoinkcraft.utils.ChatUtils;
 import com.stoinkcraft.utils.SCConstants;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
@@ -92,6 +95,19 @@ public class ServerEntCMD implements CommandExecutor {
                EnterpriseManager.getEnterpriseManager().recordPriceSnapshots();
                return true;
            }
+           if(args[0].equalsIgnoreCase("getoffset")){
+               Location playerLoc = player.getLocation();
+               Vector offset = new Vector(0, 0 ,0);
+               JobSiteManager jsm = StoinkCore.getInstance().getEnterpriseManager().getEnterpriseByMember(player.getUniqueId()).getJobSiteManager();
+               if(jsm.getGraveyardSite().contains(playerLoc)){
+                   offset = playerLoc.subtract(jsm.getGraveyardSite().getSpawnPoint()).toVector();
+               }else if(jsm.getFarmlandSite().contains(playerLoc)){
+                   offset = playerLoc.subtract(jsm.getFarmlandSite().getSpawnPoint()).toVector();
+               } else if (jsm.getQuarrySite().contains(playerLoc)) {
+                   offset = playerLoc.subtract(jsm.getQuarrySite().getSpawnPoint()).toVector();
+               }
+               player.sendMessage("x: " + offset.getX() + " y: " + offset.getY() + " z: " + offset.getZ());
+           }
            if(args[0].equalsIgnoreCase("save")){
                Bukkit.getScheduler().runTaskAsynchronously(StoinkCore.getInstance(), () -> {
                    try {
@@ -119,6 +135,7 @@ public class ServerEntCMD implements CommandExecutor {
                        enterprise.getJobSiteManager().getSkyriseSite().rebuild();
                        enterprise.getJobSiteManager().getQuarrySite().rebuild();
                        enterprise.getJobSiteManager().getFarmlandSite().rebuild();
+                       enterprise.getJobSiteManager().getGraveyardSite().rebuild();
                        ChatUtils.sendMessage(player, "Rebuilt jobsites for " + enterprise.getName());
                    }
                }

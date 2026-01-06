@@ -270,7 +270,7 @@ public class EnterpriseManager {
                     if (jsm.getSkyriseSite() != null) jsm.getSkyriseSite().tick();
                     if (jsm.getQuarrySite() != null) jsm.getQuarrySite().tick();
                     if (jsm.getFarmlandSite() != null) jsm.getFarmlandSite().tick();
-//                    if (jsm.getGraveyardSite() != null) jsm.getGraveyardSite().tick();
+                    if (jsm.getGraveyardSite() != null) jsm.getGraveyardSite().tick();
                 }
             }
         }.runTaskTimer(plugin, 20L, 20L); // run every second (20 ticks)

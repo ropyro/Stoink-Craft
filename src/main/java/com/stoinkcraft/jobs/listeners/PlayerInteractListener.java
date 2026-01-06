@@ -30,13 +30,10 @@ public class PlayerInteractListener implements Listener {
         if (block == null) return;
 
         Material type = block.getType();
-        if (type != Material.BEEHIVE && type != Material.BEE_NEST) return;
 
         Player player = event.getPlayer();
         ItemStack item = player.getInventory().getItemInMainHand();
 
-        // Require shears for honeycomb harvesting
-        if (item.getType() != Material.SHEARS) return;
 
         StoinkCore core = StoinkCore.getInstance();
 
@@ -56,7 +53,19 @@ public class PlayerInteractListener implements Listener {
                 enterprise.getJobSiteManager()
                         .resolveJobsite(block.getLocation());
 
+        if(jobSiteType.equals(JobSiteType.QUARRY)){
+            if(type.equals(Material.BEACON)){
+                event.setCancelled(true);
+                ChatUtils.sendMessage(player, ChatColor.RED + "Talk to Miner Bob to manage your power cell!");
+                return;
+            }
+        }
+
         if (jobSiteType != JobSiteType.FARMLAND) return;
+
+        // Require shears for honeycomb harvesting
+        if (item.getType() != Material.SHEARS) return;
+        if (type != Material.BEEHIVE && type != Material.BEE_NEST) return;
 
         FarmlandSite farmland =
                 enterprise.getJobSiteManager().getFarmlandSite();
@@ -76,7 +85,7 @@ public class PlayerInteractListener implements Listener {
             event.setCancelled(true);
             ChatUtils.sendMessage(
                     player,
-                    ChatColor.YELLOW + "🐝 This hive is not ready yet!"
+                    ChatColor.YELLOW + "🐝 This hive is empty!"
             );
             return;
         }
@@ -88,11 +97,6 @@ public class PlayerInteractListener implements Listener {
         event.setCancelled(true);
 
         generator.consumeHoney();
-
-        ChatUtils.sendMessage(
-                player,
-                ChatColor.GOLD + "🍯 You harvested honeycomb!"
-        );
 
     /* =========================
        CONTRACT INTEGRATION

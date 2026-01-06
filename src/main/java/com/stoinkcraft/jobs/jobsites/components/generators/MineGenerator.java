@@ -186,7 +186,7 @@ public class MineGenerator extends JobSiteGenerator {
     private void updateHologram() {
         String line = ChatColor.GREEN +
                 "Regenerates In: " + ChatColor.WHITE +
-                ChatUtils.formatDuration(getRemainingSeconds());
+                ChatUtils.formatDurationSeconds(getRemainingSeconds());
 
         String hologramId =
                 getParent().getEnterprise().getID() + "_" +
@@ -214,9 +214,8 @@ public class MineGenerator extends JobSiteGenerator {
         QuarryData data = getQuarryData();
         int speedLevel = data.getLevel("regen_speed");
 
-        // Base 300 seconds (5 min), reduce by 30 seconds per level
         long base = QuarrySite.DEFAULT_REGEN_INTERVAL_SECONDS;
-        long reduction = speedLevel * 30L;
+        long reduction = speedLevel * 60*20;
 
         return Math.max(60, base - reduction); // Minimum 60 seconds
     }

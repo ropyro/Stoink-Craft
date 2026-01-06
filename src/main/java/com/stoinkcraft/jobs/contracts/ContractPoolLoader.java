@@ -6,6 +6,8 @@ import com.stoinkcraft.jobs.contracts.rewards.MoneyReward;
 import com.stoinkcraft.jobs.contracts.triggers.*;
 import com.stoinkcraft.jobs.jobsites.JobSiteType;
 import com.stoinkcraft.jobs.jobsites.components.structures.BeeHiveStructure;
+import com.stoinkcraft.jobs.jobsites.components.structures.MausoleumStructure;
+import com.stoinkcraft.jobs.jobsites.sites.graveyard.UndeadMobType;
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 
@@ -22,6 +24,7 @@ public class ContractPoolLoader {
 
         loadFarmlandContracts(daily, weekly);
         loadQuarryContracts(daily, weekly);
+        loadGraveyardContracts(daily, weekly);
 
         return new ContractPool(daily, weekly);
     }
@@ -1105,6 +1108,415 @@ public class ContractPoolLoader {
                 Material.DIAMOND_PICKAXE,
                 "Master Miner",
                 List.of("Mine any ore type in the quarry.")
+        ));
+    }
+
+    private static void loadGraveyardContracts(List<ContractDefinition> daily, List<ContractDefinition> weekly) {
+
+        /*
+         * =========================
+         * GRAVEYARD – BASIC UNDEAD (DAILY)
+         * =========================
+         */
+
+        // Zombie contracts
+        daily.add(new ContractDefinition(
+                "graveyard_zombie_basic",
+                new UndeadKillTrigger(EntityType.ZOMBIE),
+                JobSiteType.GRAVEYARD,
+                1,
+                15,
+                Map.of(),
+                new CompositeReward(List.of(
+                        new MoneyReward(600, 0.4),
+                        new JobSiteXpReward(JobSiteType.GRAVEYARD, 30)
+                )),
+                Material.ZOMBIE_HEAD,
+                "Slay Zombies",
+                List.of("Slay zombies in your graveyard.")
+        ));
+
+        daily.add(new ContractDefinition(
+                "graveyard_zombie_medium",
+                new UndeadKillTrigger(EntityType.ZOMBIE),
+                JobSiteType.GRAVEYARD,
+                8,
+                40,
+                Map.of(),
+                new CompositeReward(List.of(
+                        new MoneyReward(1500, 0.4),
+                        new JobSiteXpReward(JobSiteType.GRAVEYARD, 70)
+                )),
+                Material.ZOMBIE_HEAD,
+                "Zombie Slayer",
+                List.of("Slay many zombies in your graveyard.")
+        ));
+
+        // Skeleton contracts
+        daily.add(new ContractDefinition(
+                "graveyard_skeleton_basic",
+                new UndeadKillTrigger(EntityType.SKELETON),
+                JobSiteType.GRAVEYARD,
+                1,
+                15,
+                Map.of(),
+                new CompositeReward(List.of(
+                        new MoneyReward(600, 0.4),
+                        new JobSiteXpReward(JobSiteType.GRAVEYARD, 30)
+                )),
+                Material.SKELETON_SKULL,
+                "Slay Skeletons",
+                List.of("Slay skeletons in your graveyard.")
+        ));
+
+        daily.add(new ContractDefinition(
+                "graveyard_skeleton_medium",
+                new UndeadKillTrigger(EntityType.SKELETON),
+                JobSiteType.GRAVEYARD,
+                8,
+                40,
+                Map.of(),
+                new CompositeReward(List.of(
+                        new MoneyReward(1500, 0.4),
+                        new JobSiteXpReward(JobSiteType.GRAVEYARD, 70)
+                )),
+                Material.SKELETON_SKULL,
+                "Skeleton Slayer",
+                List.of("Slay many skeletons in your graveyard.")
+        ));
+
+        // Mixed undead (basic)
+        daily.add(new ContractDefinition(
+                "graveyard_undead_basic",
+                new UndeadKillTrigger(EntityType.ZOMBIE, EntityType.SKELETON),
+                JobSiteType.GRAVEYARD,
+                1,
+                25,
+                Map.of(),
+                new CompositeReward(List.of(
+                        new MoneyReward(800, 0.4),
+                        new JobSiteXpReward(JobSiteType.GRAVEYARD, 40)
+                )),
+                Material.BONE,
+                "Undead Purge",
+                List.of("Slay any undead in your graveyard.")
+        ));
+
+        /*
+         * =========================
+         * GRAVEYARD – TIER 2 MOBS (DAILY)
+         * =========================
+         */
+
+        // Husk contracts (requires attunement)
+        daily.add(new ContractDefinition(
+                "graveyard_husk_basic",
+                new UndeadKillTrigger(EntityType.HUSK),
+                JobSiteType.GRAVEYARD,
+                UndeadMobType.HUSK.getRequiredLevel(),
+                20,
+                Map.of(),
+                new CompositeReward(List.of(
+                        new MoneyReward(1200, 0.4),
+                        new JobSiteXpReward(JobSiteType.GRAVEYARD, 55)
+                )),
+                Material.SAND,
+                "Desert Wanderers",
+                List.of("Slay husks in your graveyard.", "Requires Husk attunement.")
+        ));
+
+        // Stray contracts
+        daily.add(new ContractDefinition(
+                "graveyard_stray_basic",
+                new UndeadKillTrigger(EntityType.STRAY),
+                JobSiteType.GRAVEYARD,
+                UndeadMobType.STRAY.getRequiredLevel(),
+                20,
+                Map.of(),
+                new CompositeReward(List.of(
+                        new MoneyReward(1200, 0.4),
+                        new JobSiteXpReward(JobSiteType.GRAVEYARD, 55)
+                )),
+                Material.POWDER_SNOW_BUCKET,
+                "Frozen Archers",
+                List.of("Slay strays in your graveyard.", "Requires Stray attunement.")
+        ));
+
+        /*
+         * =========================
+         * GRAVEYARD – TIER 3 MOBS (DAILY)
+         * =========================
+         */
+
+        // Zombie Villager contracts
+        daily.add(new ContractDefinition(
+                "graveyard_zombie_villager_basic",
+                new UndeadKillTrigger(EntityType.ZOMBIE_VILLAGER),
+                JobSiteType.GRAVEYARD,
+                UndeadMobType.ZOMBIE_VILLAGER.getRequiredLevel(),
+                15,
+                Map.of(),
+                new CompositeReward(List.of(
+                        new MoneyReward(2000, 0.4),
+                        new JobSiteXpReward(JobSiteType.GRAVEYARD, 90)
+                )),
+                Material.EMERALD,
+                "Fallen Merchants",
+                List.of("Slay zombie villagers in your graveyard.", "Requires Zombie Villager attunement.")
+        ));
+
+        // Drowned contracts
+        daily.add(new ContractDefinition(
+                "graveyard_drowned_basic",
+                new UndeadKillTrigger(EntityType.DROWNED),
+                JobSiteType.GRAVEYARD,
+                UndeadMobType.DROWNED.getRequiredLevel(),
+                15,
+                Map.of(),
+                new CompositeReward(List.of(
+                        new MoneyReward(2000, 0.4),
+                        new JobSiteXpReward(JobSiteType.GRAVEYARD, 90)
+                )),
+                Material.TRIDENT,
+                "Sunken Dead",
+                List.of("Slay drowned in your graveyard.", "Requires Drowned attunement.")
+        ));
+
+        /*
+         * =========================
+         * GRAVEYARD – TIER 4 MOBS (DAILY)
+         * =========================
+         */
+
+        // Wither Skeleton contracts
+        daily.add(new ContractDefinition(
+                "graveyard_wither_skeleton_basic",
+                new UndeadKillTrigger(EntityType.WITHER_SKELETON),
+                JobSiteType.GRAVEYARD,
+                UndeadMobType.WITHER_SKELETON.getRequiredLevel(),
+                10,
+                Map.of(),
+                new CompositeReward(List.of(
+                        new MoneyReward(3500, 0.4),
+                        new JobSiteXpReward(JobSiteType.GRAVEYARD, 150)
+                )),
+                Material.WITHER_SKELETON_SKULL,
+                "Wither's Servants",
+                List.of("Slay wither skeletons in your graveyard.", "Requires Wither Skeleton attunement.")
+        ));
+
+        // Phantom contracts
+//        daily.add(new ContractDefinition(
+//                "graveyard_phantom_basic",
+//                new UndeadKillTrigger(EntityType.PHANTOM),
+//                JobSiteType.GRAVEYARD,
+//                UndeadMobType.PHANTOM.getRequiredLevel(),
+//                10,
+//                Map.of(),
+//                new CompositeReward(List.of(
+//                        new MoneyReward(3500, 0.4),
+//                        new JobSiteXpReward(JobSiteType.GRAVEYARD, 150)
+//                )),
+//                Material.PHANTOM_MEMBRANE,
+//                "Night Terrors",
+//                List.of("Slay phantoms in your graveyard.", "Requires Phantom attunement.")
+//        ));
+
+        /*
+         * =========================
+         * GRAVEYARD – MAUSOLEUM SPIDERS (DAILY)
+         * =========================
+         */
+
+        daily.add(new ContractDefinition(
+                "graveyard_spider_basic",
+                new SpiderKillTrigger(),
+                JobSiteType.GRAVEYARD,
+                MausoleumStructure.REQUIRED_LEVEL,
+                15,
+                Map.of(),
+                new CompositeReward(List.of(
+                        new MoneyReward(1000, 0.4),
+                        new JobSiteXpReward(JobSiteType.GRAVEYARD, 50)
+                )),
+                Material.SPIDER_EYE,
+                "Crypt Crawlers",
+                List.of("Slay spiders from the Mausoleum.", "Requires Mausoleum.")
+        ));
+
+        daily.add(new ContractDefinition(
+                "graveyard_spider_medium",
+                new SpiderKillTrigger(),
+                JobSiteType.GRAVEYARD,
+                MausoleumStructure.REQUIRED_LEVEL + 5,
+                35,
+                Map.of(),
+                new CompositeReward(List.of(
+                        new MoneyReward(2500, 0.4),
+                        new JobSiteXpReward(JobSiteType.GRAVEYARD, 110)
+                )),
+                Material.SPIDER_EYE,
+                "Arachnid Exterminator",
+                List.of("Slay many spiders from the Mausoleum.")
+        ));
+
+        /*
+         * =========================
+         * GRAVEYARD – SOULS (DAILY)
+         * =========================
+         */
+
+        daily.add(new ContractDefinition(
+                "graveyard_souls_basic",
+                new SoulCollectTrigger(),
+                JobSiteType.GRAVEYARD,
+                5,
+                10,
+                Map.of(),
+                new CompositeReward(List.of(
+                        new MoneyReward(1500, 0.4),
+                        new JobSiteXpReward(JobSiteType.GRAVEYARD, 65)
+                )),
+                Material.SOUL_LANTERN,
+                "Soul Collector",
+                List.of("Collect souls from slain undead.")
+        ));
+
+        daily.add(new ContractDefinition(
+                "graveyard_souls_medium",
+                new SoulCollectTrigger(),
+                JobSiteType.GRAVEYARD,
+                15,
+                25,
+                Map.of(),
+                new CompositeReward(List.of(
+                        new MoneyReward(3000, 0.4),
+                        new JobSiteXpReward(JobSiteType.GRAVEYARD, 130)
+                )),
+                Material.SOUL_LANTERN,
+                "Soul Harvester",
+                List.of("Collect many souls from slain undead.")
+        ));
+
+        /*
+         * =========================
+         * GRAVEYARD – WEEKLY CONTRACTS
+         * =========================
+         */
+
+        weekly.add(new ContractDefinition(
+                "graveyard_undead_weekly",
+                new UndeadKillTrigger(EntityType.ZOMBIE, EntityType.SKELETON),
+                JobSiteType.GRAVEYARD,
+                1,
+                150,
+                Map.of(),
+                new CompositeReward(List.of(
+                        new MoneyReward(6000, 0.4),
+                        new JobSiteXpReward(JobSiteType.GRAVEYARD, 250)
+                )),
+                Material.BONE_BLOCK,
+                "Graveyard Keeper",
+                List.of("Slay many undead throughout the week.")
+        ));
+
+        weekly.add(new ContractDefinition(
+                "graveyard_zombie_weekly",
+                new UndeadKillTrigger(EntityType.ZOMBIE, EntityType.HUSK, EntityType.ZOMBIE_VILLAGER, EntityType.DROWNED),
+                JobSiteType.GRAVEYARD,
+                UndeadMobType.HUSK.getRequiredLevel(),
+                200,
+                Map.of(),
+                new CompositeReward(List.of(
+                        new MoneyReward(10000, 0.4),
+                        new JobSiteXpReward(JobSiteType.GRAVEYARD, 400)
+                )),
+                Material.ZOMBIE_HEAD,
+                "Zombie Exterminator",
+                List.of("Slay all types of zombies throughout the week.")
+        ));
+
+        weekly.add(new ContractDefinition(
+                "graveyard_skeleton_weekly",
+                new UndeadKillTrigger(EntityType.SKELETON, EntityType.STRAY, EntityType.WITHER_SKELETON),
+                JobSiteType.GRAVEYARD,
+                UndeadMobType.STRAY.getRequiredLevel(),
+                200,
+                Map.of(),
+                new CompositeReward(List.of(
+                        new MoneyReward(10000, 0.4),
+                        new JobSiteXpReward(JobSiteType.GRAVEYARD, 400)
+                )),
+                Material.SKELETON_SKULL,
+                "Skeleton Exterminator",
+                List.of("Slay all types of skeletons throughout the week.")
+        ));
+
+        weekly.add(new ContractDefinition(
+                "graveyard_spider_weekly",
+                new SpiderKillTrigger(),
+                JobSiteType.GRAVEYARD,
+                MausoleumStructure.REQUIRED_LEVEL,
+                100,
+                Map.of(),
+                new CompositeReward(List.of(
+                        new MoneyReward(8000, 0.4),
+                        new JobSiteXpReward(JobSiteType.GRAVEYARD, 350)
+                )),
+                Material.COBWEB,
+                "Web Clearer",
+                List.of("Clear many spider hordes throughout the week.")
+        ));
+
+        weekly.add(new ContractDefinition(
+                "graveyard_souls_weekly",
+                new SoulCollectTrigger(),
+                JobSiteType.GRAVEYARD,
+                5,
+                75,
+                Map.of(),
+                new CompositeReward(List.of(
+                        new MoneyReward(12000, 0.4),
+                        new JobSiteXpReward(JobSiteType.GRAVEYARD, 500)
+                )),
+                Material.SOUL_TORCH,
+                "Soul Reaper",
+                List.of("Collect many souls throughout the week.")
+        ));
+
+        weekly.add(new ContractDefinition(
+                "graveyard_elite_weekly",
+                new UndeadKillTrigger(EntityType.WITHER_SKELETON, EntityType.PHANTOM),
+                JobSiteType.GRAVEYARD,
+                UndeadMobType.WITHER_SKELETON.getRequiredLevel(),
+                50,
+                Map.of(),
+                new CompositeReward(List.of(
+                        new MoneyReward(20000, 0.4),
+                        new JobSiteXpReward(JobSiteType.GRAVEYARD, 800)
+                )),
+                Material.NETHER_STAR,
+                "Elite Hunter",
+                List.of("Slay the most dangerous undead throughout the week.")
+        ));
+
+        weekly.add(new ContractDefinition(
+                "graveyard_mixed_weekly",
+                new UndeadKillTrigger(
+                        EntityType.ZOMBIE, EntityType.SKELETON, EntityType.HUSK, EntityType.STRAY,
+                        EntityType.ZOMBIE_VILLAGER, EntityType.DROWNED, EntityType.WITHER_SKELETON, EntityType.PHANTOM
+                ),
+                JobSiteType.GRAVEYARD,
+                UndeadMobType.WITHER_SKELETON.getRequiredLevel(),
+                300,
+                Map.of(),
+                new CompositeReward(List.of(
+                        new MoneyReward(25000, 0.4),
+                        new JobSiteXpReward(JobSiteType.GRAVEYARD, 1000)
+                )),
+                Material.DIAMOND_SWORD,
+                "Master of the Dead",
+                List.of("Prove your mastery over all undead.")
         ));
     }
 }

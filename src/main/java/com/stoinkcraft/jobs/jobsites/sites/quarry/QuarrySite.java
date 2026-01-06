@@ -32,8 +32,8 @@ public class QuarrySite extends JobSite {
     public static final Vector MINER_BOB_OFFSET =
             new Vector(-0.5, 0, 4.5);
 
-    //8hr default regen time
-    public static final long DEFAULT_REGEN_INTERVAL_SECONDS = 30L;
+    //3hr default regen time
+    public static final long DEFAULT_REGEN_INTERVAL_SECONDS = 60L*60L*3L;
 
     // XP per geode block mined
     public static final int GEODE_XP_REWARD = 25;
