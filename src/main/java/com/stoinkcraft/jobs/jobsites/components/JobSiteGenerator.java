@@ -3,9 +3,10 @@ package com.stoinkcraft.jobs.jobsites.components;
 import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.regions.CuboidRegion;
 import com.stoinkcraft.jobs.jobsites.JobSite;
+import com.stoinkcraft.jobs.jobsites.components.JobSiteComponent;
 import org.bukkit.Location;
 
-public class JobSiteGenerator implements JobSiteComponent{
+public class JobSiteGenerator implements JobSiteComponent {
 
     private JobSite parent;
     private boolean enabled;

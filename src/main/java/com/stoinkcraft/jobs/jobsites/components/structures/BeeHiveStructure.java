@@ -21,10 +21,10 @@ public class BeeHiveStructure extends JobSiteStructure {
     private static final File SCHEMATIC =
             new File(StoinkCore.getInstance().getDataFolder(), "/schematics/beehives.schem");
 
-    private String constructionHologram;
     public static Vector constructionHologramOffset = new Vector(-15, 3, -34);
 
     private JobSiteHologram hologram;
+    private final String hologramId;
 
     public BeeHiveStructure(JobSite jobSite) {
         super(
@@ -37,88 +37,94 @@ public class BeeHiveStructure extends JobSiteStructure {
                 jobSite
         );
 
-        constructionHologram =  getJobSite().getEnterprise().getID() + "_" + JobSiteType.FARMLAND.name() + "_beehives";
-        hologram = getHologram();
+        this.hologramId = getJobSite().getEnterprise().getID() + "_" + JobSiteType.FARMLAND.name() + "_beehives";
+        this.hologram = createHologram();
         getJobSite().addComponent(hologram);
     }
 
     @Override
     public void build() {
         super.build();
-        if(getJobSite().getData().getStructure(getId()).getState().equals(StructureState.BUILT)){
+        if (isUnlocked()) {
             hologram.delete();
-            JobSite site = getJobSite();
-            Location pasteLoc = site.getSpawnPoint();
-            SchematicUtils.pasteSchematic(SCHEMATIC, pasteLoc, false);
+            pasteStructure();
         }
     }
 
     @Override
-    public void onConstructionStart() {
-        List<String> constructionHologramLines = new ArrayList<>();
-        constructionHologramLines.add(ChatColor.GOLD + "" + ChatColor.BOLD + "Bee Hives Under Construction");
-        constructionHologramLines.add(ChatColor.WHITE + "The Bee hives unlocks bees and honey collection!");
-        constructionHologramLines.add(ChatColor.WHITE + "It also gives a considerable amount of xp when built.");
-        constructionHologramLines.add(" ");
-        constructionHologramLines.add(ChatColor.WHITE + "Time Remaining: " + ChatColor.GREEN + ChatUtils.formatDuration(getBuildTimeMillis()));
-        hologram.setHologram(constructionHologramLines);
+    public void onUnlockStart() {
+        hologram.setHologram(List.of(
+                ChatColor.GOLD + "" + ChatColor.BOLD + "Bee Hives Under Construction",
+                ChatColor.WHITE + "The Bee hives unlocks bees and honey collection!",
+                ChatColor.WHITE + "It also gives a considerable amount of xp when built.",
+                " ",
+                ChatColor.WHITE + "Time Remaining: " + ChatColor.GREEN + ChatUtils.formatDuration(getBuildTimeMillis())
+        ));
     }
 
     @Override
-    public void onConstructionTick(long remainingMillis) {
+    public void onUnlockTick(long remainingMillis) {
         String timeRemainingLine = ChatColor.WHITE + "Time Remaining: " + ChatColor.GREEN + ChatUtils.formatDuration(remainingMillis);
         hologram.setLine(0, 4, timeRemainingLine);
     }
 
     @Override
-    public void onConstructionComplete() {
-        super.onConstructionComplete();
-        JobSite site = getJobSite();
-        Location pasteLoc = site.getSpawnPoint();
-        SchematicUtils.pasteSchematic(SCHEMATIC, pasteLoc, false);
+    public void onUnlockComplete() {
+        pasteStructure();
 
-        //reward
-        site.getData().incrementXp(1000);
-        site.getEnterprise().sendEnterpriseMessage(                "§6§lBee Hive Construction Complete!",
+        // Reward
+        getJobSite().getData().incrementXp(1000);
+        getJobSite().getEnterprise().sendEnterpriseMessage(
+                "§6§lBee Hive Construction Complete!",
                 "",
                 "§a+ 5000xp",
-                "");
+                ""
+        );
 
         hologram.delete();
     }
 
     @Override
-    public void disband() {
-    }
-
-    @Override
     public void levelUp() {
         super.levelUp();
-        List<String> constructionHologramLines = new ArrayList<>();
-        if(canUnlock(getJobSite()) && !getJobSite().getData().getStructure(getId()).getState().equals(StructureState.BUILT)){
-            constructionHologramLines.add(ChatColor.GREEN + "" + ChatColor.BOLD + "Bee Hives Unlocked!");
-            constructionHologramLines.add(ChatColor.WHITE + "Talk to Farmer Joe to start building the Bee hives.");
-            constructionHologramLines.add(" ");
-            constructionHologramLines.add(ChatColor.WHITE + "The Bee hives unlocks bees and honey collection!");
-            constructionHologramLines.add(ChatColor.WHITE + "It also gives a considerable amount of xp when built.");
-            hologram.setHologram(constructionHologramLines);
+        if (!isUnlocked()) {
+            updateHologramForLevel();
         }
     }
 
-    private JobSiteHologram getHologram(){
-        List<String> constructionHologramLines = new ArrayList<>();
-        if(canUnlock(getJobSite())){
-            constructionHologramLines.add(ChatColor.GREEN + "" + ChatColor.BOLD + "Bee Hives Unlocked!");
-            constructionHologramLines.add(ChatColor.WHITE + "Talk to Farmer Joe to start building the Bee hives.");
-            constructionHologramLines.add(" ");
-            constructionHologramLines.add(ChatColor.WHITE + "The Bee hives unlocks bees and honey collection!");
-            constructionHologramLines.add(ChatColor.WHITE + "It also gives a considerable amount of xp when built.");
-        }else{
-            constructionHologramLines.add(ChatColor.RED + "" + ChatColor.BOLD + "Bee Hives Unlocked at Level: " + getRequiredJobsiteLevel());
-            constructionHologramLines.add(ChatColor.WHITE + "The Bee hives unlocks bees and honey collection!");
-            constructionHologramLines.add(ChatColor.WHITE + "It also gives a considerable amount of xp when built.");
+    private void pasteStructure() {
+        SchematicUtils.pasteSchematic(SCHEMATIC, getJobSite().getSpawnPoint(), false);
+    }
+
+    private void updateHologramForLevel() {
+        if (canUnlock()) {
+            hologram.setHologram(List.of(
+                    ChatColor.GREEN + "" + ChatColor.BOLD + "Bee Hives Unlocked!",
+                    ChatColor.WHITE + "Talk to Farmer Joe to start building the Bee hives.",
+                    " ",
+                    ChatColor.WHITE + "The Bee hives unlocks bees and honey collection!",
+                    ChatColor.WHITE + "It also gives a considerable amount of xp when built."
+            ));
         }
-        hologram = new JobSiteHologram(getJobSite(), constructionHologram, constructionHologramOffset, constructionHologramLines);
-        return hologram;
+    }
+
+    private JobSiteHologram createHologram() {
+        List<String> lines;
+        if (canUnlock()) {
+            lines = List.of(
+                    ChatColor.GREEN + "" + ChatColor.BOLD + "Bee Hives Unlocked!",
+                    ChatColor.WHITE + "Talk to Farmer Joe to start building the Bee hives.",
+                    " ",
+                    ChatColor.WHITE + "The Bee hives unlocks bees and honey collection!",
+                    ChatColor.WHITE + "It also gives a considerable amount of xp when built."
+            );
+        } else {
+            lines = List.of(
+                    ChatColor.RED + "" + ChatColor.BOLD + "Bee Hives Unlocked at Level: " + getRequiredJobsiteLevel(),
+                    ChatColor.WHITE + "The Bee hives unlocks bees and honey collection!",
+                    ChatColor.WHITE + "It also gives a considerable amount of xp when built."
+            );
+        }
+        return new JobSiteHologram(getJobSite(), hologramId, constructionHologramOffset, lines);
     }
 }

@@ -1,11 +1,9 @@
 package com.stoinkcraft.jobs.jobsites;
 
 import com.fastasyncworldedit.core.FaweAPI;
-import com.fastasyncworldedit.core.registry.state.PropertyKey;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.regions.Region;
-import com.sk89q.worldedit.world.block.BlockState;
 import com.sk89q.worldedit.world.block.BlockTypes;
 import com.sk89q.worldguard.WorldGuard;
 import com.sk89q.worldguard.protection.managers.RegionManager;
@@ -16,9 +14,9 @@ import com.stoinkcraft.enterprise.Enterprise;
 import com.stoinkcraft.jobs.jobsites.components.JobSiteComponent;
 import com.stoinkcraft.jobs.jobsites.components.JobSiteStructure;
 import com.stoinkcraft.jobs.jobsites.components.structures.StructureData;
+import com.stoinkcraft.jobs.jobsites.components.unlockable.Unlockable;
 import com.stoinkcraft.utils.RegionUtils;
 import com.stoinkcraft.utils.SchematicUtils;
-import eu.decentsoftware.holograms.api.DHAPI;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
@@ -38,7 +36,6 @@ public abstract class JobSite {
     protected String protectionRegionID;
     protected ProtectedRegion protectedRegion;
     protected final List<JobSiteUpgrade> upgrades = new ArrayList<>();
-
     protected final List<JobSiteComponent> components = new ArrayList<>();
 
     public JobSite(Enterprise enterprise, JobSiteType type, Location spawnPoint, File schematic, JobSiteData data, boolean isBuilt) {
@@ -53,25 +50,48 @@ public abstract class JobSite {
         data.setParent(this);
     }
 
-    public JobSiteData getData(){
+    public JobSiteData getData() {
         return data;
     }
+
     public List<JobSiteUpgrade> getUpgrades() {
         return upgrades;
     }
+
     public @Nullable JobSiteStructure getStructure(String structureId) {
-        return (JobSiteStructure) components.stream()
+        return components.stream()
                 .filter(component -> component instanceof JobSiteStructure)
-                .filter(s -> ((JobSiteStructure) s).getId().equalsIgnoreCase(structureId))
+                .map(component -> (JobSiteStructure) component)
+                .filter(s -> s.getUnlockableId().equalsIgnoreCase(structureId))
                 .findFirst()
                 .orElse(null);
     }
-    public void disband(){
+
+    /**
+     * Get all components that implement Unlockable
+     */
+    public List<Unlockable> getUnlockables() {
+        return components.stream()
+                .filter(component -> component instanceof Unlockable)
+                .map(component -> (Unlockable) component)
+                .toList();
+    }
+
+    /**
+     * Get a specific unlockable by ID
+     */
+    public @Nullable Unlockable getUnlockable(String id) {
+        return getUnlockables().stream()
+                .filter(u -> u.getUnlockableId().equalsIgnoreCase(id))
+                .findFirst()
+                .orElse(null);
+    }
+
+    public void disband() {
         RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
         RegionManager manager = container.get(FaweAPI.getWorld(spawnPoint.getWorld().getName()));
         manager.removeRegion(protectionRegionID);
-        components.stream().forEach(c -> c.disband());
-
+        components.forEach(JobSiteComponent::disband);
         removeBuild();
     }
 
@@ -80,18 +100,13 @@ public abstract class JobSite {
                 FaweAPI.getWorld(getSpawnPoint().getWorld().getName());
 
         try (EditSession session = WorldEdit.getInstance().newEditSession(weWorld)) {
-
-            session.setBlocks(
-                    region,
-                    BlockTypes.AIR.getDefaultState()
-            );
-
+            session.setBlocks(region, BlockTypes.AIR.getDefaultState());
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public boolean isBuilt(){
+    public boolean isBuilt() {
         return isBuilt;
     }
 
@@ -99,13 +114,13 @@ public abstract class JobSite {
         this.isBuilt = isBuilt;
     }
 
-    public void rebuild(){
+    public void rebuild() {
         disband();
         setBuilt(false);
         build();
     }
 
-    public void protectRegion(){
+    public void protectRegion() {
         RegionUtils.createProtectedRegion(
                 spawnPoint.getWorld(),
                 region,
@@ -115,13 +130,14 @@ public abstract class JobSite {
         protectedRegion = manager.getRegion(protectionRegionID);
     }
 
-    public void teleportPlayer(Player player, boolean ignoreBuilt){
-        if(!isBuilt && !ignoreBuilt) build();
+    public void teleportPlayer(Player player, boolean ignoreBuilt) {
+        if (!isBuilt && !ignoreBuilt) build();
         Location spawn = spawnPoint.clone().add(0.5, 0, 0.5);
         spawn.setYaw(90);
         player.teleport(spawn);
     }
-    public void teleportPlayer(Player player){
+
+    public void teleportPlayer(Player player) {
         teleportPlayer(player, false);
     }
 
@@ -133,15 +149,15 @@ public abstract class JobSite {
 
         SchematicUtils.pasteSchematic(schematic, spawnPoint, true);
         protectRegion();
-        components.stream().forEach(c -> c.build());
+        components.forEach(JobSiteComponent::build);
 
         isBuilt = true;
         getData().setBuilt(true);
         StoinkCore.getInstance().getLogger().info("Built " + type + " job site for " + enterprise.getName() + " at " + spawnPoint);
     }
 
-    public void tick(){
-        components.stream().forEach(c -> c.tick());
+    public void tick() {
+        components.forEach(JobSiteComponent::tick);
     }
 
     public boolean contains(Location loc) {
@@ -159,7 +175,7 @@ public abstract class JobSite {
         if (current >= upgrade.maxLevel()) return false;
         if (!upgrade.canUnlock(this)) return false;
 
-        int currentLevel = JobsiteLevelHelper.getLevelFromXp((int) d.getXp());
+        int currentLevel = JobsiteLevelHelper.getLevelFromXp(d.getXp());
         if (currentLevel < upgrade.requiredJobsiteLevel()) return false;
 
         int cost = upgrade.cost(current + 1);
@@ -172,34 +188,39 @@ public abstract class JobSite {
         return true;
     }
 
-    public boolean purchaseStructure(JobSiteStructure structure, Player player) {
+    /**
+     * Purchase any Unlockable (structures, generators, etc.)
+     */
+    public boolean purchaseUnlockable(Unlockable unlockable, Player player) {
+        if (!unlockable.canUnlock()) return false;
 
-        StructureData data = getData().getStructure(structure.getId());
-
-        if (data.getState() != JobSiteStructure.StructureState.LOCKED) return false;
-        if (!structure.canUnlock(this)) return false;
-
-        int cost = structure.getCost();
+        int cost = unlockable.getCost();
         if (!StoinkCore.getEconomy().has(player, cost)) return false;
 
         StoinkCore.getEconomy().withdrawPlayer(player, cost);
-
-        data.startBuilding(structure.getBuildTimeMillis());
-        structure.onConstructionStart();
+        getData().startUnlock(unlockable);
 
         return true;
     }
 
-    public int getLevel(){
+    /**
+     * @deprecated Use {@link #purchaseUnlockable(Unlockable, Player)} instead
+     */
+    @Deprecated
+    public boolean purchaseStructure(JobSiteStructure structure, Player player) {
+        return purchaseUnlockable(structure, player);
+    }
+
+    public int getLevel() {
         return JobsiteLevelHelper.getLevelFromXp(getData().getXp());
     }
 
-    public void levelUp(){
-        components.stream().forEach(c -> c.levelUp());
-        getEnterprise().sendEnterpriseMessage("Farmland leveled up to, " + JobsiteLevelHelper.getLevelFromXp(getData().getXp()));
+    public void levelUp() {
+        components.forEach(JobSiteComponent::levelUp);
+        getEnterprise().sendEnterpriseMessage(type.name() + " leveled up to " + getLevel());
     }
 
-    public void addComponent(JobSiteComponent component){
+    public void addComponent(JobSiteComponent component) {
         this.components.add(component);
     }
 
@@ -207,7 +228,7 @@ public abstract class JobSite {
         return components;
     }
 
-    public Enterprise getEnterprise(){
+    public Enterprise getEnterprise() {
         return this.enterprise;
     }
 

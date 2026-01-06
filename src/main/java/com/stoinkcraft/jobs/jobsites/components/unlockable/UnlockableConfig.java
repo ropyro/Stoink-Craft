@@ -1,4 +1,4 @@
-package com.stoinkcraft.jobs.jobsites.components;
+package com.stoinkcraft.jobs.jobsites.components.unlockable;
 
 import com.stoinkcraft.jobs.jobsites.JobSite;
 

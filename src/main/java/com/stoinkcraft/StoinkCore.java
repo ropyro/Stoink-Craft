@@ -112,10 +112,11 @@ public class StoinkCore extends JavaPlugin {
     public void onEnable() {
         INSTANCE = this;
 
+        registerCommands();
+
         hookLibraries();
         initManagers();
         initFilesAndResources();
-        registerCommands();
         registerListeners();
         ensureServerEnterprises();
         startTasks();

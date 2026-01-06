@@ -5,9 +5,8 @@ import com.stoinkcraft.enterprise.Enterprise;
 import com.stoinkcraft.jobs.contracts.ContractContext;
 import com.stoinkcraft.jobs.jobsites.JobSiteManager;
 import com.stoinkcraft.jobs.jobsites.JobSiteType;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
+import com.stoinkcraft.jobs.jobsites.sites.quarry.QuarrySite;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.Ageable;
 import org.bukkit.block.data.BlockData;
@@ -42,6 +41,29 @@ public class BlockBreakListener implements Listener {
         JobSiteType jobSiteType = enterprise.getJobSiteManager()
                 .resolveJobsite(block.getLocation());
         if (jobSiteType == null) return;
+
+        // =========================
+        // GEODE XP CHECK (Quarry)
+        // =========================
+        if (jobSiteType == JobSiteType.QUARRY) {
+            if (material == Material.AMETHYST_BLOCK || material == Material.AMETHYST_CLUSTER) {
+                QuarrySite quarry = enterprise.getJobSiteManager().getQuarrySite();
+                int xpReward = QuarrySite.GEODE_XP_REWARD;
+
+                // Bonus XP for clusters
+                if (material == Material.AMETHYST_CLUSTER) {
+                    xpReward *= 2;
+                }
+
+                quarry.getData().incrementXp(xpReward);
+
+                // Visual feedback
+                player.sendMessage(ChatColor.LIGHT_PURPLE + "+" + xpReward + " Quarry XP " +
+                        ChatColor.DARK_PURPLE + "⬢ Geode!");
+
+                player.playSound(player.getLocation(), Sound.BLOCK_AMETHYST_BLOCK_BREAK, 1.0f, 1.2f);
+            }
+        }
 
         // =========================
         // CROP MATURITY CHECK
@@ -90,7 +112,6 @@ public class BlockBreakListener implements Listener {
         if (isCrop &&
                 player.getWorld().equals(core.getEnterpriseWorldManager().getWorld())) {
 
-            // Run next tick to allow break to complete
             Bukkit.getScheduler().runTaskLater(
                     core,
                     () -> enterprise.getJobSiteManager()

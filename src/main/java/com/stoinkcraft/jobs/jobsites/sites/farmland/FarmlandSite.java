@@ -20,7 +20,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
-import org.checkerframework.checker.units.qual.A;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -326,9 +325,7 @@ public class FarmlandSite extends JobSite {
     }
 
     public boolean areBeeHivesBuilt() {
-        return getData()
-                .getStructure("beehive")
-                .getState().equals(JobSiteStructure.StructureState.BUILT);
+        return beeHiveStructure.isUnlocked();
     }
 
     public PassiveMobGenerator getMobGenerator() {
