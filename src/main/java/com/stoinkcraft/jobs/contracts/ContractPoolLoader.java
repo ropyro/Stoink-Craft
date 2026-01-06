@@ -3,11 +3,9 @@ package com.stoinkcraft.jobs.contracts;
 import com.stoinkcraft.jobs.contracts.rewards.CompositeReward;
 import com.stoinkcraft.jobs.contracts.rewards.JobSiteXpReward;
 import com.stoinkcraft.jobs.contracts.rewards.MoneyReward;
-import com.stoinkcraft.jobs.contracts.triggers.BlockMineTrigger;
-import com.stoinkcraft.jobs.contracts.triggers.CropHarvestTrigger;
-import com.stoinkcraft.jobs.contracts.triggers.GeodeMineTrigger;
-import com.stoinkcraft.jobs.contracts.triggers.MobKillTrigger;
+import com.stoinkcraft.jobs.contracts.triggers.*;
 import com.stoinkcraft.jobs.jobsites.JobSiteType;
+import com.stoinkcraft.jobs.jobsites.components.structures.BeeHiveStructure;
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 
@@ -384,6 +382,98 @@ public class ContractPoolLoader {
                 Material.DIAMOND_SWORD,
                 "Livestock Control",
                 List.of("Cull any livestock across your farmland.")
+        ));
+
+        /*
+         * =========================
+         * FARMLAND – HONEY (DAILY)
+         * =========================
+         */
+
+        daily.add(new ContractDefinition(
+                "farmland_honey_basic",
+                new HoneyHarvestTrigger(),
+                JobSiteType.FARMLAND,
+                BeeHiveStructure.REQUIRED_LEVEL,
+                8,
+                Map.of(),
+                new CompositeReward(List.of(
+                        new MoneyReward(1500, 0.4),
+                        new JobSiteXpReward(JobSiteType.FARMLAND, 70)
+                )),
+                Material.HONEYCOMB,
+                "Harvest Honeycomb",
+                List.of("Harvest honeycomb from your beehives.")
+        ));
+
+        daily.add(new ContractDefinition(
+                "farmland_honey_medium",
+                new HoneyHarvestTrigger(),
+                JobSiteType.FARMLAND,
+                BeeHiveStructure.REQUIRED_LEVEL,
+                20,
+                Map.of(),
+                new CompositeReward(List.of(
+                        new MoneyReward(3000, 0.4),
+                        new JobSiteXpReward(JobSiteType.FARMLAND, 130)
+                )),
+                Material.HONEYCOMB,
+                "Busy Beekeeper",
+                List.of("Harvest a good amount of honeycomb.")
+        ));
+
+        daily.add(new ContractDefinition(
+                "farmland_honey_large",
+                new HoneyHarvestTrigger(),
+                JobSiteType.FARMLAND,
+                BeeHiveStructure.REQUIRED_LEVEL,
+                40,
+                Map.of("honey_speed", 1),
+                new CompositeReward(List.of(
+                        new MoneyReward(5500, 0.4),
+                        new JobSiteXpReward(JobSiteType.FARMLAND, 220)
+                )),
+                Material.HONEYCOMB_BLOCK,
+                "Apiary Expert",
+                List.of("Harvest large amounts of honeycomb.")
+        ));
+
+        /*
+         * =========================
+         * FARMLAND – HONEY (WEEKLY)
+         * =========================
+         */
+
+        weekly.add(new ContractDefinition(
+                "farmland_honey_weekly",
+                new HoneyHarvestTrigger(),
+                JobSiteType.FARMLAND,
+                BeeHiveStructure.REQUIRED_LEVEL,
+                75,
+                Map.of(),
+                new CompositeReward(List.of(
+                        new MoneyReward(12000, 0.4),
+                        new JobSiteXpReward(JobSiteType.FARMLAND, 500)
+                )),
+                Material.HONEY_BLOCK,
+                "Honey Magnate",
+                List.of("Harvest honeycomb throughout the week.")
+        ));
+
+        weekly.add(new ContractDefinition(
+                "farmland_honey_weekly_large",
+                new HoneyHarvestTrigger(),
+                JobSiteType.FARMLAND,
+                BeeHiveStructure.REQUIRED_LEVEL,
+                150,
+                Map.of("honey_speed", 1),
+                new CompositeReward(List.of(
+                        new MoneyReward(25000, 0.4),
+                        new JobSiteXpReward(JobSiteType.FARMLAND, 950)
+                )),
+                Material.HONEY_BLOCK,
+                "Master Apiarist",
+                List.of("Become the ultimate beekeeper.")
         ));
     }
 

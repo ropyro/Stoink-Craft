@@ -123,6 +123,15 @@ public class ServerEntCMD implements CommandExecutor {
                    }
                }
            }
+           if(args[0].equalsIgnoreCase("regencontracts")){
+               if(args.length >= 2){
+                   String enterpriseName = args[1];
+                   Enterprise enterprise = StoinkCore.getInstance().getEnterpriseManager().getEnterpriseByName(enterpriseName);
+                   if(enterprise != null){
+                       StoinkCore.getInstance().getContractManager().regenerateContracts(enterprise);
+                   }
+               }
+           }
            if(args[0].equalsIgnoreCase("levelup")) {
                if (args.length >= 2) {
                    String enterpriseName = args[1];

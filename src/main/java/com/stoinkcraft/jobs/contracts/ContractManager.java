@@ -42,6 +42,13 @@ public class ContractManager {
                 .add(contract);
     }
 
+    public void regenerateContracts(Enterprise enterprise){
+        contracts.get(enterprise.getID()).clear();
+        generateContracts(enterprise, false);
+        generateContracts(enterprise, true);
+        enterprise.sendEnterpriseMessage("All contracts have been regenerated");
+    }
+
     public void handleContext(Enterprise enterprise, ContractContext context) {
         for (ActiveContract contract : getContracts(enterprise, context.getJobSiteType())) {
             if (!contract.canProgress()) continue;

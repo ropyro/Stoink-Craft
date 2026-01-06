@@ -26,11 +26,13 @@ public class BeeHiveStructure extends JobSiteStructure {
     private JobSiteHologram hologram;
     private final String hologramId;
 
+    public static final int REQUIRED_LEVEL = 20;
+
     public BeeHiveStructure(JobSite jobSite) {
         super(
                 "beehive",
                 "Bee Hives",
-                20,
+                REQUIRED_LEVEL,
                 TimeUnit.SECONDS.toMillis(10),
                 () -> 350_000,
                 site -> true,

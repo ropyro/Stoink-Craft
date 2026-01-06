@@ -58,7 +58,7 @@ public class QuarryGui {
                         "# # # # ? # # # #",
                         "# # # O U P # # #",
                         "# # # # # # # # #",
-                        "# # # 1 # # # C #",
+                        "# # # # C # # # #",
                         "# # # # # # # # #"
                 )
                 .addIngredient('#', filler())
@@ -75,7 +75,6 @@ public class QuarryGui {
                 .addIngredient('C', menuButton(Material.GOLD_INGOT, "§6Contracts",
                         List.of("§7View your active contracts", DIVIDER, ARROW + "Click to open"),
                         this::openContractList))
-                .addIngredient('1', createUnlockableItem(quarrySite.getPowerCell()))
                 .build();
 
         open(gui, "§8Quarry Menu");
@@ -266,7 +265,7 @@ public class QuarryGui {
         Gui gui = Gui.normal()
                 .setStructure(
                         "# # # # ? # # # #",
-                        "# # # S U # # # #",
+                        "# # S U # 1 # # #",
                         "# # # # # # # < #"
                 )
                 .addIngredient('#', filler())
@@ -276,6 +275,7 @@ public class QuarryGui {
                 .addIngredient('S', createPowerCellStatusItem())
                 .addIngredient('U', createUpgradeItem("power_level", Material.BEACON, "Power Level",
                         "Increases Haste effect strength"))
+                .addIngredient('1', createUnlockableItem(quarrySite.getPowerCell()))
                 .addIngredient('<', backButton(this::openWindow))
                 .build();
 

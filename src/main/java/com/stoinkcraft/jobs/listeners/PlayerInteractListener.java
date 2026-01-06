@@ -35,7 +35,7 @@ public class PlayerInteractListener implements Listener {
         Player player = event.getPlayer();
         ItemStack item = player.getInventory().getItemInMainHand();
 
-        // Require glass bottle (vanilla behavior)
+        // Require shears for honeycomb harvesting
         if (item.getType() != Material.SHEARS) return;
 
         StoinkCore core = StoinkCore.getInstance();
@@ -91,17 +91,17 @@ public class PlayerInteractListener implements Listener {
 
         ChatUtils.sendMessage(
                 player,
-                ChatColor.GOLD + "🍯 You harvested honey!"
+                ChatColor.GOLD + "🍯 You harvested honeycomb!"
         );
 
     /* =========================
-       CONTRACT INTEGRATION (OPTIONAL)
+       CONTRACT INTEGRATION
        ========================= */
 
         ContractContext context = new ContractContext(
                 player,
                 JobSiteType.FARMLAND,
-                Material.HONEY_BOTTLE,
+                Material.HONEYCOMB,  // Fixed: was HONEY_BOTTLE
                 1
         );
 
