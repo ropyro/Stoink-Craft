@@ -1,10 +1,9 @@
 package com.stoinkcraft.jobs.contracts;
 
 import com.stoinkcraft.enterprise.Enterprise;
-import com.stoinkcraft.jobs.contracts.rewards.CompositeReward;
-import com.stoinkcraft.jobs.contracts.rewards.DescribableReward;
-import com.stoinkcraft.jobs.contracts.rewards.Reward;
+import com.stoinkcraft.jobs.contracts.rewards.*;
 import com.stoinkcraft.jobs.jobsites.JobSite;
+import com.stoinkcraft.jobs.jobsites.JobSiteType;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.boss.BarColor;
@@ -122,59 +121,183 @@ public class ContractFeedbackManager {
                 .getJobSite(def.jobSiteType());
 
         int beforeLevel = site.getLevel();
-        double beforeXp = site.getData().getXp();
+        int beforeXp = site.getData().getXp();
 
         // (XP already applied at this point)
         int afterLevel = site.getLevel();
-        double afterXp = site.getData().getXp();
+        int afterXp = site.getData().getXp();
+        int xpGained = afterXp - beforeXp;
 
-        enterprise.sendEnterpriseMessage(
-                "§6§lContract Complete!",
-                "§e" + def.displayName(),
-                "",
-                "§7Contributions:"
-        );
+        // Get styling based on JobSite type
+        String[] colors = getJobSiteColors(def.jobSiteType());
+        String primary = colors[0];
+        String secondary = colors[1];
+        String icon = getJobSiteIcon(def.jobSiteType());
 
-        contract.getContributions().forEach((uuid, amount) -> {
-            OfflinePlayer player = Bukkit.getOfflinePlayer(uuid);
-            double percent = contract.getContributionPercentages().get(uuid) * 100;
+        // Build contributors string
+        String contributors = buildContributorsString(contract);
 
-            enterprise.sendEnterpriseMessage(
-                    " §f- " + player.getName() + ": " +
-                            amount + " §7(" + (int) percent + "%)"
-            );
+        // Extract reward totals
+        double totalMoney = extractTotalMoney(def.reward());
+        double playerSharePercent = extractPlayerSharePercent(def.reward());
+        double enterpriseMoney = totalMoney * (1 - playerSharePercent);
+        double playerPoolMoney = totalMoney * playerSharePercent;
+        int totalXp = extractTotalXp(def.reward());
+
+        // Build progress string
+        String progress = buildProgressString(beforeLevel, afterLevel, xpGained, secondary);
+
+        // Build enterprise rewards string
+        String enterpriseRewards = "§a+$" + formatCompact(enterpriseMoney) + " §8| §e+" + totalXp + " XP";
+
+        // Send personalized messages to each member
+        enterprise.sendPersonalizedMessage(player -> {
+            UUID uuid = player.getUniqueId();
+            Double contribution = contract.getContributionPercentages().get(uuid);
+
+            String yourRewards;
+            if (contribution != null && contribution > 0) {
+                double playerMoney = playerPoolMoney * contribution;
+                int percent = (int) (contribution * 100);
+                yourRewards = "§a+$" + formatCompact(playerMoney) + " §7(" + percent + "% contribution)";
+            } else {
+                yourRewards = "§7None §8(no contribution)";
+            }
+
+            return new String[]{
+                    "",
+                    "§8§l» " + primary + "§l" + icon + " Contract Complete! §8| " + secondary + def.displayName(),
+                    "§8§l» §7Contributors: " + contributors,
+                    "§8§l» " + secondary + "Enterprise: §f" + enterpriseRewards,
+                    "§8§l» " + secondary + "You Earned: §f" + yourRewards,
+                    "§8§l» §7Progress: " + progress,
+                    ""
+            };
         });
-
-        enterprise.sendEnterpriseMessage(
-                "",
-                "§6Rewards:"
-        );
-
-        appendRewardLore(enterprise, def.reward());
-
-        enterprise.sendEnterpriseMessage(
-                "",
-                "§aJobsite Progress:",
-                " §fXP: " + format(beforeXp) + " → " + format(afterXp),
-                " §fLevel: " + beforeLevel + " → " + afterLevel
-        );
     }
 
-    private void appendRewardLore(Enterprise enterprise, Reward reward) {
+// ==================== Helper Methods ====================
 
-        if (reward instanceof CompositeReward composite) {
-            composite.getRewards().forEach(r ->
-                    appendRewardLore(enterprise, r));
-            return;
-        }
-
-        if (reward instanceof DescribableReward describable) {
-            describable.getLore().forEach(line ->
-                    enterprise.sendEnterpriseMessage(" §f- " + line));
-        }
+    private String[] getJobSiteColors(JobSiteType type) {
+        return switch (type) {
+            case FARMLAND -> new String[]{"§6", "§e"};
+            case QUARRY -> new String[]{"§b", "§3"};
+            case GRAVEYARD -> new String[]{"§5", "§d"};
+            default -> new String[]{"§6", "§e"};
+        };
     }
 
-    private String format(double value) {
-        return String.format("%.1f", value);
+    private String getJobSiteIcon(JobSiteType type) {
+        return switch (type) {
+            case FARMLAND -> "🌾";
+            case QUARRY -> "⛏";
+            case GRAVEYARD -> "💀";
+            default -> "✔";
+        };
+    }
+
+    private String buildContributorsString(ActiveContract contract) {
+        StringBuilder sb = new StringBuilder();
+        Map<UUID, Integer> contributions = contract.getContributions();
+        Map<UUID, Double> percentages = contract.getContributionPercentages();
+
+        int count = 0;
+        int maxDisplay = 3;
+
+        List<Map.Entry<UUID, Integer>> sorted = contributions.entrySet().stream()
+                .sorted(Map.Entry.<UUID, Integer>comparingByValue().reversed())
+                .toList();
+
+        for (Map.Entry<UUID, Integer> entry : sorted) {
+            if (count >= maxDisplay) {
+                int remaining = sorted.size() - maxDisplay;
+                if (remaining > 0) {
+                    sb.append(" §7+").append(remaining).append(" more");
+                }
+                break;
+            }
+
+            if (count > 0) sb.append(" §8| ");
+
+            OfflinePlayer player = Bukkit.getOfflinePlayer(entry.getKey());
+            int percent = (int) (percentages.get(entry.getKey()) * 100);
+
+            sb.append("§f").append(player.getName())
+                    .append(" §7(").append(percent).append("%)");
+
+            count++;
+        }
+
+        return sb.toString();
+    }
+
+    private String buildProgressString(int beforeLevel, int afterLevel, int xpGained, String color) {
+        StringBuilder sb = new StringBuilder();
+
+        if (afterLevel > beforeLevel) {
+            sb.append("§fLv.").append(beforeLevel)
+                    .append(" §7→ §a§lLv.").append(afterLevel).append(" ⬆");
+        } else {
+            sb.append("§fLv.").append(afterLevel);
+        }
+
+        sb.append(" §8| ").append(color).append("+").append(formatCompact(xpGained)).append(" XP");
+
+        return sb.toString();
+    }
+
+// ==================== Reward Extraction Methods ====================
+
+    private double extractTotalMoney(Reward reward) {
+        if (reward instanceof MoneyReward money) {
+            return money.getTotalAmount();
+        } else if (reward instanceof CompositeReward composite) {
+            return composite.getRewards().stream()
+                    .mapToDouble(this::extractTotalMoney)
+                    .sum();
+        }
+        return 0;
+    }
+
+    private double extractPlayerSharePercent(Reward reward) {
+        if (reward instanceof MoneyReward money) {
+            return money.getPlayerShare();
+        } else if (reward instanceof CompositeReward composite) {
+            return composite.getRewards().stream()
+                    .filter(r -> r instanceof MoneyReward)
+                    .map(r -> ((MoneyReward) r).getPlayerShare())
+                    .findFirst()
+                    .orElse(0.0);
+        }
+        return 0;
+    }
+
+    private int extractTotalXp(Reward reward) {
+        if (reward instanceof JobSiteXpReward xp) {
+            return xp.getXp();
+        } else if (reward instanceof CompositeReward composite) {
+            return composite.getRewards().stream()
+                    .mapToInt(this::extractTotalXp)
+                    .sum();
+        }
+        return 0;
+    }
+
+    private String formatCompact(double number) {
+        if (number >= 1_000_000) {
+            return String.format("%.1fM", number / 1_000_000.0);
+        } else if (number >= 1_000) {
+            return String.format("%.1fK", number / 1_000.0);
+        }
+        return String.valueOf((int) number);
+    }
+
+    private String formatCompact(int number) {
+        if (number >= 1_000_000) {
+            return String.format("%.1fM", number / 1_000_000.0);
+        } else if (number >= 1_000) {
+            return String.format("%.1fK", number / 1_000.0);
+        }
+        return String.valueOf(number);
     }
 }

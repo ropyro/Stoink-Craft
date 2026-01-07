@@ -16,6 +16,10 @@ public class JobSiteXpReward implements DescribableReward {
         this.xp = xp;
     }
 
+    public int getXp() {
+        return xp;
+    }
+
     @Override
     public void apply(Enterprise enterprise, ActiveContract contract) {
         enterprise.getJobSiteManager()

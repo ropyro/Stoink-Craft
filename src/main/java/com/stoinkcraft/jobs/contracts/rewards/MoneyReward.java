@@ -20,16 +20,31 @@ public class MoneyReward implements DescribableReward {
         this.playerShare = playerShare;
     }
 
+    // Add these getters
+    public double getTotalAmount() {
+        return totalAmount;
+    }
+
+    public double getPlayerShare() {
+        return playerShare;
+    }
+
+    public double getEnterpriseAmount() {
+        return totalAmount * (1 - playerShare);
+    }
+
+    public double getPlayerPoolAmount() {
+        return totalAmount * playerShare;
+    }
+
     @Override
     public void apply(Enterprise enterprise, ActiveContract contract) {
-
         double playerTotal = totalAmount * playerShare;
         double enterpriseTotal = totalAmount - playerTotal;
 
         enterprise.increaseNetworth(enterpriseTotal);
 
-        Map<UUID, Double> percentages =
-                contract.getContributionPercentages();
+        Map<UUID, Double> percentages = contract.getContributionPercentages();
 
         percentages.forEach((uuid, percent) -> {
             OfflinePlayer player = Bukkit.getOfflinePlayer(uuid);

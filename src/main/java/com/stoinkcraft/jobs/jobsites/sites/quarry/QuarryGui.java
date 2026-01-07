@@ -56,9 +56,7 @@ public class QuarryGui {
         Gui gui = Gui.normal()
                 .setStructure(
                         "# # # # ? # # # #",
-                        "# # # O U P # # #",
-                        "# # # # # # # # #",
-                        "# # # # C # # # #",
+                        "# O U P # # # C #",
                         "# # # # # # # # #"
                 )
                 .addIngredient('#', filler())

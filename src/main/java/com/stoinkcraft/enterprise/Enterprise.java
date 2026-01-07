@@ -9,6 +9,7 @@ import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
 import java.util.*;
+import java.util.function.Function;
 
 public class Enterprise {
 
@@ -289,6 +290,19 @@ public class Enterprise {
 
     public void sendEnterpriseMessage(String... lines) {
         getOnlineMembers().forEach(player -> {
+            for (String line : lines) {
+                player.sendMessage(line);
+            }
+        });
+    }
+
+    /**
+     * Send personalized messages to each online member
+     * @param messageBuilder Function that takes a Player and returns their custom message lines
+     */
+    public void sendPersonalizedMessage(Function<Player, String[]> messageBuilder) {
+        getOnlineMembers().forEach(player -> {
+            String[] lines = messageBuilder.apply(player);
             for (String line : lines) {
                 player.sendMessage(line);
             }

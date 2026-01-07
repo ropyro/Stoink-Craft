@@ -43,6 +43,8 @@ public class MausoleumStructure extends JobSiteStructure {
     private Location hordeSpawnLocation;
     private int ticksSinceLastHorde = 0;
     private final Set<UUID> hordeSpiders = new HashSet<>();
+    private int cachedSpiderCount = -1;
+    private boolean readyToSpawn = false;
 
     // Base values
     private static final int BASE_HORDE_INTERVAL_TICKS = 60*5; // 20 minutes
@@ -83,8 +85,19 @@ public class MausoleumStructure extends JobSiteStructure {
         // Spawn horde on timer
         ticksSinceLastHorde++;
         if (ticksSinceLastHorde >= getHordeIntervalTicks() && hordeSpiders.isEmpty()) {
-            spawnHorde();
             ticksSinceLastHorde = 0;
+            if(!readyToSpawn)
+                getJobSite().getEnterprise().sendEnterpriseMessage(
+                        "§5§l🕷 Spider Horde Incoming!",
+                        "§7" + getHordeSize() + " spiders have emerged from the Mausoleum!"
+                );
+
+            readyToSpawn = true;
+        }
+
+        if(readyToSpawn && getJobSite().containsActivePlayer()){
+            spawnHorde();
+            readyToSpawn = false;
         }
 
         updateHologram();
@@ -153,11 +166,6 @@ public class MausoleumStructure extends JobSiteStructure {
     private void spawnHorde() {
         int hordeSize = getHordeSize();
 
-        getJobSite().getEnterprise().sendEnterpriseMessage(
-                "§5§l🕷 Spider Horde Incoming!",
-                "§7" + hordeSize + " spiders have emerged from the Mausoleum!"
-        );
-
         Bukkit.getScheduler().runTask(StoinkCore.getInstance(), () -> {
             for (int i = 0; i < hordeSize; i++) {
                 Location spawnLoc = getRandomSpawnLocation();
@@ -223,6 +231,7 @@ public class MausoleumStructure extends JobSiteStructure {
                     "§a§l🕷 Horde Cleared!",
                     "§7The spider horde has been defeated!"
             );
+            cachedSpiderCount = -1;
         }
     }
 
@@ -251,7 +260,7 @@ public class MausoleumStructure extends JobSiteStructure {
         if (!hordeSpiders.isEmpty()) {
             lines = List.of(
                     ChatColor.DARK_PURPLE + "" + ChatColor.BOLD + "🕷 Horde Active!",
-                    ChatColor.WHITE + "Spiders Remaining: " + ChatColor.RED + hordeSpiders.size()
+                    ChatColor.WHITE + "Spiders Remaining: " + ChatColor.RED + getActiveSpiderCount()
             );
         } else {
             lines = List.of(
@@ -318,7 +327,15 @@ public class MausoleumStructure extends JobSiteStructure {
 
     public int getActiveSpiderCount() {
         cleanupDeadSpiders();
+        cachedSpiderCount = hordeSpiders.size();
         return hordeSpiders.size();
+    }
+
+    public int getCachedSpiderCount(){
+        if(cachedSpiderCount == -1){
+            cachedSpiderCount = getHordeSize();
+        }
+        return cachedSpiderCount;
     }
 
     public boolean isHordeActive() {

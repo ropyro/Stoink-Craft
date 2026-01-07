@@ -369,7 +369,7 @@ public class StoinkExpansion extends PlaceholderExpansion {
                 }
                 case UNLOCKED -> {
                     if (mausoleum.isHordeActive()) {
-                        yield "§5§l⚔ Horde Active! §7(§c" + mausoleum.getActiveSpiderCount() + "§7)";
+                        yield "§5§l🕷 Horde Active! §7(§c" + mausoleum.getCachedSpiderCount() + "§7)";
                     } else {
                         yield "Next Horde: §e" + ChatUtils.formatDurationSeconds(mausoleum.getRemainingSeconds());
                     }
