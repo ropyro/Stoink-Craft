@@ -41,7 +41,7 @@ public class GraveyardSite extends JobSite {
      * Holograms
      */
     private String welcomeHologramId;
-    public static Vector welcomeHologramOffset = new Vector(-8.5, 3, 0);
+    public static Vector welcomeHologramOffset = new Vector(-8.5, 3, 0.5);
 
     /**
      * Grave Keeper NPC

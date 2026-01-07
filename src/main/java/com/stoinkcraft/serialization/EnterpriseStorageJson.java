@@ -133,7 +133,7 @@ public class EnterpriseStorageJson {
 
     // ======= LOAD =======
 
-    public static void loadAllEnterprises() {
+    public static void loadAllEnterprises(boolean loadJobSites) {
         if (!ENTERPRISES_DIR.exists()) {
             Bukkit.getLogger().info("No enterprises directory found. Creating...");
             ENTERPRISES_DIR.mkdirs();
@@ -169,9 +169,11 @@ public class EnterpriseStorageJson {
             try {
                 Enterprise enterprise = loadEnterprise(jsonFile);
                 if (enterprise != null) {
-                    // Load job sites
-                    loadJobSites(enterprise);
-                    // Load contracts
+                    // Only load job sites if Citizens is ready
+                    if (loadJobSites) {
+                        loadJobSites(enterprise);
+                    }
+                    // Load contracts (these don't depend on Citizens)
                     loadContracts(enterprise);
 
                     manager.loadEnterprise(enterprise);
@@ -190,7 +192,9 @@ public class EnterpriseStorageJson {
                         Bukkit.getLogger().info("Attempting to load from backup...");
                         Enterprise enterprise = loadEnterprise(backupFile);
                         if (enterprise != null) {
-                            loadJobSites(enterprise);
+                            if (loadJobSites) {
+                                loadJobSites(enterprise);
+                            }
                             loadContracts(enterprise);
                             manager.loadEnterprise(enterprise);
                             loaded++;
@@ -204,10 +208,26 @@ public class EnterpriseStorageJson {
             }
         }
 
-        Bukkit.getLogger().info("Loaded " + loaded + " enterprises with job sites. Failed: " + failed);
+        Bukkit.getLogger().info("Loaded " + loaded + " enterprises" + (loadJobSites ? " with job sites" : " (job sites pending)") + ". Failed: " + failed);
 
         // Sync plot indexes after loading
         StoinkCore.getInstance().getEnterprisePlotManager().resetNextIndex(manager.getEnterpriseList());
+    }
+
+    public static void loadAllJobSitesDeferred() {
+        EnterpriseManager manager = EnterpriseManager.getEnterpriseManager();
+        int count = 0;
+
+        for (Enterprise enterprise : manager.getEnterpriseList()) {
+            try {
+                loadJobSites(enterprise);
+                count++;
+            } catch (Exception e) {
+                Bukkit.getLogger().log(Level.SEVERE, "Failed to load job sites for enterprise: " + enterprise.getID(), e);
+            }
+        }
+
+        Bukkit.getLogger().info("Loaded job sites for " + count + " enterprises.");
     }
 
     private static Enterprise loadEnterprise(File jsonFile) throws IOException {

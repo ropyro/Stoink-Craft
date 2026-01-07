@@ -8,11 +8,9 @@ import com.stoinkcraft.jobs.contracts.rewards.CompositeReward;
 import com.stoinkcraft.jobs.contracts.rewards.DescribableReward;
 import com.stoinkcraft.jobs.contracts.rewards.Reward;
 import com.stoinkcraft.jobs.jobsites.*;
-import com.stoinkcraft.jobs.jobsites.components.JobSiteStructure;
 import com.stoinkcraft.jobs.jobsites.components.generators.CropGenerator;
 import com.stoinkcraft.jobs.jobsites.components.generators.HoneyGenerator;
 import com.stoinkcraft.jobs.jobsites.components.generators.PassiveMobGenerator;
-import com.stoinkcraft.jobs.jobsites.components.structures.StructureData;
 import com.stoinkcraft.jobs.jobsites.components.unlockable.Unlockable;
 import com.stoinkcraft.jobs.jobsites.components.unlockable.UnlockableProgress;
 import com.stoinkcraft.jobs.jobsites.components.unlockable.UnlockableState;
@@ -159,7 +157,7 @@ public class FarmlandGui {
             case BUILDING -> {
                 UnlockableProgress progress = farmlandSite.getData()
                         .getUnlockableProgress(unlockable.getUnlockableId());
-                long remaining = progress.getRemainingMillis();
+                long remaining = progress.getRemainingSeconds();
 
                 item.addLoreLines(SUB_HEADER + "Under Construction §8«");
                 item.addLoreLines(DIVIDER);
@@ -196,7 +194,7 @@ public class FarmlandGui {
             case BUILDING -> {
                 UnlockableProgress progress = farmlandSite.getData()
                         .getUnlockableProgress(unlockable.getUnlockableId());
-                sendInfo(player, "Under construction - " + ChatUtils.formatDuration(progress.getRemainingMillis()) + " remaining");
+                sendInfo(player, "Under construction - " + ChatUtils.formatDuration(progress.getRemainingSeconds()) + " remaining");
             }
             case UNLOCKED -> {
                 sendInfo(player, unlockable.getDisplayName() + " is already built!");
@@ -228,7 +226,7 @@ public class FarmlandGui {
 
     private String createConstructionProgressBar(Unlockable unlockable, UnlockableProgress progress) {
         long totalDuration = unlockable.getBuildTimeMillis();
-        long remaining = progress.getRemainingMillis();
+        long remaining = progress.getRemainingSeconds();
         long elapsed = totalDuration - remaining;
 
         int percent = (int) Math.min(100, (elapsed * 100) / Math.max(1, totalDuration));

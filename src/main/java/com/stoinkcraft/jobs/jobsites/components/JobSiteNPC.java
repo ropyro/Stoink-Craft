@@ -2,14 +2,13 @@ package com.stoinkcraft.jobs.jobsites.components;
 
 import com.stoinkcraft.jobs.jobsites.JobSite;
 import com.stoinkcraft.jobs.jobsites.JobSiteData;
-import com.stoinkcraft.jobs.jobsites.JobSiteType;
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.event.NPCRightClickEvent;
 import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.api.npc.NPCRegistry;
 import net.citizensnpcs.trait.LookClose;
 import net.citizensnpcs.trait.SkinTrait;
-import org.bukkit.ChatColor;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.EntityType;
 import org.bukkit.util.Vector;
@@ -35,6 +34,15 @@ public class JobSiteNPC implements JobSiteComponent{
         this.citizensId = parent.getData().getNpcId(name);
 
         JobSiteData data = parent.getData();
+
+        int storedId = parent.getData().getNpcId(name);
+        Bukkit.getLogger().info("[DEBUG] JobSiteNPC constructor - stored ID: " + storedId);
+
+        if (storedId != -1) {
+            NPC found = CitizensAPI.getNPCRegistry().getById(storedId);
+            Bukkit.getLogger().info("[DEBUG] NPC lookup result: " + (found != null ? "FOUND" : "NULL"));
+        }
+
         if (data.getNpcId(name) != -1) {
             NPCRegistry registry = CitizensAPI.getNPCRegistry();
             npc = registry.getById(data.getNpcId(name));
@@ -42,6 +50,8 @@ public class JobSiteNPC implements JobSiteComponent{
                 data.setNpc(name, -1);
             }
         }
+
+
     }
 
     @Override
@@ -110,6 +120,9 @@ public class JobSiteNPC implements JobSiteComponent{
     }
 
     public NPC getNpc() {
+        if(npc == null){
+            npc = CitizensAPI.getNPCRegistry().getById(parent.getData().getNpcId(name));
+        }
         return npc;
     }
 

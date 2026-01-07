@@ -263,6 +263,12 @@ public class MausoleumStructure extends JobSiteStructure {
         hologram.setLines(0, lines);
     }
 
+    public long getRemainingSeconds(){
+        long remainingTicks = getHordeIntervalTicks() - ticksSinceLastHorde;
+        long remainingSeconds = Math.max(0, remainingTicks);
+        return remainingSeconds;
+    }
+
     private void updateHologramForLevel() {
         if (canUnlock()) {
             hologram.setHologram(List.of(
@@ -318,5 +324,4 @@ public class MausoleumStructure extends JobSiteStructure {
     public boolean isHordeActive() {
         return !hordeSpiders.isEmpty();
     }
-
 }

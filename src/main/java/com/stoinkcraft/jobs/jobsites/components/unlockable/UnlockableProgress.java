@@ -27,14 +27,14 @@ public class UnlockableProgress {
         this.buildDurationMillis = durationMillis;
     }
 
-    public long getRemainingMillis() {
+    public long getRemainingSeconds() {
         if (state != UnlockableState.BUILDING) return 0;
         long elapsed = System.currentTimeMillis() - buildStartTime;
         return Math.max(0, buildDurationMillis - elapsed);
     }
 
     public boolean isFinished() {
-        return state == UnlockableState.BUILDING && getRemainingMillis() <= 0;
+        return state == UnlockableState.BUILDING && getRemainingSeconds() <= 0;
     }
 
     public void markUnlocked() {

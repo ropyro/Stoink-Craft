@@ -26,4 +26,8 @@ public class JobsiteLevelHelper {
         int nextXp = getXpForLevel(level + 1);
         return nextXp - xp;
     }
+
+    public static int getXpForNextLevel(int level){
+        return getXpForLevel(level + 1);
+    }
 }

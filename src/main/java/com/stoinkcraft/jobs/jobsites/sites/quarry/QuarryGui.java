@@ -366,7 +366,7 @@ public class QuarryGui {
             case BUILDING -> {
                 UnlockableProgress progress = quarrySite.getData()
                         .getUnlockableProgress(unlockable.getUnlockableId());
-                long remaining = progress.getRemainingMillis();
+                long remaining = progress.getRemainingSeconds();
 
                 item.addLoreLines(SUB_HEADER + "Under Construction §8«");
                 item.addLoreLines(DIVIDER);
@@ -403,7 +403,7 @@ public class QuarryGui {
             case BUILDING -> {
                 UnlockableProgress progress = quarrySite.getData()
                         .getUnlockableProgress(unlockable.getUnlockableId());
-                sendInfo(player, "Under construction - " + ChatUtils.formatDuration(progress.getRemainingMillis()) + " remaining");
+                sendInfo(player, "Under construction - " + ChatUtils.formatDuration(progress.getRemainingSeconds()) + " remaining");
             }
             case UNLOCKED -> {
                 sendInfo(player, unlockable.getDisplayName() + " is already built!");
@@ -425,7 +425,7 @@ public class QuarryGui {
 
     private String createConstructionProgressBar(Unlockable unlockable, UnlockableProgress progress) {
         long totalDuration = unlockable.getBuildTimeMillis();
-        long remaining = progress.getRemainingMillis();
+        long remaining = progress.getRemainingSeconds();
         long elapsed = totalDuration - remaining;
 
         int percent = (int) Math.min(100, (elapsed * 100) / Math.max(1, totalDuration));

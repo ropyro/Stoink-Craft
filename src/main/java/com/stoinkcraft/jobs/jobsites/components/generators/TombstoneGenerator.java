@@ -28,6 +28,7 @@ public class TombstoneGenerator extends JobSiteGenerator {
     // Spawn timing
     private int ticksSinceLastSpawn = 0;
     private long lastSpawnTime = 0;
+    private boolean readyToSpawn = false;
 
     // Currently spawned mob (only one per tombstone at a time)
     private UUID spawnedMobId = null;
@@ -79,10 +80,14 @@ public class TombstoneGenerator extends JobSiteGenerator {
             ticksSinceLastSpawn++;
 
             if (ticksSinceLastSpawn >= getSpawnIntervalTicks()) {
-                spawnMob();
+                readyToSpawn = true;
                 ticksSinceLastSpawn = 0;
                 lastSpawnTime = System.currentTimeMillis();
             }
+        }
+
+        if(readyToSpawn && getParent().containsActivePlayer()){
+            spawnMob();
         }
 
         updateHologram();
@@ -131,6 +136,7 @@ public class TombstoneGenerator extends JobSiteGenerator {
             );
 
             spawnedMobId = entity.getUniqueId();
+            readyToSpawn = false;
         });
     }
 
@@ -187,6 +193,13 @@ public class TombstoneGenerator extends JobSiteGenerator {
                     ChatColor.GRAY + "Attuned to: " + ChatColor.RED + type.getDisplayName(),
                     ChatColor.WHITE + formatTime(remainingSeconds)
             );
+            if(readyToSpawn){
+                lines = List.of(
+                        ChatColor.YELLOW + "💀",
+                        ChatColor.GRAY + "Attuned to: " + ChatColor.RED + type.getDisplayName(),
+                        ChatColor.WHITE + "Summoning..."
+                );
+            }
         }
 
         hologram.setLines(0, lines);

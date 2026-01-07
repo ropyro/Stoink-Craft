@@ -6,6 +6,7 @@ import com.stoinkcraft.jobs.contracts.ContractFeedbackManager;
 import com.stoinkcraft.jobs.contracts.ContractPoolLoader;
 import com.stoinkcraft.jobs.contracts.ContractManager;
 import com.stoinkcraft.jobs.listeners.*;
+import com.stoinkcraft.misc.CitizensLoadListener;
 import com.stoinkcraft.misc.daily.DailyCMD;
 import com.stoinkcraft.misc.daily.DailyManager;
 import com.stoinkcraft.jobs.boosters.BoostNoteInteractionListener;
@@ -31,6 +32,7 @@ import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.trait.SkinTrait;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.*;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -52,8 +54,9 @@ import java.util.stream.Stream;
 public class StoinkCore extends JavaPlugin {
 
     private static Economy econ = null;
-
     private static StoinkCore INSTANCE;
+
+    private boolean jobSitesLoaded = false;
 
     private EnterpriseManager em;
     public EnterpriseManager getEnterpriseManager(){
@@ -162,9 +165,40 @@ public class StoinkCore extends JavaPlugin {
 
         MarketManager.loadMarketPrices(marketFile);
 
-        EnterpriseStorageJson.loadAllEnterprises();
+        boolean citizensReady = isCitizensReady();
+
+        // Load enterprises - only load job sites if Citizens is already ready
+        EnterpriseStorageJson.loadAllEnterprises(citizensReady);
+
+        if (citizensReady) {
+            jobSitesLoaded = true;
+            getLogger().info("Citizens was already loaded, job sites initialized.");
+        } else {
+            getLogger().info("Waiting for Citizens to load before initializing job sites...");
+        }
 
         ShareStorage.loadShares();
+    }
+
+    private boolean isCitizensReady() {
+        Plugin citizens = Bukkit.getPluginManager().getPlugin("Citizens");
+        if (citizens != null && citizens.isEnabled()) {
+            try {
+                // Try to access registry - if it works, Citizens is ready
+                return CitizensAPI.getNPCRegistry() != null;
+            } catch (Exception e) {
+                return false;
+            }
+        }
+        return false;
+    }
+
+    public void onCitizensReady() {
+        if (jobSitesLoaded) return;
+        jobSitesLoaded = true;
+
+        getLogger().info("Citizens now ready, loading job sites...");
+        EnterpriseStorageJson.loadAllJobSitesDeferred();
     }
 
     private void ensureServerEnterprises() {
@@ -202,6 +236,7 @@ public class StoinkCore extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new PhantomSpawnDisabler(), this);
         getServer().getPluginManager().registerEvents(new BoostNoteInteractionListener(), this);
         getServer().getPluginManager().registerEvents(new EnderChestListener(), this);
+        getServer().getPluginManager().registerEvents(new CitizensLoadListener(this), this);
         //Jobsite Listeners
         getServer().getPluginManager().registerEvents(new CreatureSpawnListener(ewm.getWorld()), this);
         getServer().getPluginManager().registerEvents(new BlockBreakListener(), this);

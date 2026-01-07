@@ -235,4 +235,9 @@ public abstract class JobSite {
     public JobSiteType getType() {
         return type;
     }
+
+    public boolean containsActivePlayer() {
+        return enterprise.getOnlineMembers().stream()
+                .anyMatch(p -> contains(p.getLocation()));
+    }
 }
