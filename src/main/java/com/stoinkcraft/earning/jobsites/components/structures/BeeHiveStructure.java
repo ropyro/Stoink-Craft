@@ -36,7 +36,7 @@ public class BeeHiveStructure extends JobSiteStructure {
                 REQUIRED_LEVEL,
                 BUILD_TIME,
                 () -> COST,
-                site -> site.getData().getUnlockableState("barn") == UnlockableState.UNLOCKED,
+                site -> true,
                 jobSite
         );
 
