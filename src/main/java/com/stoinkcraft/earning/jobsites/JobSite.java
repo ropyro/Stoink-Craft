@@ -90,6 +90,7 @@ public abstract class JobSite {
     public void disband() {
         components.forEach(JobSiteComponent::disband);
         removeBuild();
+        StoinkCore.getInstance().getProtectionManager().unindexJobSite(this);
     }
 
     private void removeBuild() {
@@ -151,6 +152,8 @@ public abstract class JobSite {
         isBuilt = true;
         getData().setBuilt(true);
         StoinkCore.getInstance().getLogger().info("Built " + type + " job site for " + enterprise.getName() + " at " + spawnPoint);
+
+        StoinkCore.getInstance().getProtectionManager().indexJobSite(this);
     }
 
     public void tick() {

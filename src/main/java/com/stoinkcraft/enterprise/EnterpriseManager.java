@@ -89,11 +89,6 @@ public class EnterpriseManager {
         enterpriseList.remove(enterprise);
 
         EnterpriseStorageJson.disband(enterprise);
-
-        JobSiteManager jsm = enterprise.getJobSiteManager();
-        ProtectionManager pm = StoinkCore.getInstance().getProtectionManager();
-
-        jsm.getAllJobSites().stream().forEach(js -> pm.unindexJobSite(js));
         enterprise.getJobSiteManager().disbandJobSites();
 
         // Optional: log to console
@@ -135,8 +130,6 @@ public class EnterpriseManager {
             ProtectionManager pm = StoinkCore.getInstance().getProtectionManager();
             JobSiteManager jsm = enterprise.initializeJobSiteManager();
             jsm.initializeJobSites();
-            jsm.getAllJobSites().stream().forEach(js -> pm.indexJobSite(js));
-
             enterpriseList.add(enterprise);
             StoinkCore.getInstance().getContractManager().generateContracts(enterprise, false); // daily
             StoinkCore.getInstance().getContractManager().generateContracts(enterprise, true);  // weekly

@@ -159,19 +159,19 @@ public class JobSiteManager {
     }
 
     public JobSiteType resolveJobsite(Location location) {
-        if (getFarmlandSite() != null &&
+        if (getFarmlandSite() != null && getFarmlandSite().isBuilt() &&
                 getFarmlandSite().contains(location)) {
             return JobSiteType.FARMLAND;
         }
-         if (getQuarrySite() != null &&
+         if (getQuarrySite() != null && getQuarrySite().isBuilt() &&
                  getQuarrySite().contains(location)) {
              return JobSiteType.QUARRY;
          }
-         if (getSkyriseSite() != null &&
+         if (getSkyriseSite() != null && getSkyriseSite().isBuilt() &&
                  getSkyriseSite().contains(location)) {
              return JobSiteType.SKYRISE;
          }
-         if(getGraveyardSite() != null &&
+         if(getGraveyardSite() != null && getGraveyardSite().isBuilt() &&
                  getGraveyardSite().contains(location)){
              return JobSiteType.GRAVEYARD;
          }
