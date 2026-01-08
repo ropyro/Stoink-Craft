@@ -2,6 +2,7 @@ package com.stoinkcraft.jobs.jobsites.sites.quarry;
 
 import com.stoinkcraft.StoinkCore;
 import com.stoinkcraft.enterprise.Enterprise;
+import com.stoinkcraft.jobs.collections.CollectionsGui;
 import com.stoinkcraft.jobs.contracts.ActiveContract;
 import com.stoinkcraft.jobs.contracts.ContractDefinition;
 import com.stoinkcraft.jobs.contracts.rewards.CompositeReward;
@@ -56,7 +57,7 @@ public class QuarryGui {
         Gui gui = Gui.normal()
                 .setStructure(
                         "# # # # ? # # # #",
-                        "# O U P # # # C #",
+                        "# O U P # # O C #",
                         "# # # # # # # # #"
                 )
                 .addIngredient('#', filler())
@@ -73,9 +74,17 @@ public class QuarryGui {
                 .addIngredient('C', menuButton(Material.GOLD_INGOT, "§6Contracts",
                         List.of("§7View your active contracts", DIVIDER, ARROW + "Click to open"),
                         this::openContractList))
+                .addIngredient('O', menuButton(Material.BOOK, "§5Collections",  // NEW
+                        List.of("§7View your collection progress", "§7and earn bonus XP", DIVIDER, ARROW + "Click to open"),
+                        this::openCollections))
                 .build();
 
         open(gui, "§8Quarry Menu");
+    }
+
+    private void openCollections() {
+        CollectionsGui collectionGui = new CollectionsGui(quarrySite, opener, this::openWindow);
+        collectionGui.openCollectionList();
     }
 
     private SimpleItem createHelpItem() {

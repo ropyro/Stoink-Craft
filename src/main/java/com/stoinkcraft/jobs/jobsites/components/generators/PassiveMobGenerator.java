@@ -130,7 +130,6 @@ public class PassiveMobGenerator extends JobSiteGenerator {
             case SHEEP -> EntityType.SHEEP;
             case PIG -> EntityType.PIG;
             case CHICKEN -> EntityType.CHICKEN;
-            case HORSE -> EntityType.HORSE;
             default -> null;
         };
     }
@@ -244,7 +243,6 @@ public class PassiveMobGenerator extends JobSiteGenerator {
         SHEEP("Sheep"),
         PIG("Pig"),
         CHICKEN("Chicken"),
-        HORSE("Horse"),
         NONE("None");
 
         private final String displayName;

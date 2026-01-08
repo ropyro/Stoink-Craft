@@ -2,7 +2,9 @@ package com.stoinkcraft.jobs.listeners;
 
 import com.stoinkcraft.StoinkCore;
 import com.stoinkcraft.enterprise.Enterprise;
+import com.stoinkcraft.jobs.collections.CollectionManager;
 import com.stoinkcraft.jobs.contracts.ContractContext;
+import com.stoinkcraft.jobs.jobsites.JobSite;
 import com.stoinkcraft.jobs.jobsites.JobSiteManager;
 import com.stoinkcraft.jobs.jobsites.JobSiteType;
 import com.stoinkcraft.jobs.jobsites.sites.graveyard.GraveyardSite;
@@ -63,6 +65,19 @@ public class EntityDeathListener implements Listener {
 
         core.getContractManager().handleContext(enterprise, context);
         event.getDrops().clear();
+
+        // =========================
+        // COLLECTION PROGRESS
+        // =========================
+        JobSite jobSite = enterprise.getJobSiteManager().getJobSite(jobSiteType);
+        if (jobSite != null) {
+            CollectionManager.handleEntityCollection(
+                    enterprise,
+                    jobSite,
+                    entity.getType(),
+                    killer
+            );
+        }
     }
 
 }

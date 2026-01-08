@@ -2,6 +2,7 @@ package com.stoinkcraft.jobs.jobsites.sites.farmland;
 
 import com.stoinkcraft.StoinkCore;
 import com.stoinkcraft.enterprise.Enterprise;
+import com.stoinkcraft.jobs.collections.CollectionsGui;
 import com.stoinkcraft.jobs.contracts.ActiveContract;
 import com.stoinkcraft.jobs.contracts.ContractDefinition;
 import com.stoinkcraft.jobs.contracts.rewards.CompositeReward;
@@ -60,7 +61,7 @@ public class FarmlandGui {
                         "# # # # ? # # # #",
                         "# # # F A B # # #",
                         "# # # # # # # # #",
-                        "# 1 2 . . . # C #",
+                        "# 1 2 . . # O C #",
                         "# # # # # # # # #"
                 )
                 .addIngredient('#', filler())
@@ -79,9 +80,17 @@ public class FarmlandGui {
                         this::openContractList))
                 .addIngredient('1', createUnlockableItem(farmlandSite.getBarnStructure()))
                 .addIngredient('2', createUnlockableItem(farmlandSite.getBeeHiveStructure()))
+                .addIngredient('O', menuButton(Material.BOOK, "§5Collections",  // NEW
+                        List.of("§7View your collection progress", "§7and earn bonus XP", DIVIDER, ARROW + "Click to open"),
+                        this::openCollections))
                 .build();
 
         open(gui, "§8Farmland Menu");
+    }
+
+    private void openCollections() {
+        CollectionsGui collectionGui = new CollectionsGui(farmlandSite, opener, this::openWindow);
+        collectionGui.openCollectionList();
     }
 
     private SimpleItem createHelpItem() {

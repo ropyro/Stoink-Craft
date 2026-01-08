@@ -1,13 +1,14 @@
 package com.stoinkcraft.jobs.jobsites;
 
 import com.google.gson.annotations.Expose;
+import com.stoinkcraft.jobs.collections.CollectionRegistry;
+import com.stoinkcraft.jobs.collections.CollectionType;
 import com.stoinkcraft.jobs.jobsites.components.structures.StructureData;
 import com.stoinkcraft.jobs.jobsites.components.unlockable.Unlockable;
 import com.stoinkcraft.jobs.jobsites.components.unlockable.UnlockableProgress;
 import com.stoinkcraft.jobs.jobsites.components.unlockable.UnlockableState;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class JobSiteData {
 
@@ -21,6 +22,8 @@ public class JobSiteData {
     private final Map<String, Integer> npcs;
     @Expose
     private final Map<String, UnlockableProgress> unlockables;
+    @Expose
+    private final Map<String, Long> collectionCounts = new HashMap<>();
     @Expose
     private int xp;
 
@@ -102,6 +105,74 @@ public class JobSiteData {
             getParent().levelUp();
         }
     }
+
+    /**
+     * Get the current collection count for a specific collection type
+     */
+    public long getCollectionCount(String collectionId) {
+        return collectionCounts.getOrDefault(collectionId, 0L);
+    }
+
+    /**
+     * Get the current collection count for a specific collection type
+     */
+    public long getCollectionCount(CollectionType type) {
+        return getCollectionCount(type.getId());
+    }
+
+    /**
+     * Add progress to a collection and return any level-ups that occurred.
+     *
+     * @param collectionId The collection ID
+     * @param amount Amount to add
+     * @return List of levels that were achieved (empty if no level-ups)
+     */
+    public List<Integer> addCollectionProgress(String collectionId, long amount) {
+        long oldCount = getCollectionCount(collectionId);
+        int oldLevel = CollectionRegistry.getLevelFromCount(oldCount);
+
+        long newCount = oldCount + amount;
+        collectionCounts.put(collectionId, newCount);
+
+        int newLevel = CollectionRegistry.getLevelFromCount(newCount);
+
+        // Collect all levels achieved
+        List<Integer> levelsAchieved = new ArrayList<>();
+        for (int level = oldLevel + 1; level <= newLevel; level++) {
+            levelsAchieved.add(level);
+        }
+
+        return levelsAchieved;
+    }
+
+    /**
+     * Add progress to a collection and return any level-ups that occurred.
+     */
+    public List<Integer> addCollectionProgress(CollectionType type, long amount) {
+        return addCollectionProgress(type.getId(), amount);
+    }
+
+    /**
+     * Get the current level for a collection
+     */
+    public int getCollectionLevel(String collectionId) {
+        return CollectionRegistry.getLevelFromCount(getCollectionCount(collectionId));
+    }
+
+    /**
+     * Get the current level for a collection
+     */
+    public int getCollectionLevel(CollectionType type) {
+        return getCollectionLevel(type.getId());
+    }
+
+    /**
+     * Get all collection counts (for GUI display)
+     */
+    public Map<String, Long> getAllCollectionCounts() {
+        return Collections.unmodifiableMap(collectionCounts);
+    }
+
 
     // ==================== Parent ====================
 

@@ -2,6 +2,8 @@ package com.stoinkcraft.jobs.listeners;
 
 import com.stoinkcraft.StoinkCore;
 import com.stoinkcraft.enterprise.Enterprise;
+import com.stoinkcraft.jobs.collections.CollectionManager;
+import com.stoinkcraft.jobs.collections.CollectionType;
 import com.stoinkcraft.jobs.contracts.ContractContext;
 import com.stoinkcraft.jobs.jobsites.JobSiteType;
 import com.stoinkcraft.jobs.jobsites.components.generators.HoneyGenerator;
@@ -93,10 +95,19 @@ public class PlayerInteractListener implements Listener {
     /* =========================
        HARVEST
        ========================= */
-
         event.setCancelled(true);
-
         generator.consumeHoney();
+
+        // =========================
+        // COLLECTION PROGRESS
+        // =========================
+        CollectionManager.handleDirectCollection(
+                enterprise,
+                farmland,
+                CollectionType.HONEYCOMB,
+                1,
+                player
+        );
 
     /* =========================
        CONTRACT INTEGRATION

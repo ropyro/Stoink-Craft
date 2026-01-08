@@ -2,6 +2,7 @@ package com.stoinkcraft.jobs.jobsites.sites.graveyard;
 
 import com.stoinkcraft.StoinkCore;
 import com.stoinkcraft.enterprise.Enterprise;
+import com.stoinkcraft.jobs.collections.CollectionsGui;
 import com.stoinkcraft.jobs.contracts.ActiveContract;
 import com.stoinkcraft.jobs.contracts.ContractDefinition;
 import com.stoinkcraft.jobs.contracts.rewards.CompositeReward;
@@ -60,7 +61,8 @@ public class GraveyardGui {
                         "# # # # # # # # #",
                         "# # # # ? # # # #",
                         "# # # # # # # # #",
-                        "# T A M U # S C #",
+                        "# # T A M U S # #",
+                        "# # # C # O # # #",
                         "# # # # # # # # #"
                 )
                 .addIngredient('#', filler())
@@ -85,9 +87,17 @@ public class GraveyardGui {
                             graveyardSite.getData().addSouls(-10);
                             graveyardSite.getMausoleumStructure().spawnHorde(true);
                         }))
+                .addIngredient('O', menuButton(Material.BOOK, "§5Collections",  // NEW
+                        List.of("§7View your collection progress", "§7and earn bonus XP", DIVIDER, ARROW + "Click to open"),
+                        this::openCollections))
                 .build();
 
         open(gui, "§8Graveyard Menu");
+    }
+
+    private void openCollections() {
+        CollectionsGui collectionGui = new CollectionsGui(graveyardSite, opener, this::openWindow);
+        collectionGui.openCollectionList();
     }
 
     private SimpleItem createHelpItem() {
