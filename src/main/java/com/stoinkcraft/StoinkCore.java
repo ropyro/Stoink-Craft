@@ -1,5 +1,6 @@
 package com.stoinkcraft;
 
+import com.stoinkcraft.earning.jobsites.protection.ProtectionManager;
 import com.stoinkcraft.enterprise.*;
 import com.stoinkcraft.enterprise.listeners.*;
 import com.stoinkcraft.earning.contracts.ContractFeedbackManager;
@@ -93,6 +94,9 @@ public class StoinkCore extends JavaPlugin {
         return cfm;
     }
 
+    private ProtectionManager pm;
+    public ProtectionManager getProtectionManager() {return pm;}
+
 
     @Override
     public void onDisable() {
@@ -123,6 +127,9 @@ public class StoinkCore extends JavaPlugin {
         registerListeners();
         ensureServerEnterprises();
         startTasks();
+
+        if(jobSitesLoaded)
+            indexProtectionRegions();
 
         getLogger().info("StoinkCore loaded.");
     }
@@ -155,6 +162,7 @@ public class StoinkCore extends JavaPlugin {
         epm = new EnterprisePlotManager(ewm);
         cm = new ContractManager(ContractPoolLoader.load());
         cfm = new ContractFeedbackManager();
+        pm = new ProtectionManager(this);
     }
 
     private void initFilesAndResources(){
@@ -183,6 +191,17 @@ public class StoinkCore extends JavaPlugin {
         ShareStorage.loadShares();
     }
 
+    private void indexProtectionRegions(){
+        try{
+            getLogger().info("Indexing protection regions...");
+            pm.rebuildIndex();
+        }catch (Exception e){
+            getLogger().info(e.getMessage());
+            return;
+        }
+        getLogger().info("Protection regions successfully indexed!");
+    }
+
     private boolean isCitizensReady() {
         Plugin citizens = Bukkit.getPluginManager().getPlugin("Citizens");
         if (citizens != null && citizens.isEnabled()) {
@@ -202,6 +221,7 @@ public class StoinkCore extends JavaPlugin {
 
         getLogger().info("Citizens now ready, loading job sites...");
         EnterpriseStorageJson.loadAllJobSitesDeferred();
+        indexProtectionRegions();
     }
 
     private void ensureServerEnterprises() {
@@ -240,6 +260,7 @@ public class StoinkCore extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new BoostNoteInteractionListener(), this);
         getServer().getPluginManager().registerEvents(new EnderChestListener(), this);
         getServer().getPluginManager().registerEvents(new CitizensLoadListener(this), this);
+        getServer().getPluginManager().registerEvents(pm, this);
         //Jobsite Listeners
         getServer().getPluginManager().registerEvents(new CreatureSpawnListener(ewm.getWorld()), this);
         getServer().getPluginManager().registerEvents(new BlockBreakListener(), this);
