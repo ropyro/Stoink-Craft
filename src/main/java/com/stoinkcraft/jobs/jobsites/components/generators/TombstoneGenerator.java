@@ -38,9 +38,9 @@ public class TombstoneGenerator extends JobSiteGenerator {
     private final String hologramId;
     private static final Vector HOLOGRAM_OFFSET = new Vector(-0.2, 2, 0.5);
 
-    // Base spawn interval in ticks (20 ticks = 1 second)
-    private static final int BASE_SPAWN_INTERVAL_TICKS = 30; // 30 seconds
-    private static final int MIN_SPAWN_INTERVAL_TICKS = 5;  // 5 seconds minimum
+    // Base spawn interval (1 tick = 1 second in your system)
+    private static final int BASE_SPAWN_INTERVAL_SECONDS = 30; // 30 seconds
+    private static final int MIN_SPAWN_INTERVAL_SECONDS = 8;   // 8 seconds minimum
 
     public TombstoneGenerator(Location tombstoneLocation, JobSite parent, int index) {
         super(parent, false); // Disabled by default until purchased
@@ -215,8 +215,9 @@ public class TombstoneGenerator extends JobSiteGenerator {
 
     private int getSpawnIntervalTicks() {
         int speedLevel = getGraveyardData().getLevel("spawn_speed");
-        int interval = BASE_SPAWN_INTERVAL_TICKS - (speedLevel * 2);
-        return Math.max(MIN_SPAWN_INTERVAL_TICKS, interval);
+        // Each level reduces by 2.2 seconds
+        int interval = BASE_SPAWN_INTERVAL_SECONDS - (int)(speedLevel * 2.2);
+        return Math.max(MIN_SPAWN_INTERVAL_SECONDS, interval);
     }
 
     // ==================== Attunement ====================

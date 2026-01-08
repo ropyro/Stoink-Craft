@@ -22,11 +22,13 @@ public class HoneyGenerator extends JobSiteGenerator {
     private final World world;
 
     private static final int MAX_HONEY = 5;
-    private static final int BASE_GENERATION_SECONDS = 1;
-    private static final int MIN_GENERATION_SECONDS = 1;
+    private static final int BASE_GENERATION_SECONDS = 300; // 5 minutes base
+    private static final int MIN_GENERATION_SECONDS = 30;   // 30 seconds minimum
 
     private int honeyLevel = 0;
     private int ticksSinceLastHoney = 0;
+
+
 
     private JobSiteHologram hologram;
     private final String hologramId;
@@ -159,9 +161,9 @@ public class HoneyGenerator extends JobSiteGenerator {
 
     private int getGenerationIntervalTicks() {
         int speedLevel = getSpeedLevel();
-        int seconds = BASE_GENERATION_SECONDS - (speedLevel * 5);
-        seconds = Math.max(MIN_GENERATION_SECONDS, seconds);
-        return seconds;
+        // Each level reduces by 8% of base
+        int reduction = (int) (BASE_GENERATION_SECONDS * 0.08 * speedLevel);
+        return Math.max(MIN_GENERATION_SECONDS, BASE_GENERATION_SECONDS - reduction);
     }
 
     private int getSpeedLevel() {

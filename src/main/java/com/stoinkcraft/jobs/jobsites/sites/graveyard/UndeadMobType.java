@@ -11,19 +11,18 @@ public enum UndeadMobType {
     ZOMBIE("Zombie", EntityType.ZOMBIE, 0, 1, Material.ZOMBIE_HEAD),
     SKELETON("Skeleton", EntityType.SKELETON, 0, 1, Material.SKELETON_SKULL),
 
-    // Tier 2 (Level 10)
-    HUSK("Husk", EntityType.HUSK, 25, 10, Material.SAND),
-    STRAY("Stray", EntityType.STRAY, 25, 10, Material.POWDER_SNOW_BUCKET),
+    // Tier 2 (Level 8) - Early progression
+    HUSK("Husk", EntityType.HUSK, 15, 8, Material.SAND),
+    STRAY("Stray", EntityType.STRAY, 15, 8, Material.POWDER_SNOW_BUCKET),
 
-    // Tier 3 (Level 18)
-    ZOMBIE_VILLAGER("Zombie Villager", EntityType.ZOMBIE_VILLAGER, 75, 18, Material.EMERALD),
-    DROWNED("Drowned", EntityType.DROWNED, 75, 18, Material.TRIDENT),
+    // Tier 3 (Level 16) - Mid progression
+    ZOMBIE_VILLAGER("Zombie Villager", EntityType.ZOMBIE_VILLAGER, 40, 16, Material.EMERALD),
+    DROWNED("Drowned", EntityType.DROWNED, 40, 16, Material.TRIDENT),
 
-    // Tier 4 (Level 25)
-    WITHER_SKELETON("Wither Skeleton", EntityType.WITHER_SKELETON, 125, 25, Material.WITHER_SKELETON_SKULL),
-    //PHANTOM("Phantom", EntityType.PHANTOM, 500, 25, Material.PHANTOM_MEMBRANE),
+    // Tier 4 (Level 24) - Late progression
+    WITHER_SKELETON("Wither Skeleton", EntityType.WITHER_SKELETON, 80, 24, Material.WITHER_SKELETON_SKULL),
 
-    // Random (default state - no attunement)
+    // Random (default state - cycles through unlocked types)
     RANDOM("Random", null, 0, 1, Material.SPAWNER);
 
     private final String displayName;

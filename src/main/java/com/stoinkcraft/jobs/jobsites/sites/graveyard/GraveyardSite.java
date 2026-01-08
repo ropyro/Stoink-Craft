@@ -52,10 +52,20 @@ public class GraveyardSite extends JobSite {
     public static Vector graveKeeperOffset = new Vector(-2.5, 0, -1.5);
 
     /**
-     * Tombstone Generators (30 total)
+     * Tombstone Generators (27 total)
      */
     public static final int TOTAL_TOMBSTONES = 27;
     public static final int STARTING_TOMBSTONES = 4;
+
+    // Tombstone pricing - exponential scaling
+    private static final int BASE_TOMBSTONE_COST = 2_000;
+    private static final double TOMBSTONE_COST_MULTIPLIER = 1.12; // Gentler curve
+
+    /**
+     * Soul drop chance (0.0 - 1.0)
+     */
+    public static final double SOUL_DROP_CHANCE = 0.25;
+
     private final List<TombstoneGenerator> tombstoneGenerators = new ArrayList<>();
 
     // Tombstone locations - adjust these based on your schematic
@@ -109,16 +119,6 @@ public class GraveyardSite extends JobSite {
     private MausoleumStructure mausoleumStructure;
     public static Vector mausoleumHordeSpawnOffset = new Vector(-24, -8, 14); // Adjust based on schematic
 
-    /**
-     * Tombstone Pricing
-     */
-    private static final int BASE_TOMBSTONE_COST = 1000;
-    private static final double TOMBSTONE_COST_MULTIPLIER = 1.15;
-
-    /**
-     * Soul drop chance (0.0 - 1.0)
-     */
-    public static final double SOUL_DROP_CHANCE = 0.3;
 
     @Override
     public void protectRegion() {
@@ -184,47 +184,95 @@ public class GraveyardSite extends JobSite {
     }
 
     private void registerUpgrades() {
-        // Spawn speed upgrade
+
+        // =========================
+        // SPAWN SPEED
+        // =========================
+        // Reduces time between spawns at each tombstone
+        // Base: 30 seconds, Min: 5 seconds
+        // Each level = -2.5 seconds
+
         upgrades.add(new JobSiteUpgrade(
                 "spawn_speed",
                 "Spawn Speed",
-                10,
-                2,
-                lvl -> 5000 * lvl,
+                10,                    // max level
+                1,                     // base jobsite level
+                3,                     // +3 per level
+                // Level 1 @ JS1, Level 2 @ JS4... Level 10 @ JS28
+                lvl -> 2500 + (lvl * 2000), // 4500, 6500, 8500... 22500
                 site -> true,
                 (site, lvl) -> {}
         ));
 
-        // Tombstone capacity upgrade
+        // =========================
+        // TOMBSTONE CAPACITY
+        // =========================
+        // Increases max purchasable tombstones beyond level-based cap
+        // Each level = +2 additional tombstone slots
+
         upgrades.add(new JobSiteUpgrade(
                 "tombstone_capacity",
                 "Tombstone Capacity",
                 10,
-                1,
-                lvl -> 10000 * lvl,
+                3,                     // base level
+                2,                     // +2 per level
+                // Level 1 @ JS3, Level 2 @ JS5... Level 10 @ JS21
+                lvl -> 4000 + (lvl * 3000), // 7000, 10000, 13000... 34000
                 site -> true,
                 (site, lvl) -> {}
         ));
 
-        // Mausoleum spawn speed
+        // =========================
+        // MAUSOLEUM HORDE FREQUENCY
+        // =========================
+        // Reduces time between spider horde spawns
+        // Requires Mausoleum to be built
+
         upgrades.add(new JobSiteUpgrade(
                 "mausoleum_spawn_speed",
                 "Horde Frequency",
                 10,
-                MausoleumStructure.REQUIRED_LEVEL,
-                lvl -> 15000 * lvl,
+                MausoleumStructure.REQUIRED_LEVEL + 2, // JS 17
+                2,                     // +2 per level
+                // Level 1 @ JS17, Level 2 @ JS19... Level 10 @ JS35
+                lvl -> 8000 + (lvl * 6000), // 14000, 20000, 26000... 68000
                 site -> site.getData().getUnlockableState("mausoleum") == UnlockableState.UNLOCKED,
                 (site, lvl) -> {}
         ));
 
-        // Mausoleum horde size
+        // =========================
+        // MAUSOLEUM HORDE SIZE
+        // =========================
+        // Increases spiders per horde (more risk, more reward)
+        // Each level = +3 spiders
+
         upgrades.add(new JobSiteUpgrade(
                 "mausoleum_horde_size",
                 "Horde Size",
                 10,
-                MausoleumStructure.REQUIRED_LEVEL,
-                lvl -> 12000 * lvl,
+                MausoleumStructure.REQUIRED_LEVEL + 2, // JS 17
+                2,                     // +2 per level
+                // Level 1 @ JS17, Level 2 @ JS19... Level 10 @ JS35
+                lvl -> 6000 + (lvl * 5000), // 11000, 16000, 21000... 56000
                 site -> site.getData().getUnlockableState("mausoleum") == UnlockableState.UNLOCKED,
+                (site, lvl) -> {}
+        ));
+
+        // =========================
+        // SOUL HARVEST CHANCE (NEW)
+        // =========================
+        // Increases soul drop rate
+        // Base: 25%, Max: 50% at level 10
+
+        upgrades.add(new JobSiteUpgrade(
+                "soul_harvest",
+                "Soul Harvest",
+                10,
+                5,                     // base level
+                2,                     // +2 per level
+                // Level 1 @ JS5, Level 2 @ JS7... Level 10 @ JS23
+                lvl -> 3000 + (lvl * 2500), // 5500, 8000, 10500... 28000
+                site -> true,
                 (site, lvl) -> {}
         ));
     }
@@ -253,11 +301,11 @@ public class GraveyardSite extends JobSite {
         int level = getLevel();
         int capacityLevel = getData().getLevel("tombstone_capacity");
 
-        // Base: Level 1 = 4, Level 30 = 30
-        // Linear scaling: roughly 1 per level
-        int baseCapacity = STARTING_TOMBSTONES + (int) ((level - 1) * (TOTAL_TOMBSTONES - STARTING_TOMBSTONES) / 29.0);
+        // Base formula: starts at 4, gains roughly 1 per 1.5 levels
+        // Level 1 = 4, Level 15 = ~13, Level 30 = ~23
+        int baseCapacity = STARTING_TOMBSTONES + (int) ((level - 1) * 0.65);
 
-        // Capacity upgrade adds extra slots
+        // Capacity upgrade adds extra slots (+2 per level)
         int bonusCapacity = capacityLevel * 2;
 
         return Math.min(TOTAL_TOMBSTONES, baseCapacity + bonusCapacity);
@@ -268,8 +316,10 @@ public class GraveyardSite extends JobSite {
      */
     public int getNextTombstoneCost() {
         int owned = getData().getTombstonesPurchased();
-        return (int) (BASE_TOMBSTONE_COST * Math.pow(TOMBSTONE_COST_MULTIPLIER, owned - STARTING_TOMBSTONES));
+        int purchasedBeyondStart = Math.max(0, owned - STARTING_TOMBSTONES);
+        return (int) (BASE_TOMBSTONE_COST * Math.pow(TOMBSTONE_COST_MULTIPLIER, purchasedBeyondStart));
     }
+
 
     /**
      * Purchase the next tombstone
@@ -311,11 +361,10 @@ public class GraveyardSite extends JobSite {
      * Called when a graveyard mob is killed - handles soul drops
      */
     public void onMobKilled(Player killer, EntityType entityType) {
-        if (Math.random() < SOUL_DROP_CHANCE) {
+        if (Math.random() < getSoulDropChance()) {
             getData().addSouls(1);
             ChatUtils.sendMessage(killer, ChatColor.LIGHT_PURPLE + "✦ +1 Soul");
 
-            // Fire soul contract context
             ContractContext soulContext = new ContractContext(
                     killer,
                     JobSiteType.GRAVEYARD,
@@ -325,6 +374,12 @@ public class GraveyardSite extends JobSite {
             StoinkCore.getInstance().getContractManager()
                     .handleContext(enterprise, soulContext);
         }
+    }
+
+    public double getSoulDropChance() {
+        int harvestLevel = getData().getLevel("soul_harvest");
+        // Base 25% + 2.5% per level = max 50%
+        return SOUL_DROP_CHANCE + (harvestLevel * 0.025);
     }
 
     // ==================== Overrides ====================

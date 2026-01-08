@@ -37,9 +37,11 @@ public class PassiveMobGenerator extends JobSiteGenerator {
     private int ticksSinceLastSpawn = 0;
 
     // Base values (no longer upgrades)
-    private static final int BASE_SPAWN_INTERVAL = 100; // ticks
-    private static final int BASE_MAX_MOBS = 10;
-    private static final int MOBS_PER_CAPACITY_LEVEL = 5;
+    private static final int BASE_SPAWN_INTERVAL = 10;     // 10 seconds
+    private static final int MIN_SPAWN_INTERVAL = 2;       // 2 seconds minimum
+    private static final int BASE_MAX_MOBS = 8;
+    private static final int MOBS_PER_CAPACITY_LEVEL = 4;  // +4 per level = 48 max
+
 
     public PassiveMobGenerator(Location corner1, Location corner2, JobSite parent, String regionName) {
         super(parent);
@@ -193,8 +195,13 @@ public class PassiveMobGenerator extends JobSiteGenerator {
 
     private int calculateSpawnInterval() {
         int lvl = getSpawnSpeedLevel();
-        return Math.max(10, BASE_SPAWN_INTERVAL - (lvl * 9));
+        // Each level reduces by 0.8 seconds
+        return Math.max(MIN_SPAWN_INTERVAL, BASE_SPAWN_INTERVAL - (int)(lvl * 0.8));
     }
+
+// Level 0:  10 seconds between spawns
+// Level 5:  6 seconds between spawns
+// Level 10: 2 seconds between spawns
 
     private int getMaxMobCapacity() {
         return BASE_MAX_MOBS + (getMobCapacityLevel() * MOBS_PER_CAPACITY_LEVEL);

@@ -39,7 +39,7 @@ public class CropGenerator extends JobSiteGenerator {
     // Base growth chance per upgrade level:
     // Level 1 = 2%
     // Level 10 = 20%
-    private static final double BASE_GROWTH_CHANCE = 0.02;
+    private static final double BASE_GROWTH_CHANCE = 0.015; // 1.5% per tick per level
 
     public CropGenerator(Location corner1, Location corner2, JobSite parent, String regionName) {
         super(parent);

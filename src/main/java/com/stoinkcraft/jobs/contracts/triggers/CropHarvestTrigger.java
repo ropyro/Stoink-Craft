@@ -3,18 +3,25 @@ package com.stoinkcraft.jobs.contracts.triggers;
 import com.stoinkcraft.jobs.contracts.ContractContext;
 import org.bukkit.Material;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class CropHarvestTrigger implements ContractTrigger {
 
-    private final Material cropType;
+    private final List<Material> cropTypes = new ArrayList<>();
 
     public CropHarvestTrigger(Material cropType) {
-        this.cropType = cropType;
+        this.cropTypes.add(cropType);
+    }
+
+    public CropHarvestTrigger(List<Material> cropType) {
+        cropType.forEach(ct -> this.cropTypes.add(ct));
     }
 
     @Override
     public boolean matches(ContractContext context) {
         Material harvested = context.getEventData(Material.class);
-        return harvested == cropType;
+        return cropTypes.stream().anyMatch(ct -> ct.equals(harvested));
     }
 
     @Override

@@ -5,6 +5,7 @@ import com.stoinkcraft.jobs.jobsites.JobSite;
 import com.stoinkcraft.jobs.jobsites.JobSiteType;
 import com.stoinkcraft.jobs.jobsites.components.JobSiteHologram;
 import com.stoinkcraft.jobs.jobsites.components.JobSiteStructure;
+import com.stoinkcraft.jobs.jobsites.components.unlockable.UnlockableState;
 import com.stoinkcraft.utils.ChatUtils;
 import com.stoinkcraft.utils.SchematicUtils;
 import org.bukkit.ChatColor;
@@ -27,15 +28,17 @@ public class BeeHiveStructure extends JobSiteStructure {
     private final String hologramId;
 
     public static final int REQUIRED_LEVEL = 20;
-
+    public static final int COST = 150_000;
+    public static final long BUILD_TIME = TimeUnit.MINUTES.toMillis(45); // 45 minutes
+    public static final int COMPLETION_XP = 2000;
     public BeeHiveStructure(JobSite jobSite) {
         super(
                 "beehive",
                 "Bee Hives",
                 REQUIRED_LEVEL,
-                TimeUnit.SECONDS.toMillis(10),
-                () -> 350_000,
-                site -> true,
+                BUILD_TIME,
+                () -> COST,
+                site -> site.getData().getUnlockableState("barn") == UnlockableState.UNLOCKED,
                 jobSite
         );
 
@@ -73,16 +76,13 @@ public class BeeHiveStructure extends JobSiteStructure {
     @Override
     public void onUnlockComplete() {
         pasteStructure();
-
-        // Reward
-        getJobSite().getData().incrementXp(1000);
+        getJobSite().getData().incrementXp(COMPLETION_XP);
         getJobSite().getEnterprise().sendEnterpriseMessage(
                 "§6§lBee Hive Construction Complete!",
                 "",
-                "§a+ 5000xp",
+                "§a+ " + COMPLETION_XP + " XP",
                 ""
         );
-
         hologram.delete();
     }
 

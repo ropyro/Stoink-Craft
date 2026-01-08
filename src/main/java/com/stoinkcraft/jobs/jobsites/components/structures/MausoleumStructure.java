@@ -31,8 +31,10 @@ public class MausoleumStructure extends JobSiteStructure {
     private static final File SCHEMATIC =
             new File(StoinkCore.getInstance().getDataFolder(), "/schematics/mausoleum.schem");
 
-    public static final int REQUIRED_LEVEL = 10;
-    public static final long BUILD_TIME_MILLIS = TimeUnit.SECONDS.toMillis(10);
+    public static final int REQUIRED_LEVEL = 15;
+    public static final int COST = 175_000;
+    public static final long BUILD_TIME_MILLIS = TimeUnit.MINUTES.toMillis(30); // 30 minutes
+    public static final int COMPLETION_XP = 1500;
 
     public static Vector constructionHologramOffset = new Vector(-35, 4, 23.3); // Adjust based on schematic
 
@@ -47,14 +49,16 @@ public class MausoleumStructure extends JobSiteStructure {
     private boolean readyToSpawn = false;
 
     // Base values
-    private static final int BASE_HORDE_INTERVAL_TICKS = 60*5; // 20 minutes
-    private static final int MIN_HORDE_INTERVAL_TICKS = 60*1;   // 5 minutes
-    private static final int BASE_HORDE_SIZE = 5;
-    private static final int SPIDERS_PER_UPGRADE = 3;
+    // Horde timing
+    private static final int BASE_HORDE_INTERVAL_SECONDS = 60 * 10; // 10 minutes base
+    private static final int MIN_HORDE_INTERVAL_SECONDS = 60 * 3;   // 3 minutes minimum
+    private static final int BASE_HORDE_SIZE = 6;
+    private static final int SPIDERS_PER_UPGRADE = 2;
+    private static final int MAX_HORDE_SIZE = 30;
 
     // Rewards per spider
-    private static final int XP_PER_SPIDER = 15;
-    private static final int MONEY_PER_SPIDER = 50;
+    private static final int XP_PER_SPIDER = 12;
+    private static final int MONEY_PER_SPIDER = 40;
 
     public MausoleumStructure(JobSite jobSite, Vector hordeSpawnOffset) {
         super(
@@ -62,7 +66,7 @@ public class MausoleumStructure extends JobSiteStructure {
                 "Mausoleum",
                 REQUIRED_LEVEL,
                 BUILD_TIME_MILLIS,
-                () -> 500_000,
+                () -> COST,
                 site -> true,
                 jobSite
         );
@@ -141,11 +145,11 @@ public class MausoleumStructure extends JobSiteStructure {
     public void onUnlockComplete() {
         pasteStructure();
 
-        getJobSite().getData().incrementXp(2000);
+        getJobSite().getData().incrementXp(COMPLETION_XP);
         getJobSite().getEnterprise().sendEnterpriseMessage(
                 "§5§lMausoleum Construction Complete!",
                 "",
-                "§a+ 2000 XP",
+                "§a+ " + COMPLETION_XP + " XP",
                 "§7Spider hordes will now spawn periodically!",
                 ""
         );
@@ -239,13 +243,16 @@ public class MausoleumStructure extends JobSiteStructure {
 
     private int getHordeIntervalTicks() {
         int speedLevel = getGraveyardData().getLevel("mausoleum_spawn_speed");
-        int interval = BASE_HORDE_INTERVAL_TICKS - (speedLevel * 90); // 1.5 min reduction per level
-        return Math.max(MIN_HORDE_INTERVAL_TICKS, interval);
+        // Each level reduces by 42 seconds (0.7 minutes)
+        int interval = BASE_HORDE_INTERVAL_SECONDS - (speedLevel * 42);
+        return Math.max(MIN_HORDE_INTERVAL_SECONDS, interval);
     }
+
 
     private int getHordeSize() {
         int sizeLevel = getGraveyardData().getLevel("mausoleum_horde_size");
-        return BASE_HORDE_SIZE + (sizeLevel * SPIDERS_PER_UPGRADE);
+        int size = BASE_HORDE_SIZE + (sizeLevel * SPIDERS_PER_UPGRADE);
+        return Math.min(MAX_HORDE_SIZE, size);
     }
 
     // ==================== Hologram ====================

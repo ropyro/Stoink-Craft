@@ -13,6 +13,7 @@ import com.stoinkcraft.jobs.jobsites.components.generators.HoneyGenerator;
 import com.stoinkcraft.jobs.jobsites.components.generators.PassiveMobGenerator;
 import com.stoinkcraft.jobs.jobsites.components.structures.BarnStructure;
 import com.stoinkcraft.jobs.jobsites.components.structures.BeeHiveStructure;
+import com.stoinkcraft.jobs.jobsites.components.unlockable.UnlockableState;
 import com.stoinkcraft.utils.ChatUtils;
 import com.stoinkcraft.utils.TimeUtils;
 import net.citizensnpcs.api.event.NPCRightClickEvent;
@@ -162,35 +163,46 @@ public class FarmlandSite extends JobSite {
     private void registerUpgrades() {
 
         // =========================
-        // CROP UPGRADES
+        // CROP GROWTH SPEED
         // =========================
+        // Affects how fast crops grow beyond vanilla rate
+        // Each level = +2% growth tick chance (base 2% at level 1)
 
         upgrades.add(new JobSiteUpgrade(
                 "crop_growth_speed",
                 "Crop Growth Speed",
-                10,
-                5,
-                lvl -> 5000 * lvl,
+                10,                    // max level
+                1,                     // base jobsite level
+                3,                     // +3 jobsite levels per upgrade
+                // Level 1 @ JS1, Level 2 @ JS4, Level 3 @ JS7... Level 10 @ JS28
+                lvl -> 1000 + (lvl * 1500),  // 2500, 4000, 5500... 16000
                 site -> true,
-                (site, lvl) -> {} // effect is read dynamically by CropGenerator
+                (site, lvl) -> {}
         ));
+
+        // =========================
+        // CROP UNLOCKS
+        // =========================
+        // Single-purchase unlocks, spread across progression
 
         upgrades.add(new JobSiteUpgrade(
                 "unlock_carrot",
                 "Unlock Carrots",
                 1,
                 5,
-                lvl -> 25000,
+                0,                     // single purchase, no increment
+                lvl -> 8_000,
                 site -> true,
-                (site, lvl) -> {} // unlock = upgrade level > 0
+                (site, lvl) -> {}
         ));
 
         upgrades.add(new JobSiteUpgrade(
                 "unlock_potato",
                 "Unlock Potatoes",
                 1,
-                20,
-                lvl -> 75000,
+                12,
+                0,
+                lvl -> 25_000,
                 site -> site.getData().getLevel("unlock_carrot") > 0,
                 (site, lvl) -> {}
         ));
@@ -199,88 +211,111 @@ public class FarmlandSite extends JobSite {
                 "unlock_beetroot",
                 "Unlock Beetroots",
                 1,
-                30,
-                lvl -> 125000,
+                22,
+                0,
+                lvl -> 60_000,
                 site -> site.getData().getLevel("unlock_potato") > 0,
                 (site, lvl) -> {}
         ));
 
-// =========================
-// MOB UPGRADES
-// =========================
+        // =========================
+        // ANIMAL SPAWN SPEED
+        // =========================
+        // Affects spawn interval: BASE_INTERVAL - (level * 9) ticks
+        // Level 0: 100 ticks, Level 10: 10 ticks
 
         upgrades.add(new JobSiteUpgrade(
                 "mob_spawn_speed",
                 "Animal Spawn Speed",
                 10,
-                2, // requires jobsite level 2
-                lvl -> 6000 * lvl,
-                site -> true,
+                3,                     // requires barn proximity (level 3 feels right)
+                2,                     // +2 per level
+                // Level 1 @ JS3, Level 2 @ JS5... Level 10 @ JS21
+                lvl -> 2000 + (lvl * 2000),  // 4000, 6000, 8000... 22000
+                site -> site.getData().getUnlockableState("barn") == UnlockableState.UNLOCKED,
                 (site, lvl) -> {}
         ));
+
+        // =========================
+        // ANIMAL CAPACITY
+        // =========================
+        // Base: 10 mobs, +5 per level = 60 max at level 10
 
         upgrades.add(new JobSiteUpgrade(
                 "mob_capacity",
                 "Animal Capacity",
                 10,
                 4,
-                lvl -> 9000 * lvl,
-                site -> true,
+                2,
+                // Level 1 @ JS4, Level 2 @ JS6... Level 10 @ JS22
+                lvl -> 3000 + (lvl * 2500),  // 5500, 8000, 10500... 28000
+                site -> site.getData().getUnlockableState("barn") == UnlockableState.UNLOCKED,
                 (site, lvl) -> {}
         ));
 
-// -------------------------
-// MOB UNLOCKS
-// -------------------------
+        // =========================
+        // ANIMAL UNLOCKS
+        // =========================
+        // Requires barn to be built first
 
         upgrades.add(new JobSiteUpgrade(
                 "unlock_sheep",
                 "Unlock Sheep",
                 1,
-                3,
-                lvl -> 25000,
-                site -> true,
+                10,                    // Same as barn unlock level
+                0,
+                lvl -> 12_000,
+                site -> site.getData().getUnlockableState("barn") == UnlockableState.UNLOCKED,
                 (site, lvl) -> {}
         ));
 
         upgrades.add(new JobSiteUpgrade(
                 "unlock_pig",
-                "Unlock Pig",
+                "Unlock Pigs",
                 1,
-                6,
-                lvl -> 50000,
+                14,
+                0,
+                lvl -> 22_000,
                 site -> site.getData().getLevel("unlock_sheep") > 0,
                 (site, lvl) -> {}
         ));
 
         upgrades.add(new JobSiteUpgrade(
                 "unlock_chicken",
-                "Unlock Chicken",
+                "Unlock Chickens",
                 1,
-                10,
-                lvl -> 75000,
+                18,
+                0,
+                lvl -> 35_000,
                 site -> site.getData().getLevel("unlock_pig") > 0,
                 (site, lvl) -> {}
         ));
 
         upgrades.add(new JobSiteUpgrade(
                 "unlock_horse",
-                "Unlock Horse",
+                "Unlock Horses",
                 1,
-                18,
-                lvl -> 125000,
+                24,
+                0,
+                lvl -> 75_000,
                 site -> site.getData().getLevel("unlock_chicken") > 0,
                 (site, lvl) -> {}
         ));
 
-        //Bee hive upgrade
+        // =========================
+        // HONEY GENERATION SPEED
+        // =========================
+        // Requires bee hives structure
+
         upgrades.add(new JobSiteUpgrade(
                 "honey_speed",
                 "Honey Generation Speed",
                 10,
-                5,
-                lvl -> 5000 * lvl,
-                site -> true,
+                20,                    // Same as bee hive unlock
+                2,
+                // Level 1 @ JS20, Level 2 @ JS22... Level 10 @ JS38
+                lvl -> 5000 + (lvl * 4000),  // 9000, 13000, 17000... 45000
+                site -> site.getData().getUnlockableState("beehive") == UnlockableState.UNLOCKED,
                 (site, lvl) -> {}
         ));
     }

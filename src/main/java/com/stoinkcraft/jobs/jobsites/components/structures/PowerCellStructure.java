@@ -32,13 +32,18 @@ public class PowerCellStructure extends JobSiteStructure {
     private static final int EFFECT_CHECK_INTERVAL = 3; // ticks (1 second)
     private int tickCounter = 0;
 
+    public static final int REQUIRED_LEVEL = 10;
+    public static final int COST = 75_000;
+    public static final long BUILD_TIME = TimeUnit.MINUTES.toMillis(20); // 20 minutes
+    public static final int COMPLETION_XP = 750;
+
     public PowerCellStructure(JobSite jobSite) {
         super(
                 "powercell",
                 "Power Cell",
-                10,
-                TimeUnit.SECONDS.toMillis(30),
-                () -> 125_000,
+                REQUIRED_LEVEL,
+                BUILD_TIME,
+                () -> COST,
                 site -> true,
                 jobSite
         );
@@ -123,12 +128,13 @@ public class PowerCellStructure extends JobSiteStructure {
     public void onUnlockComplete() {
         pasteStructure();
 
-        getJobSite().getData().incrementXp(500);
+        getJobSite().getData().incrementXp(COMPLETION_XP);
         getJobSite().getEnterprise().sendEnterpriseMessage(
                 "§6§lPower Cell Construction Complete!",
                 "",
-                "§a+ 500xp",
-                "§eMiners now receive Haste in the quarry!"
+                "§a+ " + COMPLETION_XP + " XP",
+                "§eMiners now receive Haste in the quarry!",
+                "§7Upgrade the Power Cell for stronger effects."
         );
 
         hologram.delete();

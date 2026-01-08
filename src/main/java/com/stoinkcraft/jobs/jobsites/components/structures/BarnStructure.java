@@ -26,13 +26,19 @@ public class BarnStructure extends JobSiteStructure {
     private JobSiteHologram hologram;
     private final String hologramId;
 
+    public static final int REQUIRED_LEVEL = 10;
+    public static final int COST = 50_000;
+    public static final long BUILD_TIME = TimeUnit.MINUTES.toMillis(15); // 15 minutes
+    public static final int COMPLETION_XP = 500;
+
+
     public BarnStructure(JobSite jobSite) {
         super(
                 "barn",
                 "Animal Barn",
-                10,
-                TimeUnit.SECONDS.toMillis(10),
-                () -> 150_000,
+                REQUIRED_LEVEL,
+                BUILD_TIME,
+                () -> COST,
                 site -> true,
                 jobSite
         );
@@ -71,16 +77,13 @@ public class BarnStructure extends JobSiteStructure {
     @Override
     public void onUnlockComplete() {
         pasteStructure();
-
-        // Reward
-        getJobSite().getData().incrementXp(1000);
+        getJobSite().getData().incrementXp(COMPLETION_XP);
         getJobSite().getEnterprise().sendEnterpriseMessage(
                 "§6§lBarn Construction Complete!",
                 "",
-                "§a+ 1000xp",
+                "§a+ " + COMPLETION_XP + " XP",
                 ""
         );
-
         hologram.delete();
     }
 

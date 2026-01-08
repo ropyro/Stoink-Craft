@@ -38,7 +38,7 @@ public class MineGenerator extends JobSiteGenerator {
     private final String regionName;
 
     // Geode settings
-    private static final double GEODE_SPAWN_CHANCE = 0.03; // 3% of blocks
+    private static final double GEODE_SPAWN_CHANCE = 0.025; // 2.5% of blocks
     private static final BlockType GEODE_BLOCK = BlockTypes.AMETHYST_BLOCK;
     private static final BlockType GEODE_CLUSTER = BlockTypes.AMETHYST_CLUSTER;
 
@@ -214,10 +214,11 @@ public class MineGenerator extends JobSiteGenerator {
         QuarryData data = getQuarryData();
         int speedLevel = data.getLevel("regen_speed");
 
-        long base = QuarrySite.DEFAULT_REGEN_INTERVAL_SECONDS;
-        long reduction = speedLevel * 60*20;
+        long base = QuarrySite.DEFAULT_REGEN_INTERVAL_SECONDS; // 7200
+        long reductionPerLevel = 60L * 10L; // 10 minutes = 600 seconds
+        long reduction = speedLevel * reductionPerLevel;
 
-        return Math.max(60, base - reduction); // Minimum 60 seconds
+        return Math.max(60L * 30L, base - reduction); // Minimum 30 minutes
     }
 
     public long getRemainingSeconds() {
