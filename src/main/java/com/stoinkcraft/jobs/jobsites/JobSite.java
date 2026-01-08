@@ -11,6 +11,7 @@ import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import com.sk89q.worldguard.protection.regions.RegionContainer;
 import com.stoinkcraft.StoinkCore;
 import com.stoinkcraft.enterprise.Enterprise;
+import com.stoinkcraft.jobs.collections.CollectionManager;
 import com.stoinkcraft.jobs.jobsites.components.JobSiteComponent;
 import com.stoinkcraft.jobs.jobsites.components.JobSiteStructure;
 import com.stoinkcraft.jobs.jobsites.components.structures.StructureData;
@@ -23,6 +24,7 @@ import org.bukkit.entity.Player;
 import javax.annotation.Nullable;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public abstract class JobSite {
@@ -216,8 +218,16 @@ public abstract class JobSite {
     }
 
     public void levelUp() {
+        int newLevel = getLevel();
         components.forEach(JobSiteComponent::levelUp);
-        getEnterprise().sendEnterpriseMessage(type.name() + " leveled up to " + getLevel());
+        enterprise.sendEnterpriseMessage(
+                "",
+                "§a§l" + type.name() + " Leveled Up!",
+                "",
+                "§7Level" + (newLevel-1)+ " ▶ §a" + newLevel,
+                ""
+        );
+        CollectionManager.playLevelUpSound(enterprise, this);
     }
 
     public void addComponent(JobSiteComponent component) {

@@ -82,9 +82,6 @@ public class CollectionManager {
         for (int level : levelsAchieved) {
             int xpReward = CollectionRegistry.getXpRewardForLevel(level);
 
-            // Award XP to the jobsite
-            jobSite.getData().incrementXp(xpReward);
-
             // Get the new total for the announcement
             long totalCollected = jobSite.getData().getCollectionCount(type);
 
@@ -92,6 +89,9 @@ public class CollectionManager {
             sendLevelUpAnnouncement(enterprise, type, level, xpReward, totalCollected);
 
             // Play sound to all online members at the jobsite
+
+            // Award XP to the jobsite
+            jobSite.getData().incrementXp(xpReward);
             playLevelUpSound(enterprise, jobSite);
         }
     }
@@ -119,7 +119,7 @@ public class CollectionManager {
     /**
      * Play level-up sound to members at the jobsite
      */
-    private static void playLevelUpSound(Enterprise enterprise, JobSite jobSite) {
+    public static void playLevelUpSound(Enterprise enterprise, JobSite jobSite) {
         enterprise.getOnlineMembers().stream()
                 .filter(p -> jobSite.contains(p.getLocation()))
                 .forEach(p -> {

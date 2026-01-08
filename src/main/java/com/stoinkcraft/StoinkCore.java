@@ -1,5 +1,6 @@
 package com.stoinkcraft;
 
+import com.sk89q.worldguard.WorldGuard;
 import com.stoinkcraft.enterprise.*;
 import com.stoinkcraft.enterprise.listeners.*;
 import com.stoinkcraft.jobs.contracts.ContractFeedbackManager;
@@ -142,6 +143,9 @@ public class StoinkCore extends JavaPlugin {
         if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
             new StoinkExpansion(this).register();
         }
+
+       // WorldGuard.getInstance().getPlatform().getEventBus().register(this);
+
     }
 
     private void initManagers(){
