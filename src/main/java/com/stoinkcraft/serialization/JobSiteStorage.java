@@ -2,10 +2,10 @@ package com.stoinkcraft.serialization;
 
 import com.google.gson.Gson;
 import com.stoinkcraft.StoinkCore;
-import com.stoinkcraft.jobs.jobsites.sites.farmland.FarmlandData;
-import com.stoinkcraft.jobs.jobsites.sites.graveyard.GraveyardData;
-import com.stoinkcraft.jobs.jobsites.sites.quarry.QuarryData;
-import com.stoinkcraft.jobs.jobsites.sites.skyrise.SkyriseData;
+import com.stoinkcraft.earning.jobsites.sites.farmland.FarmlandData;
+import com.stoinkcraft.earning.jobsites.sites.graveyard.GraveyardData;
+import com.stoinkcraft.earning.jobsites.sites.quarry.QuarryData;
+import com.stoinkcraft.earning.jobsites.sites.skyrise.SkyriseData;
 import org.bukkit.Bukkit;
 
 import java.io.*;

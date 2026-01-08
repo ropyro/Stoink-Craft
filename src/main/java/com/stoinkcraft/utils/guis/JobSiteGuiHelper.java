@@ -1,16 +1,16 @@
 package com.stoinkcraft.utils.guis;
 
 import com.stoinkcraft.StoinkCore;
-import com.stoinkcraft.jobs.contracts.ActiveContract;
-import com.stoinkcraft.jobs.contracts.ContractDefinition;
-import com.stoinkcraft.jobs.contracts.rewards.CompositeReward;
-import com.stoinkcraft.jobs.contracts.rewards.DescribableReward;
-import com.stoinkcraft.jobs.contracts.rewards.Reward;
-import com.stoinkcraft.jobs.jobsites.JobSite;
-import com.stoinkcraft.jobs.jobsites.JobSiteUpgrade;
-import com.stoinkcraft.jobs.jobsites.components.unlockable.Unlockable;
-import com.stoinkcraft.jobs.jobsites.components.unlockable.UnlockableProgress;
-import com.stoinkcraft.jobs.jobsites.components.unlockable.UnlockableState;
+import com.stoinkcraft.earning.contracts.ActiveContract;
+import com.stoinkcraft.earning.contracts.ContractDefinition;
+import com.stoinkcraft.earning.contracts.rewards.CompositeReward;
+import com.stoinkcraft.earning.contracts.rewards.DescribableReward;
+import com.stoinkcraft.earning.contracts.rewards.Reward;
+import com.stoinkcraft.earning.jobsites.JobSite;
+import com.stoinkcraft.earning.jobsites.JobSiteUpgrade;
+import com.stoinkcraft.earning.jobsites.components.unlockable.Unlockable;
+import com.stoinkcraft.earning.jobsites.components.unlockable.UnlockableProgress;
+import com.stoinkcraft.earning.jobsites.components.unlockable.UnlockableState;
 import com.stoinkcraft.utils.ChatUtils;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;

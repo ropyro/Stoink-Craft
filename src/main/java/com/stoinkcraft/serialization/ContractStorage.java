@@ -3,13 +3,10 @@ package com.stoinkcraft.serialization;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.stoinkcraft.StoinkCore;
-import com.stoinkcraft.jobs.contracts.ActiveContract;
-import com.stoinkcraft.jobs.contracts.ContractDefinition;
-import com.stoinkcraft.jobs.contracts.ContractPool;
-import com.stoinkcraft.jobs.contracts.ContractSaveData;
-import com.stoinkcraft.jobs.jobsites.sites.farmland.FarmlandData;
-import com.stoinkcraft.jobs.jobsites.sites.quarry.QuarryData;
-import com.stoinkcraft.jobs.jobsites.sites.skyrise.SkyriseData;
+import com.stoinkcraft.earning.contracts.ActiveContract;
+import com.stoinkcraft.earning.contracts.ContractDefinition;
+import com.stoinkcraft.earning.contracts.ContractPool;
+import com.stoinkcraft.earning.contracts.ContractSaveData;
 import org.bukkit.Bukkit;
 
 import java.io.*;

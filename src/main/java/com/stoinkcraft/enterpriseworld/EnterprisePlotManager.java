@@ -1,7 +1,7 @@
 package com.stoinkcraft.enterpriseworld;
 
 import com.stoinkcraft.enterprise.Enterprise;
-import com.stoinkcraft.jobs.jobsites.JobSiteType;
+import com.stoinkcraft.earning.jobsites.JobSiteType;
 import org.bukkit.Location;
 
 import java.util.Collection;

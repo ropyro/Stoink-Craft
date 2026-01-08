@@ -2,8 +2,8 @@ package com.stoinkcraft.enterprise;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import com.stoinkcraft.jobs.jobsites.JobSiteManager;
-import com.stoinkcraft.jobs.boosters.Booster;
+import com.stoinkcraft.earning.jobsites.JobSiteManager;
+import com.stoinkcraft.earning.boosters.Booster;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;

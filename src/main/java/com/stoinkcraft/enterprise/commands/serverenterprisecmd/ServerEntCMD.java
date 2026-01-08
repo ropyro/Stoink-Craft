@@ -1,19 +1,19 @@
 package com.stoinkcraft.enterprise.commands.serverenterprisecmd;
 
 import com.stoinkcraft.StoinkCore;
-import com.stoinkcraft.jobs.jobsites.JobSiteManager;
-import com.stoinkcraft.jobs.jobsites.JobsiteLevelHelper;
-import com.stoinkcraft.jobs.jobsites.sites.farmland.FarmlandData;
-import com.stoinkcraft.jobs.jobsites.sites.farmland.FarmlandGui;
-import com.stoinkcraft.jobs.boosters.BoosterItemHelper;
+import com.stoinkcraft.earning.jobsites.JobSiteManager;
+import com.stoinkcraft.earning.jobsites.JobsiteLevelHelper;
+import com.stoinkcraft.earning.jobsites.sites.farmland.FarmlandData;
+import com.stoinkcraft.earning.jobsites.sites.farmland.FarmlandGui;
+import com.stoinkcraft.earning.boosters.BoosterItemHelper;
 import com.stoinkcraft.enterprise.Enterprise;
 import com.stoinkcraft.enterprise.EnterpriseManager;
 import com.stoinkcraft.enterprise.ServerEnterprise;
-import com.stoinkcraft.jobs.jobsites.sites.graveyard.GraveyardData;
-import com.stoinkcraft.jobs.jobsites.sites.quarry.QuarryData;
+import com.stoinkcraft.earning.jobsites.sites.graveyard.GraveyardData;
+import com.stoinkcraft.earning.jobsites.sites.quarry.QuarryData;
 import com.stoinkcraft.serialization.EnterpriseMigration;
 import com.stoinkcraft.serialization.EnterpriseStorageJson;
-import com.stoinkcraft.shares.ShareStorage;
+import com.stoinkcraft.enterprise.shares.ShareStorage;
 import com.stoinkcraft.utils.ChatUtils;
 import com.stoinkcraft.utils.SCConstants;
 import org.bukkit.Bukkit;

@@ -1,10 +1,10 @@
 package com.stoinkcraft.enterprise;
 
 import com.stoinkcraft.StoinkCore;
-import com.stoinkcraft.jobs.jobsites.JobSiteManager;
-import com.stoinkcraft.jobs.boosters.Booster;
+import com.stoinkcraft.earning.jobsites.JobSiteManager;
+import com.stoinkcraft.earning.boosters.Booster;
 import com.stoinkcraft.serialization.EnterpriseStorageJson;
-import com.stoinkcraft.shares.ShareManager;
+import com.stoinkcraft.enterprise.shares.ShareManager;
 import com.stoinkcraft.utils.ChatUtils;
 import com.stoinkcraft.utils.SCConstants;
 import net.citizensnpcs.api.npc.NPC;
