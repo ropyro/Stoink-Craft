@@ -88,9 +88,6 @@ public abstract class JobSite {
     }
 
     public void disband() {
-        RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
-        RegionManager manager = container.get(FaweAPI.getWorld(spawnPoint.getWorld().getName()));
-        manager.removeRegion(protectionRegionID);
         components.forEach(JobSiteComponent::disband);
         removeBuild();
     }
@@ -148,7 +145,7 @@ public abstract class JobSite {
         }
 
         SchematicUtils.pasteSchematic(schematic, spawnPoint, true);
-        protectRegion();
+
         components.forEach(JobSiteComponent::build);
 
         isBuilt = true;
@@ -220,9 +217,9 @@ public abstract class JobSite {
         components.forEach(JobSiteComponent::levelUp);
         enterprise.sendEnterpriseMessage(
                 "",
-                "§a§l" + type.name() + " Leveled Up!",
+                "§a§l" + type.name() + " leveled Up!",
                 "",
-                "§7Level" + (newLevel-1)+ " ▶ §a" + newLevel,
+                "§7Level " + (newLevel-1)+ " ▶ §a" + newLevel,
                 ""
         );
         CollectionManager.playLevelUpSound(enterprise, this);

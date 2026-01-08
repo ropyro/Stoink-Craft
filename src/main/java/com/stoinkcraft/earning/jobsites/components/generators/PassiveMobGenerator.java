@@ -71,28 +71,11 @@ public class PassiveMobGenerator extends JobSiteGenerator {
 
     @Override
     public void build() {
-        Map<StateFlag, StateFlag.State> flags = new HashMap<>();
-        flags.put(Flags.BLOCK_BREAK, StateFlag.State.DENY);
-        flags.put(Flags.INTERACT, StateFlag.State.ALLOW);
-        flags.put(Flags.USE, StateFlag.State.ALLOW);
-        flags.put(Flags.BLOCK_PLACE, StateFlag.State.DENY);
-        flags.put(Flags.MOB_SPAWNING, StateFlag.State.ALLOW);
-        flags.put(Flags.MOB_DAMAGE, StateFlag.State.ALLOW);
-        flags.put(Flags.PVP, StateFlag.State.DENY);
-
-        RegionUtils.createProtectedRegion(
-                getParent().getSpawnPoint().getWorld(),
-                cuboidRegion,
-                regionName,
-                flags,
-                10
-        );
     }
 
     @Override
     public void disband(){
         clearAllMobs();
-        RegionUtils.removeProtectedRegion(getParent().getSpawnPoint().getWorld(), regionName);
     }
 
     // --------------------------------------------------

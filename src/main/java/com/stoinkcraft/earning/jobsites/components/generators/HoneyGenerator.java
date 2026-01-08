@@ -3,6 +3,10 @@ package com.stoinkcraft.earning.jobsites.components.generators;
 import com.stoinkcraft.earning.jobsites.JobSite;
 import com.stoinkcraft.earning.jobsites.components.JobSiteGenerator;
 import com.stoinkcraft.earning.jobsites.components.JobSiteHologram;
+import com.stoinkcraft.earning.jobsites.protection.ProtectedZone;
+import com.stoinkcraft.earning.jobsites.protection.ProtectionAction;
+import com.stoinkcraft.earning.jobsites.protection.ProtectionQuery;
+import com.stoinkcraft.earning.jobsites.protection.ProtectionResult;
 import com.stoinkcraft.earning.jobsites.sites.farmland.FarmlandSite;
 import com.stoinkcraft.utils.TimeUtils;
 import org.bukkit.ChatColor;
@@ -11,10 +15,11 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.type.Beehive;
 import org.bukkit.util.Vector;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public class HoneyGenerator extends JobSiteGenerator {
+public class HoneyGenerator extends JobSiteGenerator implements ProtectedZone {
 
     private boolean initialized = false;
 
@@ -57,6 +62,34 @@ public class HoneyGenerator extends JobSiteGenerator {
 
     public JobSiteHologram getHologram() {
         return hologram;
+    }
+
+    // =========================================================================
+// PROTECTION
+// =========================================================================
+
+    @Override
+    public @NotNull ProtectionResult checkProtection(@NotNull ProtectionQuery query) {
+        // Check if this is our specific hive block
+        Location queryLoc = query.location();
+        if (queryLoc.getBlockX() != hiveLocation.getBlockX() ||
+                queryLoc.getBlockY() != hiveLocation.getBlockY() ||
+                queryLoc.getBlockZ() != hiveLocation.getBlockZ() ||
+                !queryLoc.getWorld().equals(hiveLocation.getWorld())) {
+            return ProtectionResult.ABSTAIN;
+        }
+
+        // Allow shearing this hive (harvest logic handled by PlayerInteractListener)
+        if (query.action() == ProtectionAction.SHEAR) {
+            return ProtectionResult.ALLOW;
+        }
+
+        // Deny breaking the hive block itself
+        if (query.action() == ProtectionAction.BREAK) {
+            return ProtectionResult.DENY;
+        }
+
+        return ProtectionResult.ABSTAIN;
     }
 
     @Override

@@ -81,10 +81,11 @@ public class Enterprise {
     }
 
     // Initialize JobSiteManager after loading
-    public void initializeJobSiteManager() {
+    public JobSiteManager initializeJobSiteManager() {
         if (jobSiteManager == null) {
             jobSiteManager = new JobSiteManager(this, plotIndex);
         }
+        return jobSiteManager;
     }
 
     public JobSiteManager getJobSiteManager() {

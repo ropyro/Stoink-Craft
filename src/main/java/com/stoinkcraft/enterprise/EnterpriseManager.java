@@ -1,8 +1,10 @@
 package com.stoinkcraft.enterprise;
 
 import com.stoinkcraft.StoinkCore;
+import com.stoinkcraft.earning.jobsites.JobSite;
 import com.stoinkcraft.earning.jobsites.JobSiteManager;
 import com.stoinkcraft.earning.boosters.Booster;
+import com.stoinkcraft.earning.jobsites.protection.ProtectionManager;
 import com.stoinkcraft.serialization.EnterpriseStorageJson;
 import com.stoinkcraft.enterprise.shares.ShareManager;
 import com.stoinkcraft.utils.ChatUtils;
@@ -88,6 +90,10 @@ public class EnterpriseManager {
 
         EnterpriseStorageJson.disband(enterprise);
 
+        JobSiteManager jsm = enterprise.getJobSiteManager();
+        ProtectionManager pm = StoinkCore.getInstance().getProtectionManager();
+
+        jsm.getAllJobSites().stream().forEach(js -> pm.unindexJobSite(js));
         enterprise.getJobSiteManager().disbandJobSites();
 
         // Optional: log to console
@@ -126,8 +132,11 @@ public class EnterpriseManager {
 
     public boolean createEnterprise(Enterprise enterprise){
         if(getEnterpriseByMember(enterprise.getCeo()) == null){
-            enterprise.initializeJobSiteManager();
-            enterprise.getJobSiteManager().initializeJobSites();
+            ProtectionManager pm = StoinkCore.getInstance().getProtectionManager();
+            JobSiteManager jsm = enterprise.initializeJobSiteManager();
+            jsm.initializeJobSites();
+            jsm.getAllJobSites().stream().forEach(js -> pm.indexJobSite(js));
+
             enterpriseList.add(enterprise);
             StoinkCore.getInstance().getContractManager().generateContracts(enterprise, false); // daily
             StoinkCore.getInstance().getContractManager().generateContracts(enterprise, true);  // weekly

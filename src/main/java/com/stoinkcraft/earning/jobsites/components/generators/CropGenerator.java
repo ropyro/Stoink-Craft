@@ -15,17 +15,22 @@ import com.sk89q.worldguard.protection.flags.StateFlag;
 import com.stoinkcraft.StoinkCore;
 import com.stoinkcraft.earning.jobsites.JobSite;
 import com.stoinkcraft.earning.jobsites.components.JobSiteGenerator;
+import com.stoinkcraft.earning.jobsites.protection.ProtectedZone;
+import com.stoinkcraft.earning.jobsites.protection.ProtectionAction;
+import com.stoinkcraft.earning.jobsites.protection.ProtectionQuery;
+import com.stoinkcraft.earning.jobsites.protection.ProtectionResult;
 import com.stoinkcraft.earning.jobsites.sites.farmland.FarmlandData;
 import com.stoinkcraft.earning.jobsites.sites.farmland.FarmlandSite;
 import com.stoinkcraft.utils.RegionUtils;
 import com.stoinkcraft.utils.TimeUtils;
 import org.bukkit.*;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-public class CropGenerator extends JobSiteGenerator {
+public class CropGenerator extends JobSiteGenerator implements ProtectedZone {
 
     private final Location corner1;
     private final Location corner2;
@@ -57,6 +62,31 @@ public class CropGenerator extends JobSiteGenerator {
         this.dirtLayerRegion = getRegion(dirt1, dirt2);
     }
 
+    // =========================================================================
+// PROTECTION
+// =========================================================================
+
+    @Override
+    public @NotNull ProtectionResult checkProtection(@NotNull ProtectionQuery query) {
+        // Check if location is within our crop region
+        BlockVector3 pos = BlockVector3.at(
+                query.location().getBlockX(),
+                query.location().getBlockY(),
+                query.location().getBlockZ()
+        );
+
+        if (!cuboidRegion.contains(pos)) {
+            return ProtectionResult.ABSTAIN;
+        }
+
+        // Allow breaking crops within this region
+        if (query.action() == ProtectionAction.BREAK) {
+            return ProtectionResult.ALLOW;
+        }
+
+        return ProtectionResult.ABSTAIN;
+    }
+
     @Override
     public void tick() {
         super.tick();
@@ -68,27 +98,12 @@ public class CropGenerator extends JobSiteGenerator {
     @Override
     public void build() {
         super.build();
-        Map<StateFlag, StateFlag.State> flags = new HashMap<>();
-        flags.put(Flags.BLOCK_BREAK, StateFlag.State.ALLOW);
-        flags.put(Flags.INTERACT, StateFlag.State.ALLOW);
-        flags.put(Flags.USE, StateFlag.State.ALLOW);
-        flags.put(Flags.BLOCK_PLACE, StateFlag.State.DENY);
-
-        RegionUtils.createProtectedRegion(
-                getParent().getSpawnPoint().getWorld(),
-                cuboidRegion,
-                regionName,
-                flags,
-                10
-        );
-
         regenerateCrops();
     }
 
     @Override
     public void disband() {
         super.disband();
-        RegionUtils.removeProtectedRegion(getParent().getSpawnPoint().getWorld(), regionName);
     }
 
     /**

@@ -14,6 +14,10 @@ import com.sk89q.worldguard.protection.flags.StateFlag;
 import com.stoinkcraft.earning.jobsites.JobSite;
 import com.stoinkcraft.earning.jobsites.JobSiteType;
 import com.stoinkcraft.earning.jobsites.components.JobSiteGenerator;
+import com.stoinkcraft.earning.jobsites.protection.ProtectedZone;
+import com.stoinkcraft.earning.jobsites.protection.ProtectionAction;
+import com.stoinkcraft.earning.jobsites.protection.ProtectionQuery;
+import com.stoinkcraft.earning.jobsites.protection.ProtectionResult;
 import com.stoinkcraft.earning.jobsites.sites.quarry.OreSet;
 import com.stoinkcraft.earning.jobsites.sites.quarry.QuarryData;
 import com.stoinkcraft.earning.jobsites.sites.quarry.QuarrySite;
@@ -23,12 +27,13 @@ import eu.decentsoftware.holograms.api.DHAPI;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
-public class MineGenerator extends JobSiteGenerator {
+public class MineGenerator extends JobSiteGenerator implements ProtectedZone {
 
     private final Location corner1;
     private final Location corner2;
@@ -58,6 +63,36 @@ public class MineGenerator extends JobSiteGenerator {
         this.cuboidRegion = createRegion(this.corner1, this.corner2);
     }
 
+    // =========================================================================
+    // PROTECTION
+    // =========================================================================
+
+    @Override
+    public @NotNull ProtectionResult checkProtection(@NotNull ProtectionQuery query) {
+        // Check if location is within our mine region
+        BlockVector3 pos = BlockVector3.at(
+                query.location().getBlockX(),
+                query.location().getBlockY(),
+                query.location().getBlockZ()
+        );
+
+        if (!cuboidRegion.contains(pos)) {
+            return ProtectionResult.ABSTAIN;
+        }
+
+        // Allow breaking blocks within the mine
+        if (query.action() == ProtectionAction.BREAK) {
+            return ProtectionResult.ALLOW;
+        }
+
+        // Allow explosions within the mine (for future bomb feature)
+        if (query.action() == ProtectionAction.EXPLOSION) {
+            return ProtectionResult.ALLOW;
+        }
+
+        return ProtectionResult.ABSTAIN;
+    }
+
     /* =========================
        LIFECYCLE
        ========================= */
@@ -65,22 +100,6 @@ public class MineGenerator extends JobSiteGenerator {
     @Override
     public void build() {
         super.build();
-
-        Map<StateFlag, StateFlag.State> flags = new HashMap<>();
-        flags.put(Flags.BLOCK_BREAK, StateFlag.State.ALLOW);
-        flags.put(Flags.INTERACT, StateFlag.State.ALLOW);
-        flags.put(Flags.USE, StateFlag.State.ALLOW);
-        flags.put(Flags.BLOCK_PLACE, StateFlag.State.DENY);
-        flags.put(Flags.MOB_SPAWNING, StateFlag.State.DENY);
-        flags.put(Flags.MOB_DAMAGE, StateFlag.State.DENY);
-
-        RegionUtils.createProtectedRegion(
-                getParent().getSpawnPoint().getWorld(),
-                cuboidRegion,
-                regionName,
-                flags,
-                10
-        );
 
         // First regen happens immediately on build
         regenerateMine();
@@ -103,10 +122,6 @@ public class MineGenerator extends JobSiteGenerator {
     @Override
     public void disband() {
         super.disband();
-        RegionUtils.removeProtectedRegion(
-                getParent().getSpawnPoint().getWorld(),
-                regionName
-        );
     }
 
     /* =========================
