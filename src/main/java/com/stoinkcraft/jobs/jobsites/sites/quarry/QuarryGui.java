@@ -4,25 +4,15 @@ import com.stoinkcraft.StoinkCore;
 import com.stoinkcraft.enterprise.Enterprise;
 import com.stoinkcraft.jobs.collections.CollectionsGui;
 import com.stoinkcraft.jobs.contracts.ActiveContract;
-import com.stoinkcraft.jobs.contracts.ContractDefinition;
-import com.stoinkcraft.jobs.contracts.rewards.CompositeReward;
-import com.stoinkcraft.jobs.contracts.rewards.DescribableReward;
-import com.stoinkcraft.jobs.contracts.rewards.Reward;
 import com.stoinkcraft.jobs.jobsites.JobSiteType;
 import com.stoinkcraft.jobs.jobsites.JobSiteUpgrade;
 import com.stoinkcraft.jobs.jobsites.JobsiteLevelHelper;
-import com.stoinkcraft.jobs.jobsites.components.unlockable.Unlockable;
-import com.stoinkcraft.jobs.jobsites.components.unlockable.UnlockableProgress;
-import com.stoinkcraft.jobs.jobsites.components.unlockable.UnlockableState;
-import com.stoinkcraft.utils.ChatUtils;
-import com.stoinkcraft.utils.guis.ClickableAutoUpdateItem;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.jetbrains.annotations.NotNull;
 import xyz.xenondevs.invui.gui.Gui;
-import xyz.xenondevs.invui.item.Item;
 import xyz.xenondevs.invui.item.ItemProvider;
 import xyz.xenondevs.invui.item.builder.ItemBuilder;
 import xyz.xenondevs.invui.item.impl.AbstractItem;
@@ -31,20 +21,15 @@ import xyz.xenondevs.invui.window.Window;
 
 import java.util.List;
 
+import static com.stoinkcraft.utils.guis.JobSiteGuiHelper.*;
+
 public class QuarryGui {
+
+    private static final Theme THEME = Theme.QUARRY;
 
     private final QuarrySite quarrySite;
     private final Player opener;
     private Window currentWindow;
-
-    // ==================== Color Constants ====================
-    private static final String HEADER = "§8§l» §6§l";
-    private static final String SUB_HEADER = "§8§l» §e";
-    private static final String BULLET = " §7• ";
-    private static final String CHECKMARK = "§a✔ ";
-    private static final String CROSS = "§c✖ ";
-    private static final String ARROW = "§e▶ ";
-    private static final String DIVIDER = " ";
 
     public QuarryGui(QuarrySite quarrySite, Player opener) {
         this.quarrySite = quarrySite;
@@ -57,7 +42,7 @@ public class QuarryGui {
         Gui gui = Gui.normal()
                 .setStructure(
                         "# # # # ? # # # #",
-                        "# O U P # # O C #",
+                        "# O U P # # L C #",
                         "# # # # # # # # #"
                 )
                 .addIngredient('#', filler())
@@ -74,7 +59,7 @@ public class QuarryGui {
                 .addIngredient('C', menuButton(Material.GOLD_INGOT, "§6Contracts",
                         List.of("§7View your active contracts", DIVIDER, ARROW + "Click to open"),
                         this::openContractList))
-                .addIngredient('O', menuButton(Material.BOOK, "§5Collections",  // NEW
+                .addIngredient('L', menuButton(Material.BOOK, "§5Collections",
                         List.of("§7View your collection progress", "§7and earn bonus XP", DIVIDER, ARROW + "Click to open"),
                         this::openCollections))
                 .build();
@@ -94,20 +79,20 @@ public class QuarryGui {
         long regenTime = quarrySite.getMineGenerator().getRemainingSeconds();
 
         return new SimpleItem(new ItemBuilder(Material.OAK_SIGN)
-                .setDisplayName(HEADER + "Quarry Help §8«")
+                .setDisplayName(header(THEME, "Quarry Help"))
                 .addLoreLines(DIVIDER)
-                .addLoreLines(SUB_HEADER + "Quarry Status §8«")
+                .addLoreLines(subHeader(THEME, "Quarry Status"))
                 .addLoreLines(BULLET + "§fLevel: §a" + level)
                 .addLoreLines(BULLET + "§fXP to next: §a" + String.format("%,d", xpToNext) + " XP")
-                .addLoreLines(BULLET + "§fRegen in: §e" + formatTime(regenTime))
+                .addLoreLines(BULLET + "§fRegen in: §e" + formatDurationSeconds(regenTime))
                 .addLoreLines(BULLET + "§fOre Set: §b" + quarrySite.getData().getCurrentOreSet().getDisplayName())
                 .addLoreLines(DIVIDER)
-                .addLoreLines(SUB_HEADER + "How It Works §8«")
+                .addLoreLines(subHeader(THEME, "How It Works"))
                 .addLoreLines(BULLET + "§fMine ores to complete §acontracts")
                 .addLoreLines(BULLET + "§fFind §dgeodes §ffor bonus XP!")
                 .addLoreLines(BULLET + "§fQuarry regenerates periodically")
                 .addLoreLines(DIVIDER)
-                .addLoreLines(SUB_HEADER + "Power Cell §8«")
+                .addLoreLines(subHeader(THEME, "Power Cell"))
                 .addLoreLines(BULLET + "§fBuild the Power Cell for §eHaste")
                 .addLoreLines(BULLET + "§fUpgrade for stronger effects")
         );
@@ -123,7 +108,7 @@ public class QuarryGui {
                         "# # # # # # # < #"
                 )
                 .addIngredient('#', filler())
-                .addIngredient('?', createSubMenuHelp("Ore Sets",
+                .addIngredient('?', createSubMenuHelp(THEME, "Ore Sets",
                         "Select which ore set to mine.",
                         "Different sets have different ores!"))
                 .addIngredient('1', createOreSetItem(OreSet.MINING_BASICS))
@@ -147,29 +132,31 @@ public class QuarryGui {
                 int jobsiteLevel = quarrySite.getLevel();
 
                 String unlockUpgradeId = quarrySite.getUnlockUpgradeId(oreSet);
-                JobSiteUpgrade upgrade = unlockUpgradeId != null ? findUpgrade(unlockUpgradeId) : null;
+                JobSiteUpgrade upgrade = unlockUpgradeId != null ? findUpgrade(quarrySite, unlockUpgradeId) : null;
 
                 ItemBuilder item = new ItemBuilder(oreSet.getIcon());
 
-                if (!unlocked) {
+                if (!unlocked && upgrade != null) {
+                    int requiredLevel = upgrade.getRequiredJobsiteLevel(1);
+
                     item.setDisplayName("§c" + oreSet.getDisplayName() + " §8(Locked)");
                     item.addLoreLines("§7" + oreSet.getDescription());
                     item.addLoreLines(DIVIDER);
-                    item.addLoreLines(SUB_HEADER + "Requirements §8«");
+                    item.addLoreLines(subHeader(THEME, "Requirements"));
                     item.addLoreLines(BULLET + "§fCost: §6$" + String.format("%,d", upgrade.cost(1)));
-                    item.addLoreLines(BULLET + "§fRequired Level: §e" + oreSet.getRequiredLevel());
+                    item.addLoreLines(BULLET + "§fRequired Level: §e" + requiredLevel);
                     item.addLoreLines(DIVIDER);
 
-                    if (jobsiteLevel < oreSet.getRequiredLevel()) {
+                    if (jobsiteLevel < requiredLevel) {
                         item.addLoreLines(CROSS + "§cYour level: §f" + jobsiteLevel);
-                    } else if (!upgrade.canUnlock(quarrySite)) {
+                    } else if (!upgrade.canPurchase(quarrySite, 1)) {
                         item.addLoreLines(CROSS + "§cPrevious set not unlocked");
                     } else {
                         item.addLoreLines(CHECKMARK + "§aReady to unlock!");
                     }
 
                     item.addLoreLines(DIVIDER);
-                    item.addLoreLines(SUB_HEADER + "Ore Contents §8«");
+                    item.addLoreLines(subHeader(THEME, "Ore Contents"));
                     addOreContentsLore(item, oreSet);
                     item.addLoreLines(DIVIDER);
                     item.addLoreLines(ARROW + "Click to unlock");
@@ -180,14 +167,14 @@ public class QuarryGui {
                     item.addLoreLines(DIVIDER);
                     item.addLoreLines(CHECKMARK + "§aCurrently selected");
                     item.addLoreLines(DIVIDER);
-                    item.addLoreLines(SUB_HEADER + "Ore Contents §8«");
+                    item.addLoreLines(subHeader(THEME, "Ore Contents"));
                     addOreContentsLore(item, oreSet);
 
                 } else {
                     item.setDisplayName("§e" + oreSet.getDisplayName());
                     item.addLoreLines("§7" + oreSet.getDescription());
                     item.addLoreLines(DIVIDER);
-                    item.addLoreLines(SUB_HEADER + "Ore Contents §8«");
+                    item.addLoreLines(subHeader(THEME, "Ore Contents"));
                     addOreContentsLore(item, oreSet);
                     item.addLoreLines(DIVIDER);
                     item.addLoreLines(ARROW + "Click to select");
@@ -202,12 +189,12 @@ public class QuarryGui {
 
                 if (!unlocked) {
                     String unlockUpgradeId = quarrySite.getUnlockUpgradeId(oreSet);
-                    JobSiteUpgrade upgrade = findUpgrade(unlockUpgradeId);
+                    JobSiteUpgrade upgrade = findUpgrade(quarrySite, unlockUpgradeId);
 
-                    if (quarrySite.purchaseUpgrade(upgrade, p)) {
+                    if (upgrade != null && quarrySite.purchaseUpgrade(upgrade, p)) {
                         sendSuccess(p, oreSet.getDisplayName() + " unlocked!");
-                    } else {
-                        sendPurchaseError(p, upgrade);
+                    } else if (upgrade != null) {
+                        sendUpgradePurchaseError(p, quarrySite, upgrade);
                     }
                 } else {
                     quarrySite.getData().setCurrentOreSet(oreSet);
@@ -227,36 +214,27 @@ public class QuarryGui {
         });
     }
 
-    private String formatBlockName(String id) {
-        String name = id.replace("minecraft:", "").replace("_", " ");
-        String[] words = name.split(" ");
-        StringBuilder result = new StringBuilder();
-        for (String word : words) {
-            if (!word.isEmpty()) {
-                result.append(Character.toUpperCase(word.charAt(0)))
-                        .append(word.substring(1))
-                        .append(" ");
-            }
-        }
-        return result.toString().trim();
-    }
-
     // ==================== Upgrade Menu ====================
 
     private void openUpgradeMenu() {
         Gui gui = Gui.normal()
                 .setStructure(
                         "# # # # ? # # # #",
-                        "# # # R P # # # #",
+                        "# # # R # # # # #",
                         "# # # # # # # < #"
                 )
                 .addIngredient('#', filler())
-                .addIngredient('?', createSubMenuHelp("Upgrades",
+                .addIngredient('?', createSubMenuHelp(THEME, "Upgrades",
                         "Upgrade your quarry's efficiency."))
-                .addIngredient('R', createUpgradeItem("regen_speed", Material.CLOCK, "Regeneration Speed",
-                        "Decreases time between mine regens"))
-                .addIngredient('P', createUpgradeItem("power_level", Material.BEACON, "Power Cell Level",
-                        "Increases Haste effect strength"))
+                .addIngredient('R', createUpgradeItem(
+                        quarrySite,
+                        "regen_speed",
+                        Material.CLOCK,
+                        "Regeneration Speed",
+                        "Decreases time between mine regens",
+                        THEME,
+                        this::openUpgradeMenu
+                ))
                 .addIngredient('<', backButton(this::openWindow))
                 .build();
 
@@ -269,20 +247,32 @@ public class QuarryGui {
         boolean built = quarrySite.isPowerCellBuilt();
         int powerLevel = quarrySite.getData().getLevel("power_level");
 
+        String statusLine = built
+                ? "Power Cell is operational!"
+                : "§cBuild the Power Cell first!";
+        String effectLine = built && powerLevel > 0
+                ? "Current Haste Level: " + toRoman(powerLevel)
+                : "";
+
         Gui gui = Gui.normal()
                 .setStructure(
                         "# # # # ? # # # #",
-                        "# # S U # 1 # # #",
+                        "# # S # P # U # #",
                         "# # # # # # # < #"
                 )
                 .addIngredient('#', filler())
-                .addIngredient('?', createSubMenuHelp("Power Cell",
-                        built ? "Power Cell is operational!" : "§cBuild the Power Cell first!",
-                        built ? "Current Haste Level: " + (powerLevel > 0 ? toRoman(powerLevel) : "None") : ""))
+                .addIngredient('?', createSubMenuHelp(THEME, "Power Cell", statusLine, effectLine))
                 .addIngredient('S', createPowerCellStatusItem())
-                .addIngredient('U', createUpgradeItem("power_level", Material.BEACON, "Power Level",
-                        "Increases Haste effect strength"))
-                .addIngredient('1', createUnlockableItem(quarrySite.getPowerCell()))
+                .addIngredient('P', createUnlockableStructureItem(
+                        quarrySite,
+                        quarrySite.getPowerCell(),
+                        THEME,
+                        "Provides Haste effect to miners",
+                        Material.COBWEB,
+                        Material.SCAFFOLDING,
+                        Material.BEACON
+                ))
+                .addIngredient('U', createPowerLevelUpgradeItem())
                 .addIngredient('<', backButton(this::openWindow))
                 .build();
 
@@ -300,14 +290,14 @@ public class QuarryGui {
 
                 if (!built) {
                     item.setDisplayName("§cPower Cell §8(Not Built)");
-                    item.addLoreLines("§7Build the Power Cell from the main menu");
+                    item.addLoreLines("§7Build the Power Cell structure first");
                     item.addLoreLines(DIVIDER);
                     item.addLoreLines(CROSS + "§cStructure not built");
                 } else {
                     item.setDisplayName("§6Power Cell Status");
                     item.addLoreLines("§7Provides Haste to miners");
                     item.addLoreLines(DIVIDER);
-                    item.addLoreLines(SUB_HEADER + "Status §8«");
+                    item.addLoreLines(subHeader(THEME, "Status"));
 
                     if (powerLevel > 0) {
                         item.addLoreLines(BULLET + "§fEffect: §aHaste " + toRoman(powerLevel));
@@ -331,173 +321,64 @@ public class QuarryGui {
         };
     }
 
-    // ==================== Unlockable Item (Auto-Updating) ====================
-
-    private Item createUnlockableItem(Unlockable unlockable) {
-        ClickableAutoUpdateItem item = new ClickableAutoUpdateItem(
-                20,
-                () -> buildUnlockableItemProvider(unlockable),
-                (player, event) -> handleUnlockableClick(unlockable, player)
-        );
-        item.start();
-        return item;
-    }
-
-    private ItemProvider buildUnlockableItemProvider(Unlockable unlockable) {
-        UnlockableState state = unlockable.getUnlockState();
-        int jobsiteLevel = quarrySite.getLevel();
-
-        ItemBuilder item = new ItemBuilder(getMaterialForState(unlockable, state));
-        item.setDisplayName("§6" + unlockable.getDisplayName());
-        item.addLoreLines(getDescriptionForUnlockable(unlockable));
-        item.addLoreLines(DIVIDER);
-
-        switch (state) {
-            case LOCKED -> {
-                item.addLoreLines(SUB_HEADER + "Requirements §8«");
-                item.addLoreLines(BULLET + "§fCost: §6$" + String.format("%,d", unlockable.getCost()));
-                item.addLoreLines(BULLET + "§fRequired Level: §e" + unlockable.getRequiredJobsiteLevel());
-                item.addLoreLines(DIVIDER);
-
-                if (jobsiteLevel < unlockable.getRequiredJobsiteLevel()) {
-                    item.addLoreLines(CROSS + "§cYour level: §f" + jobsiteLevel);
-                } else if (!unlockable.canUnlock()) {
-                    item.addLoreLines(CROSS + "§cRequirements not met");
-                } else {
-                    item.addLoreLines(CHECKMARK + "§aReady to build!");
-                }
-
-                item.addLoreLines(DIVIDER);
-                item.addLoreLines(ARROW + "Click to start construction");
-            }
-            case BUILDING -> {
-                UnlockableProgress progress = quarrySite.getData()
-                        .getUnlockableProgress(unlockable.getUnlockableId());
-                long remaining = progress.getRemainingSeconds();
-
-                item.addLoreLines(SUB_HEADER + "Under Construction §8«");
-                item.addLoreLines(DIVIDER);
-                item.addLoreLines(BULLET + "§fTime Remaining:");
-                item.addLoreLines("   §6" + ChatUtils.formatDuration(remaining));
-                item.addLoreLines(DIVIDER);
-                item.addLoreLines(createConstructionProgressBar(unlockable, progress));
-            }
-            case UNLOCKED -> {
-                item.addLoreLines(CHECKMARK + "§aConstruction Complete");
-                item.addLoreLines(DIVIDER);
-                item.addLoreLines(BULLET + "§fThis structure is operational");
-            }
-        }
-
-        return item;
-    }
-
-    private void handleUnlockableClick(Unlockable unlockable, Player player) {
-        UnlockableState state = unlockable.getUnlockState();
-
-        switch (state) {
-            case LOCKED -> {
-                if (quarrySite.purchaseUnlockable(unlockable, player)) {
-                    sendSuccess(player, unlockable.getDisplayName() + " construction started!");
-                } else if (quarrySite.getLevel() < unlockable.getRequiredJobsiteLevel()) {
-                    sendError(player, "You need Quarry Level " + unlockable.getRequiredJobsiteLevel() + "!");
-                } else if (!StoinkCore.getEconomy().has(player, unlockable.getCost())) {
-                    sendError(player, "You need $" + String.format("%,d", unlockable.getCost()) + "!");
-                } else {
-                    sendError(player, "Requirements not met!");
-                }
-            }
-            case BUILDING -> {
-                UnlockableProgress progress = quarrySite.getData()
-                        .getUnlockableProgress(unlockable.getUnlockableId());
-                sendInfo(player, "Under construction - " + ChatUtils.formatDuration(progress.getRemainingSeconds()) + " remaining");
-            }
-            case UNLOCKED -> {
-                sendInfo(player, unlockable.getDisplayName() + " is already built!");
-            }
-        }
-    }
-
-    private Material getMaterialForState(Unlockable unlockable, UnlockableState state) {
-        return switch (state) {
-            case LOCKED -> Material.COBWEB;
-            case BUILDING -> Material.SCAFFOLDING;
-            case UNLOCKED -> Material.BEACON;
-        };
-    }
-
-    private String getDescriptionForUnlockable(Unlockable unlockable) {
-        return "§7Provides Haste effect to miners";
-    }
-
-    private String createConstructionProgressBar(Unlockable unlockable, UnlockableProgress progress) {
-        long totalDuration = unlockable.getBuildTimeMillis();
-        long remaining = progress.getRemainingSeconds();
-        long elapsed = totalDuration - remaining;
-
-        int percent = (int) Math.min(100, (elapsed * 100) / Math.max(1, totalDuration));
-        int bars = percent / 10;
-
-        String bar = "§a" + "▌".repeat(bars) + "§7" + "▌".repeat(10 - bars);
-        return "   " + bar + " §f" + percent + "%";
-    }
-
-    // ==================== Upgrade Item ====================
-
-    private AbstractItem createUpgradeItem(String upgradeId, Material mat, String name, String description) {
+    /**
+     * Custom upgrade item for Power Level that requires Power Cell to be built.
+     */
+    private AbstractItem createPowerLevelUpgradeItem() {
         return new AbstractItem() {
             @Override
             public ItemProvider getItemProvider() {
-                JobSiteUpgrade upgrade = findUpgrade(upgradeId);
+                JobSiteUpgrade upgrade = findUpgrade(quarrySite, "power_level");
                 if (upgrade == null) {
                     return new ItemBuilder(Material.BARRIER).setDisplayName("§cUpgrade not found");
                 }
 
-                int currentLevel = quarrySite.getData().getLevel(upgradeId);
+                boolean powerCellBuilt = quarrySite.isPowerCellBuilt();
+                int currentLevel = quarrySite.getData().getLevel("power_level");
                 int maxLevel = upgrade.maxLevel();
                 int jobsiteLevel = quarrySite.getLevel();
+                int nextLevel = currentLevel + 1;
                 boolean maxed = currentLevel >= maxLevel;
 
-                ItemBuilder item = new ItemBuilder(mat);
-                item.setDisplayName("§6" + name);
-                item.addLoreLines("§7" + description);
+                ItemBuilder item = new ItemBuilder(Material.BEACON);
+                item.setDisplayName("§6Power Level");
+                item.addLoreLines("§7Increases Haste effect strength");
                 item.addLoreLines(DIVIDER);
 
-                item.addLoreLines(SUB_HEADER + "Progress §8«");
+                if (!powerCellBuilt) {
+                    item.addLoreLines(CROSS + "§cBuild the Power Cell first!");
+                    return item;
+                }
+
+                // Current Progress
+                item.addLoreLines(subHeader(THEME, "Progress"));
                 item.addLoreLines(BULLET + "§fLevel: §a" + currentLevel + "§7/§f" + maxLevel);
                 item.addLoreLines(BULLET + createLevelBar(currentLevel, maxLevel));
-                item.addLoreLines(DIVIDER);
 
-                // Special info for regen speed
-                if (upgradeId.equals("regen_speed")) {
-                    long currentInterval = quarrySite.getMineGenerator().getRegenIntervalSeconds();
-                    item.addLoreLines(BULLET + "§fCurrent Interval: §e" + formatTime(currentInterval));
-                }
-
-                // Special info for power level
-                if (upgradeId.equals("power_level") && currentLevel > 0) {
+                if (currentLevel > 0) {
                     item.addLoreLines(BULLET + "§fCurrent Effect: §aHaste " + toRoman(currentLevel));
                 }
+                item.addLoreLines(DIVIDER);
 
                 if (maxed) {
-                    item.addLoreLines(DIVIDER);
                     item.addLoreLines(CHECKMARK + "§aMax Level Reached!");
+                    item.addLoreLines(BULLET + "§fMax Effect: §aHaste " + toRoman(maxLevel));
                 } else {
-                    item.addLoreLines(DIVIDER);
-                    item.addLoreLines(SUB_HEADER + "Next Level §8«");
-                    item.addLoreLines(BULLET + "§fCost: §6$" + String.format("%,d", upgrade.cost(currentLevel + 1)));
-                    item.addLoreLines(BULLET + "§fRequired Level: §e" + upgrade.requiredJobsiteLevel());
+                    int nextLevelCost = upgrade.cost(nextLevel);
+                    int nextLevelRequiredJS = upgrade.getRequiredJobsiteLevel(nextLevel);
+
+                    item.addLoreLines(subHeader(THEME, "Next Level"));
+                    item.addLoreLines(BULLET + "§fCost: §6$" + String.format("%,d", nextLevelCost));
+                    item.addLoreLines(BULLET + "§fRequired Level: §e" + nextLevelRequiredJS);
+                    item.addLoreLines(BULLET + "§fEffect: §aHaste " + toRoman(nextLevel));
                     item.addLoreLines(DIVIDER);
 
-                    // Check power cell requirement for power_level upgrade
-                    if (upgradeId.equals("power_level") && !quarrySite.isPowerCellBuilt()) {
-                        item.addLoreLines(CROSS + "§cPower Cell not built");
-                    } else if (jobsiteLevel < upgrade.requiredJobsiteLevel()) {
-                        item.addLoreLines(CROSS + "§cYour level: §f" + jobsiteLevel);
-                    } else if (!upgrade.canUnlock(quarrySite)) {
+                    if (jobsiteLevel < nextLevelRequiredJS) {
+                        item.addLoreLines(CROSS + "§cYour level: §f" + jobsiteLevel + " §7(need §e" + nextLevelRequiredJS + "§7)");
+                    } else if (!upgrade.canPurchase(quarrySite, nextLevel)) {
                         item.addLoreLines(CROSS + "§cRequirements not met");
                     } else {
-                        item.addLoreLines(CHECKMARK + "§aRequirements met");
+                        item.addLoreLines(CHECKMARK + "§aReady to upgrade!");
                     }
 
                     item.addLoreLines(DIVIDER);
@@ -509,30 +390,30 @@ public class QuarryGui {
 
             @Override
             public void handleClick(@NotNull ClickType click, @NotNull Player p, @NotNull InventoryClickEvent e) {
-                JobSiteUpgrade upgrade = findUpgrade(upgradeId);
+                if (!quarrySite.isPowerCellBuilt()) {
+                    sendError(p, "Build the Power Cell first!");
+                    return;
+                }
+
+                JobSiteUpgrade upgrade = findUpgrade(quarrySite, "power_level");
                 if (upgrade == null) return;
 
-                int currentLevel = quarrySite.getData().getLevel(upgradeId);
+                int currentLevel = quarrySite.getData().getLevel("power_level");
                 if (currentLevel >= upgrade.maxLevel()) {
-                    sendInfo(p, name + " is already at max level!");
+                    sendInfo(p, "Power Level is already at max!");
                     return;
                 }
 
                 if (quarrySite.purchaseUpgrade(upgrade, p)) {
-                    int newLevel = quarrySite.getData().getLevel(upgradeId);
-                    sendSuccess(p, name + " upgraded to level " + newLevel + "!");
+                    int newLevel = quarrySite.getData().getLevel("power_level");
+                    sendSuccess(p, "Power Level upgraded to " + newLevel + "! (Haste " + toRoman(newLevel) + ")");
                 } else {
-                    sendPurchaseError(p, upgrade);
+                    sendUpgradePurchaseError(p, quarrySite, upgrade);
                 }
 
-                notifyWindows();
+                openPowerCellMenu();
             }
         };
-    }
-
-    private String createLevelBar(int current, int max) {
-        int filled = max > 0 ? (int) ((current / (double) max) * 10) : 0;
-        return "§a" + "■".repeat(filled) + "§7" + "■".repeat(10 - filled);
     }
 
     // ==================== Contract Menu ====================
@@ -555,7 +436,7 @@ public class QuarryGui {
                         "# # # # # # # < #"
                 )
                 .addIngredient('#', filler())
-                .addIngredient('?', createSubMenuHelp("Contracts",
+                .addIngredient('?', createSubMenuHelp(THEME, "Contracts",
                         "Complete contracts to earn",
                         "money and Quarry XP."))
                 .addIngredient('<', backButton(this::openWindow))
@@ -564,161 +445,12 @@ public class QuarryGui {
         List<ActiveContract> contracts = core.getContractManager()
                 .getContracts(enterprise, JobSiteType.QUARRY);
 
-        contracts.forEach(contract -> gui.addItems(createContractItem(contract)));
+        contracts.forEach(contract -> gui.addItems(createContractItem(contract, THEME)));
 
         open(gui, "§8Quarry Contracts");
     }
 
-    private SimpleItem createContractItem(ActiveContract contract) {
-        ContractDefinition def = contract.getDefinition();
-        boolean completed = contract.isCompleted();
-
-        ItemBuilder builder = new ItemBuilder(def.displayItem());
-
-        // Title
-        if (completed) {
-            builder.setDisplayName(CHECKMARK + "§a" + def.displayName());
-        } else {
-            builder.setDisplayName("§e" + def.displayName());
-        }
-
-        // Description
-        builder.addLoreLines(DIVIDER);
-        def.description().forEach(line -> builder.addLoreLines("§7" + line));
-
-        // Progress
-        builder.addLoreLines(DIVIDER);
-        builder.addLoreLines(SUB_HEADER + "Progress §8«");
-        builder.addLoreLines(BULLET + "§f" + contract.getProgress() + "§7/§f" + contract.getTarget());
-        builder.addLoreLines(BULLET + createContractProgressBar(contract.getProgress(), contract.getTarget()));
-
-        // Expiration
-        builder.addLoreLines(DIVIDER);
-        builder.addLoreLines(SUB_HEADER + "Time §8«");
-        builder.addLoreLines(BULLET + "§fExpires: §e" + formatTimeRemaining(contract.getExpirationTime()));
-
-        // Rewards
-        builder.addLoreLines(DIVIDER);
-        builder.addLoreLines(SUB_HEADER + "Rewards §8«");
-        addRewardLore(builder, def.reward());
-
-        return new SimpleItem(builder);
-    }
-
-    private String createContractProgressBar(int current, int target) {
-        int percent = (int) ((current / (double) Math.max(1, target)) * 100);
-        int bars = Math.min(10, percent / 10);
-        return "§a" + "▌".repeat(bars) + "§7" + "▌".repeat(10 - bars) + " §f" + percent + "%";
-    }
-
-    private void addRewardLore(ItemBuilder builder, Reward reward) {
-        if (reward instanceof CompositeReward composite) {
-            composite.getRewards().forEach(r -> addRewardLore(builder, r));
-            return;
-        }
-
-        if (reward instanceof DescribableReward describable) {
-            describable.getLore().forEach(line -> builder.addLoreLines(BULLET + "§f" + line));
-        }
-    }
-
-    private String formatTimeRemaining(long expiry) {
-        long millis = expiry - System.currentTimeMillis();
-        if (millis <= 0) return "§cExpired";
-
-        long minutes = millis / 60000;
-        long hours = minutes / 60;
-        long days = hours / 24;
-
-        if (days > 0) return days + "d " + (hours % 24) + "h";
-        if (hours > 0) return hours + "h " + (minutes % 60) + "m";
-        return minutes + "m";
-    }
-
-    // ==================== Helper Items ====================
-
-    private SimpleItem filler() {
-        return new SimpleItem(new ItemBuilder(Material.BLACK_STAINED_GLASS_PANE).setDisplayName(" "));
-    }
-
-    private SimpleItem createSubMenuHelp(String title, String... lines) {
-        ItemBuilder item = new ItemBuilder(Material.OAK_SIGN)
-                .setDisplayName(HEADER + title + " §8«")
-                .addLoreLines(DIVIDER);
-
-        for (String line : lines) {
-            if (line != null && !line.isEmpty()) {
-                item.addLoreLines("§7" + line);
-            }
-        }
-
-        return new SimpleItem(item);
-    }
-
-    private AbstractItem menuButton(Material mat, String name, List<String> lore, Runnable action) {
-        return new AbstractItem() {
-            @Override
-            public ItemProvider getItemProvider() {
-                ItemBuilder item = new ItemBuilder(mat).setDisplayName(name);
-                lore.forEach(item::addLoreLines);
-                return item;
-            }
-
-            @Override
-            public void handleClick(@NotNull ClickType click, @NotNull Player p, @NotNull InventoryClickEvent e) {
-                action.run();
-            }
-        };
-    }
-
-    private AbstractItem backButton(Runnable action) {
-        return new AbstractItem() {
-            @Override
-            public ItemProvider getItemProvider() {
-                return new ItemBuilder(Material.ARROW)
-                        .setDisplayName("§c« Back")
-                        .addLoreLines("§7Return to previous menu");
-            }
-
-            @Override
-            public void handleClick(@NotNull ClickType click, @NotNull Player p, @NotNull InventoryClickEvent e) {
-                action.run();
-            }
-        };
-    }
-
-    // ==================== Utilities ====================
-
-    private JobSiteUpgrade findUpgrade(String id) {
-        return quarrySite.getUpgrades().stream()
-                .filter(u -> u.id().equals(id))
-                .findFirst()
-                .orElse(null);
-    }
-
-    private String formatTime(long seconds) {
-        long minutes = seconds / 60;
-        long hours = minutes / 60;
-
-        seconds %= 60;
-        minutes %= 60;
-
-        if (hours > 0) {
-            return hours + "h " + minutes + "m";
-        }
-        return minutes + "m " + seconds + "s";
-    }
-
-    private String toRoman(int num) {
-        return switch (num) {
-            case 1 -> "I";
-            case 2 -> "II";
-            case 3 -> "III";
-            case 4 -> "IV";
-            case 5 -> "V";
-            default -> String.valueOf(num);
-        };
-    }
+    // ==================== Window Management ====================
 
     private void open(Gui gui, String title) {
         currentWindow = Window.single()
@@ -727,33 +459,5 @@ public class QuarryGui {
                 .setGui(gui)
                 .build();
         currentWindow.open();
-    }
-
-    // ==================== Messages ====================
-
-    private void sendSuccess(Player p, String message) {
-        ChatUtils.sendMessage(p, "§a✔ " + message);
-    }
-
-    private void sendError(Player p, String message) {
-        ChatUtils.sendMessage(p, "§c✖ " + message);
-    }
-
-    private void sendInfo(Player p, String message) {
-        ChatUtils.sendMessage(p, "§e" + message);
-    }
-
-    private void sendPurchaseError(Player p, JobSiteUpgrade upgrade) {
-        int jobsiteLevel = quarrySite.getLevel();
-
-        if (jobsiteLevel < upgrade.requiredJobsiteLevel()) {
-            sendError(p, "You need Quarry Level " + upgrade.requiredJobsiteLevel() + "!");
-        } else if (!StoinkCore.getEconomy().has(p, upgrade.cost(quarrySite.getData().getLevel(upgrade.id()) + 1))) {
-            sendError(p, "Insufficient funds!");
-        } else if (!upgrade.canUnlock(quarrySite)) {
-            sendError(p, "Requirements not met!");
-        } else {
-            sendError(p, "Unable to purchase!");
-        }
     }
 }
