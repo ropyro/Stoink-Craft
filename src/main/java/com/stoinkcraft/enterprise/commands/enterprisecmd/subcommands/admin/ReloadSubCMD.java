@@ -2,7 +2,6 @@ package com.stoinkcraft.enterprise.commands.enterprisecmd.subcommands.admin;
 
 import com.stoinkcraft.StoinkCore;
 import com.stoinkcraft.enterprise.commands.SubCommand;
-import com.stoinkcraft.market.MarketManager;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -34,8 +33,7 @@ public class ReloadSubCMD implements SubCommand {
 
         player.sendMessage("Reloading StoinkCore...");
 
-        File marketFile = new File(plugin.getDataFolder(), "market.yml");
-        MarketManager.loadMarketPrices(marketFile);
+        //TODO: reload logic
 
         player.sendMessage("StoinkCore successfully reloaded!");
 

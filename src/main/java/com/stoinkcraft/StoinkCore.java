@@ -16,7 +16,6 @@ import com.stoinkcraft.enterprise.commands.enterprisecmd.EnterpriseCMD;
 import com.stoinkcraft.enterprise.commands.enterprisecmd.EnterpriseTabCompleter;
 import com.stoinkcraft.enterprise.commands.serverenterprisecmd.ServerEntCMD;
 import com.stoinkcraft.enterprise.commands.serverenterprisecmd.ServerEntTabCompleter;
-import com.stoinkcraft.market.MarketManager;
 import com.stoinkcraft.misc.EnderChestListener;
 import com.stoinkcraft.misc.playerupgrades.PMenuCommand;
 import com.stoinkcraft.serialization.EnterpriseStorageJson;
@@ -174,8 +173,6 @@ public class StoinkCore extends JavaPlugin {
 
         saveResourceFolder("schematics", false);
 
-        MarketManager.loadMarketPrices(marketFile);
-
         boolean citizensReady = isCitizensReady();
 
         // Load enterprises - only load job sites if Citizens is already ready
@@ -277,7 +274,6 @@ public class StoinkCore extends JavaPlugin {
         startContractResetTask();
         cfm.startCleanupTask(this);
 
-        MarketManager.startRotatingBoosts(this);
         // Periodic autosave (every 5 minutes):
         new BukkitRunnable() {
             @Override
