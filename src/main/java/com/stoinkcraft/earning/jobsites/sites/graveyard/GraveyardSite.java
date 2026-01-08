@@ -1,11 +1,6 @@
 package com.stoinkcraft.earning.jobsites.sites.graveyard;
 
 import com.fastasyncworldedit.core.FaweAPI;
-import com.sk89q.worldguard.WorldGuard;
-import com.sk89q.worldguard.protection.flags.Flags;
-import com.sk89q.worldguard.protection.flags.StateFlag;
-import com.sk89q.worldguard.protection.managers.RegionManager;
-import com.sk89q.worldguard.protection.regions.RegionContainer;
 import com.stoinkcraft.StoinkCore;
 import com.stoinkcraft.enterprise.Enterprise;
 import com.stoinkcraft.earning.contracts.ContractContext;
@@ -115,27 +110,6 @@ public class GraveyardSite extends JobSite {
      */
     private MausoleumStructure mausoleumStructure;
     public static Vector mausoleumHordeSpawnOffset = new Vector(-24, -8, 14); // Adjust based on schematic
-
-
-    @Override
-    public void protectRegion() {
-        Map<StateFlag, StateFlag.State> flags = new HashMap<>();
-        flags.put(Flags.BLOCK_BREAK, StateFlag.State.ALLOW);
-        flags.put(Flags.INTERACT, StateFlag.State.ALLOW);
-        flags.put(Flags.USE, StateFlag.State.ALLOW);
-        flags.put(Flags.BLOCK_PLACE, StateFlag.State.DENY);
-        flags.put(Flags.MOB_SPAWNING, StateFlag.State.ALLOW);
-
-        RegionUtils.createProtectedRegion(
-                spawnPoint.getWorld(),
-                region,
-                protectionRegionID,
-                flags, 1);
-
-        RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
-        RegionManager manager = container.get(FaweAPI.getWorld(spawnPoint.getWorld().getName()));
-        protectedRegion = manager.getRegion(protectionRegionID);
-    }
 
     public GraveyardSite(Enterprise enterprise, Location spawnPoint, GraveyardData data) {
         super(enterprise, JobSiteType.GRAVEYARD, spawnPoint,

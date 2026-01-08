@@ -10,8 +10,6 @@ import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.world.block.BlockState;
 import com.sk89q.worldedit.world.block.BlockType;
 import com.sk89q.worldedit.world.block.BlockTypes;
-import com.sk89q.worldguard.protection.flags.Flags;
-import com.sk89q.worldguard.protection.flags.StateFlag;
 import com.stoinkcraft.StoinkCore;
 import com.stoinkcraft.earning.jobsites.JobSite;
 import com.stoinkcraft.earning.jobsites.components.JobSiteGenerator;
@@ -21,13 +19,10 @@ import com.stoinkcraft.earning.jobsites.protection.ProtectionQuery;
 import com.stoinkcraft.earning.jobsites.protection.ProtectionResult;
 import com.stoinkcraft.earning.jobsites.sites.farmland.FarmlandData;
 import com.stoinkcraft.earning.jobsites.sites.farmland.FarmlandSite;
-import com.stoinkcraft.utils.RegionUtils;
 import com.stoinkcraft.utils.TimeUtils;
 import org.bukkit.*;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 
 public class CropGenerator extends JobSiteGenerator implements ProtectedZone {

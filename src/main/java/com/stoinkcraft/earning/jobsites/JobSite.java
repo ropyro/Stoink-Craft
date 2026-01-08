@@ -5,10 +5,6 @@ import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.world.block.BlockTypes;
-import com.sk89q.worldguard.WorldGuard;
-import com.sk89q.worldguard.protection.managers.RegionManager;
-import com.sk89q.worldguard.protection.regions.ProtectedRegion;
-import com.sk89q.worldguard.protection.regions.RegionContainer;
 import com.stoinkcraft.StoinkCore;
 import com.stoinkcraft.enterprise.Enterprise;
 import com.stoinkcraft.earning.collections.CollectionManager;
@@ -33,8 +29,6 @@ public abstract class JobSite {
     protected final Location spawnPoint;
     protected File schematic;
     protected boolean isBuilt;
-    protected String protectionRegionID;
-    protected ProtectedRegion protectedRegion;
     protected final List<JobSiteUpgrade> upgrades = new ArrayList<>();
     protected final List<JobSiteComponent> components = new ArrayList<>();
 
@@ -46,7 +40,6 @@ public abstract class JobSite {
         this.schematic = schematic;
         this.data = data;
         this.isBuilt = isBuilt;
-        this.protectionRegionID = "enterprise_" + enterprise.getID() + "_" + type.name();
         data.setParent(this);
     }
 
@@ -116,16 +109,6 @@ public abstract class JobSite {
         disband();
         setBuilt(false);
         build();
-    }
-
-    public void protectRegion() {
-        RegionUtils.createProtectedRegion(
-                spawnPoint.getWorld(),
-                region,
-                protectionRegionID);
-        RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
-        RegionManager manager = container.get(FaweAPI.getWorld(spawnPoint.getWorld().getName()));
-        protectedRegion = manager.getRegion(protectionRegionID);
     }
 
     public void teleportPlayer(Player player, boolean ignoreBuilt) {

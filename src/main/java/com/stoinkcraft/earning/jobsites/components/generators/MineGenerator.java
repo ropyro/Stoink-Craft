@@ -9,8 +9,6 @@ import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.world.block.BlockType;
 import com.sk89q.worldedit.world.block.BlockTypes;
-import com.sk89q.worldguard.protection.flags.Flags;
-import com.sk89q.worldguard.protection.flags.StateFlag;
 import com.stoinkcraft.earning.jobsites.JobSite;
 import com.stoinkcraft.earning.jobsites.JobSiteType;
 import com.stoinkcraft.earning.jobsites.components.JobSiteGenerator;
@@ -22,15 +20,12 @@ import com.stoinkcraft.earning.jobsites.sites.quarry.OreSet;
 import com.stoinkcraft.earning.jobsites.sites.quarry.QuarryData;
 import com.stoinkcraft.earning.jobsites.sites.quarry.QuarrySite;
 import com.stoinkcraft.utils.ChatUtils;
-import com.stoinkcraft.utils.RegionUtils;
 import eu.decentsoftware.holograms.api.DHAPI;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Random;
 
 public class MineGenerator extends JobSiteGenerator implements ProtectedZone {

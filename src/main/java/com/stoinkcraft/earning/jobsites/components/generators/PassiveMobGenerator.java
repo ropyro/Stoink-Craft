@@ -1,18 +1,12 @@
 package com.stoinkcraft.earning.jobsites.components.generators;
 
 import com.sk89q.worldedit.regions.CuboidRegion;
-import com.sk89q.worldguard.protection.flags.Flags;
-import com.sk89q.worldguard.protection.flags.StateFlag;
 import com.stoinkcraft.StoinkCore;
 import com.stoinkcraft.earning.jobsites.JobSite;
 import com.stoinkcraft.earning.jobsites.components.JobSiteGenerator;
 import com.stoinkcraft.earning.jobsites.sites.farmland.FarmlandSite;
-import com.stoinkcraft.utils.RegionUtils;
 import com.stoinkcraft.utils.TimeUtils;
 import org.bukkit.*;
-
-import java.util.HashMap;
-import java.util.Map;
 
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.*;
