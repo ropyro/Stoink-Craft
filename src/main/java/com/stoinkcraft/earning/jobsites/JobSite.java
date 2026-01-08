@@ -244,6 +244,10 @@ public abstract class JobSite {
         return type;
     }
 
+    public Region getRegion() {
+        return region;
+    }
+
     public boolean containsActivePlayer() {
         return enterprise.getOnlineMembers().stream()
                 .anyMatch(p -> contains(p.getLocation()));

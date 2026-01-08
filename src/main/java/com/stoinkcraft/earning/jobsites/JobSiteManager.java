@@ -12,6 +12,7 @@ import com.stoinkcraft.earning.jobsites.sites.quarry.QuarrySite;
 import com.stoinkcraft.earning.jobsites.sites.skyrise.SkyriseSite;
 import org.bukkit.Location;
 
+import java.util.List;
 import java.util.Map;
 
 public class JobSiteManager {
@@ -134,6 +135,10 @@ public class JobSiteManager {
     }
 
     public GraveyardSite getGraveyardSite() {return graveyardSite;}
+
+    public List<JobSite> getAllJobSites(){
+        return List.of(skyriseSite, quarrySite, farmlandSite, graveyardSite);
+    }
 
     public JobSite getJobSite(JobSiteType jobSiteType){
         switch (jobSiteType){
