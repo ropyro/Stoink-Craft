@@ -1,0 +1,66 @@
+# StoinkCore Generator Configuration
+# This file controls timing, spawn rates, and scaling for all generators.
+# After making changes, use /stoinkcore reload to apply them without restarting.
+
+generators:
+
+  # =============================================
+  # CROP GENERATOR (Farmland)
+  # =============================================
+  crop:
+    # Base growth chance per tick per upgrade level
+    # At level 1: 1.5% chance per tick
+    # At level 10: 15% chance per tick
+    base-growth-chance: 0.015
+
+  # =============================================
+  # PASSIVE MOB GENERATOR (Farmland)
+  # =============================================
+  passive-mob:
+    # Base spawn interval in seconds (at level 0)
+    base-spawn-interval: 10
+    # Minimum spawn interval in seconds (cap)
+    min-spawn-interval: 2
+    # Base maximum mobs (at level 0)
+    base-max-mobs: 8
+    # Additional mobs per capacity upgrade level
+    mobs-per-capacity-level: 4
+    # Seconds reduction per spawn speed level
+    spawn-speed-reduction-per-level: 0.8
+
+  # =============================================
+  # HONEY GENERATOR (Farmland - Beehives)
+  # =============================================
+  honey:
+    # Maximum honey level (when hive is full)
+    max-honey: 5
+    # Base generation time in seconds (at level 0)
+    base-generation-seconds: 300
+    # Minimum generation time in seconds (cap)
+    min-generation-seconds: 30
+    # Percentage of base time reduced per speed level (0.08 = 8%)
+    speed-reduction-percentage: 0.08
+
+  # =============================================
+  # MINE GENERATOR (Quarry)
+  # =============================================
+  mine:
+    # Chance for geode spawn per block (0.025 = 2.5%)
+    geode-spawn-chance: 0.025
+    # Base regeneration interval in seconds (7200 = 2 hours)
+    base-regen-interval-seconds: 7200
+    # Seconds reduction per regen speed level (600 = 10 minutes)
+    regen-speed-reduction-per-level: 600
+    # Minimum regeneration interval in seconds (1800 = 30 minutes)
+    min-regen-interval-seconds: 1800
+
+  # =============================================
+  # TOMBSTONE GENERATOR (Graveyard)
+  # =============================================
+  tombstone:
+    # Base spawn interval in seconds (at level 0)
+    base-spawn-interval: 30
+    # Minimum spawn interval in seconds (cap)
+    min-spawn-interval: 8
+    # Seconds reduction per spawn speed level
+    spawn-speed-reduction-per-level: 2.2

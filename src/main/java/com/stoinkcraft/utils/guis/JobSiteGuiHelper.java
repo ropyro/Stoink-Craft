@@ -207,18 +207,22 @@ public class JobSiteGuiHelper {
     // ==================== Messages ====================
 
     public static void sendSuccess(Player p, String message) {
+        p.closeInventory();
         ChatUtils.sendMessage(p, "§a✔ " + message);
     }
 
     public static void sendError(Player p, String message) {
+        p.closeInventory();
         ChatUtils.sendMessage(p, "§c✖ " + message);
     }
 
     public static void sendInfo(Player p, String message) {
+        p.closeInventory();
         ChatUtils.sendMessage(p, "§e" + message);
     }
 
     public static void sendInfo(Player p, String message, Theme theme) {
+        p.closeInventory();
         ChatUtils.sendMessage(p, theme.secondary + message);
     }
 
@@ -562,7 +566,7 @@ public class JobSiteGuiHelper {
             case BUILDING -> {
                 UnlockableProgress progress = jobSite.getData()
                         .getUnlockableProgress(unlockable.getUnlockableId());
-                sendInfo(player, "Under construction - " + ChatUtils.formatDurationSeconds(progress.getRemainingSeconds()) + " remaining");
+                sendInfo(player, "Under construction - " + ChatUtils.formatDuration(progress.getRemainingMillis()) + " remaining");
             }
             case UNLOCKED -> {
                 sendInfo(player, unlockable.getDisplayName() + " is already built!");
@@ -572,7 +576,7 @@ public class JobSiteGuiHelper {
 
     private static String createConstructionProgressBar(Unlockable unlockable, UnlockableProgress progress) {
         long totalDuration = unlockable.getBuildTimeMillis();
-        long remaining = progress.getRemainingSeconds();
+        long remaining = progress.getRemainingMillis();
         long elapsed = totalDuration - remaining;
 
         int percent = (int) Math.min(100, (elapsed * 100) / Math.max(1, totalDuration));

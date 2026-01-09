@@ -53,10 +53,10 @@ public class Enterprise {
 
     private List<UUID> activeEnterpriseChat = new ArrayList<>();
 
+
     // NOT serialized directly - loaded/saved separately
     private transient JobSiteManager jobSiteManager;
 
-    // ... constructors ...
 
     public Enterprise(String name, UUID ceo, double bankBalance, double netWorth,
                       int outstandingShares, Booster activeBooster, UUID enterpriseID) {

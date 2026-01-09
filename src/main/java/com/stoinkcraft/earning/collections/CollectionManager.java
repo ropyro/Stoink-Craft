@@ -142,14 +142,14 @@ public class CollectionManager {
      * Get formatted progress string for display
      * Example: "1,234 / 5,000"
      */
-    public static String getProgressString(long currentCount, int currentLevel) {
-        if (currentLevel >= CollectionRegistry.MAX_LEVEL) {
-            return "§a§lMAX LEVEL";
-        }
-
-        long nextThreshold = CollectionRegistry.getThresholdForLevel(currentLevel + 1);
-        return NUMBER_FORMAT.format(currentCount) + " / " + NUMBER_FORMAT.format(nextThreshold);
-    }
+//    public static String getProgressString(long currentCount, int currentLevel) {
+//        if (currentLevel >= CollectionRegistry.MAX_LEVEL) {
+//            return "§a§lMAX LEVEL";
+//        }
+//
+//        long nextThreshold = CollectionRegistry.getThresholdForLevel(currentLevel + 1);
+//        return NUMBER_FORMAT.format(currentCount) + " / " + NUMBER_FORMAT.format(nextThreshold);
+//    }
 
     /**
      * Get a progress bar string

@@ -1,0 +1,24 @@
+# StoinkCore Economy Configuration
+# This file controls fundamental economy settings for the plugin.
+# After making changes, use /stoinkcore reload to apply them without restarting.
+
+economy:
+  # Percentage of earnings that go to the player (rest goes to enterprise)
+  # Range: 0.0 to 1.0 (0% to 100%)
+  # Default: 0.25 (players get 25%, enterprise gets 75%)
+  player-pay-split-percentage: 0.25
+
+  # Cost to create a new enterprise
+  # Must be a positive number
+  # Default: 10000.0
+  enterprise-founding-cost: 10000.0
+
+  # Daily tax rate on enterprise funds that aren't invested
+  # Range: 0.0 to 1.0 (0% to 100%)
+  # Default: 0.35 (35% daily tax encourages active management)
+  enterprise-daily-tax: 0.35
+
+  # Maximum number of shares an enterprise can have
+  # Must be a positive integer
+  # Default: 100
+  max-shares: 100

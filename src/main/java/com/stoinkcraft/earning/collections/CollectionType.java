@@ -55,6 +55,7 @@ public enum CollectionType {
     STONE("stone", "Stone", JobSiteType.QUARRY, Material.STONE,
             Set.of(Material.COBBLESTONE, Material.STONE, Material.GRANITE, Material.DIORITE,
                     Material.ANDESITE, Material.DEEPSLATE, Material.NETHERRACK), Set.of()),
+    GEODE("geode", "Geode", JobSiteType.QUARRY, Material.AMETHYST_CLUSTER, Set.of(Material.AMETHYST_BLOCK, Material.AMETHYST_CLUSTER), Set.of()),
 
     // ==================== GRAVEYARD - UNDEAD ====================
     ZOMBIE("zombie", "Zombie", JobSiteType.GRAVEYARD, Material.ZOMBIE_HEAD,

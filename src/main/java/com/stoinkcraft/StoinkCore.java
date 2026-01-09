@@ -1,5 +1,7 @@
 package com.stoinkcraft;
 
+import com.stoinkcraft.config.ConfigLoader;
+import com.stoinkcraft.earning.jobsites.protection.ProtectionListeners;
 import com.stoinkcraft.earning.jobsites.protection.ProtectionManager;
 import com.stoinkcraft.enterprise.*;
 import com.stoinkcraft.enterprise.listeners.*;
@@ -166,6 +168,9 @@ public class StoinkCore extends JavaPlugin {
 
     private void initFilesAndResources(){
 
+        // Initialize configuration system
+        ConfigLoader.initialize(this);
+
         File marketFile = new File(getDataFolder(), "market.yml");
         if(!marketFile.exists()){
             saveResource("market.yml", false);
@@ -257,7 +262,7 @@ public class StoinkCore extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new BoostNoteInteractionListener(), this);
         getServer().getPluginManager().registerEvents(new EnderChestListener(), this);
         getServer().getPluginManager().registerEvents(new CitizensLoadListener(this), this);
-        getServer().getPluginManager().registerEvents(pm, this);
+        getServer().getPluginManager().registerEvents(new ProtectionListeners(this), this);
         //Jobsite Listeners
         getServer().getPluginManager().registerEvents(new CreatureSpawnListener(ewm.getWorld()), this);
         getServer().getPluginManager().registerEvents(new BlockBreakListener(), this);

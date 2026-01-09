@@ -1,7 +1,7 @@
 package com.stoinkcraft.enterprise;
 
 public enum Role {
-    CEO("CEO", "§c§lCEO"), EMPLOYEE("Employee", "§eEmployee");
+    CEO("CEO", "§c§lCEO"), EXECUTIVE("Executive", "§aExecutive"), EMPLOYEE("Employee", "§eEmployee");
 
     String name;
     String formattedName;

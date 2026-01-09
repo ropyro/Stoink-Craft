@@ -1,5 +1,6 @@
 package com.stoinkcraft.earning.jobsites.components.generators;
 
+import com.stoinkcraft.config.ConfigLoader;
 import com.stoinkcraft.earning.jobsites.JobSite;
 import com.stoinkcraft.earning.jobsites.components.JobSiteGenerator;
 import com.stoinkcraft.earning.jobsites.components.JobSiteHologram;
@@ -25,10 +26,6 @@ public class HoneyGenerator extends JobSiteGenerator implements ProtectedZone {
 
     private final Location hiveLocation;
     private final World world;
-
-    private static final int MAX_HONEY = 5;
-    private static final int BASE_GENERATION_SECONDS = 300; // 5 minutes base
-    private static final int MIN_GENERATION_SECONDS = 30;   // 30 seconds minimum
 
     private int honeyLevel = 0;
     private int ticksSinceLastHoney = 0;
@@ -112,7 +109,7 @@ public class HoneyGenerator extends JobSiteGenerator implements ProtectedZone {
         if (!site.areBeeHivesBuilt()) return;
 
         if (!TimeUtils.isDay(world)) return;
-        if (honeyLevel >= MAX_HONEY) return;
+        if (honeyLevel >= ConfigLoader.getGenerators().getHoneyMaxHoney()) return;
 
 
         ticksSinceLastHoney++;
@@ -127,7 +124,7 @@ public class HoneyGenerator extends JobSiteGenerator implements ProtectedZone {
     }
 
     private void updateHologramText(FarmlandSite site) {
-        int percent = (int) ((honeyLevel / (double) MAX_HONEY) * 100);
+        int percent = (int) ((honeyLevel / (double) ConfigLoader.getGenerators().getHoneyMaxHoney()) * 100);
         List<String> lines = List.of();
         if (!site.areBeeHivesBuilt()) {
             lines = List.of("");
@@ -138,7 +135,7 @@ public class HoneyGenerator extends JobSiteGenerator implements ProtectedZone {
     }
 
     private String getProgressBar() {
-        int percent = (int) ((honeyLevel / (double) MAX_HONEY) * 100);
+        int percent = (int) ((honeyLevel / (double) ConfigLoader.getGenerators().getHoneyMaxHoney()) * 100);
 
         int bars = percent / 10;
         String bar = ChatColor.GOLD + "█".repeat(bars)
@@ -155,7 +152,7 @@ public class HoneyGenerator extends JobSiteGenerator implements ProtectedZone {
             return;
         }
 
-        honeyLevel = Math.min(hive.getHoneyLevel(), MAX_HONEY);
+        honeyLevel = Math.min(hive.getHoneyLevel(), ConfigLoader.getGenerators().getHoneyMaxHoney());
     }
 
     /* =========================
@@ -177,7 +174,7 @@ public class HoneyGenerator extends JobSiteGenerator implements ProtectedZone {
        ========================= */
 
     public boolean canHarvest() {
-        return honeyLevel >= MAX_HONEY;
+        return honeyLevel >= ConfigLoader.getGenerators().getHoneyMaxHoney();
     }
 
     /** Called by event handler */
@@ -194,9 +191,11 @@ public class HoneyGenerator extends JobSiteGenerator implements ProtectedZone {
 
     private int getGenerationIntervalTicks() {
         int speedLevel = getSpeedLevel();
-        // Each level reduces by 8% of base
-        int reduction = (int) (BASE_GENERATION_SECONDS * 0.08 * speedLevel);
-        return Math.max(MIN_GENERATION_SECONDS, BASE_GENERATION_SECONDS - reduction);
+        int baseSeconds = ConfigLoader.getGenerators().getHoneyBaseGenerationSeconds();
+        int minSeconds = ConfigLoader.getGenerators().getHoneyMinGenerationSeconds();
+        double reductionPercentage = ConfigLoader.getGenerators().getHoneySpeedReductionPercentage();
+        int reduction = (int) (baseSeconds * reductionPercentage * speedLevel);
+        return Math.max(minSeconds, baseSeconds - reduction);
     }
 
     private int getSpeedLevel() {

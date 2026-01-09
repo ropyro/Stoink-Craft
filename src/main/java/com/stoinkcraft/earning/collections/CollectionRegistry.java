@@ -1,18 +1,22 @@
 package com.stoinkcraft.earning.collections;
 
+import com.stoinkcraft.config.ConfigLoader;
+
 /**
  * Static registry for collection level thresholds and XP rewards.
  * All functions are centralized here for easy balancing adjustments.
+ * Now loads values from collections.yml via ConfigLoader.
  */
 public final class CollectionRegistry {
 
-    public static final int MAX_LEVEL = 27;
+    public static final int DEFAULT_MAX_LEVEL = 27;
 
-    // Threshold scaling - designed for collaborative play
+    // Default threshold scaling - designed for collaborative play
     // Solo: ~2-3 hours per level early, ~8-10 hours per level late
     // 5-player: ~30 min per level early, ~2 hours per level late
+    // These are fallback values if config not loaded
 
-    private static final long[] THRESHOLDS = {
+    private static final long[] DEFAULT_THRESHOLDS = {
             0,       // Level 0 (not achieved)
             100,     // Level 1  - Tutorial
             250,     // Level 2  - Getting started
@@ -43,8 +47,9 @@ public final class CollectionRegistry {
             75000,   // Level 27 - Mastery
     };
 
-    // XP rewards scale meaningfully but not explosively
-    private static final int[] XP_REWARDS = {
+    // Default XP rewards scale meaningfully but not explosively
+    // These are fallback values if config not loaded
+    private static final int[] DEFAULT_XP_REWARDS = {
             0,      // Level 0
             50,     // Level 1
             75,     // Level 2
@@ -77,15 +82,50 @@ public final class CollectionRegistry {
 
     private CollectionRegistry() {}
 
+    /**
+     * Get max level from config, or default if not loaded.
+     * Public so other classes can access the configured max level.
+     */
+    public static int getMaxLevel() {
+        if (ConfigLoader.isInitialized()) {
+            return ConfigLoader.getCollections().getMaxLevel();
+        }
+        return DEFAULT_MAX_LEVEL;
+    }
+
+    /**
+     * Get thresholds from config, or defaults if not loaded.
+     */
+    private static long[] getThresholds() {
+        if (ConfigLoader.isInitialized()) {
+            return ConfigLoader.getCollections().getThresholds();
+        }
+        return DEFAULT_THRESHOLDS;
+    }
+
+    /**
+     * Get XP rewards from config, or defaults if not loaded.
+     */
+    private static int[] getXpRewards() {
+        if (ConfigLoader.isInitialized()) {
+            return ConfigLoader.getCollections().getXpRewards();
+        }
+        return DEFAULT_XP_REWARDS;
+    }
+
     public static long getThresholdForLevel(int level) {
         if (level <= 0) return 0;
-        if (level > MAX_LEVEL) level = MAX_LEVEL;
-        return THRESHOLDS[level];
+        long[] thresholds = getThresholds();
+        int maxLevel = getMaxLevel();
+        if (level > maxLevel) level = maxLevel;
+        return thresholds[level];
     }
 
     public static int getLevelFromCount(long count) {
-        for (int level = MAX_LEVEL; level >= 1; level--) {
-            if (count >= THRESHOLDS[level]) {
+        long[] thresholds = getThresholds();
+        int maxLevel = getMaxLevel();
+        for (int level = maxLevel; level >= 1; level--) {
+            if (count >= thresholds[level]) {
                 return level;
             }
         }
@@ -94,20 +134,24 @@ public final class CollectionRegistry {
 
     public static int getXpRewardForLevel(int level) {
         if (level <= 0) return 0;
-        if (level > MAX_LEVEL) level = MAX_LEVEL;
-        return XP_REWARDS[level];
+        int[] xpRewards = getXpRewards();
+        int maxLevel = getMaxLevel();
+        if (level > maxLevel) level = maxLevel;
+        return xpRewards[level];
     }
 
     public static double getProgressToNextLevel(long count) {
         int currentLevel = getLevelFromCount(count);
+        long[] thresholds = getThresholds();
+        int maxLevel = getMaxLevel();
 
-        if (currentLevel >= MAX_LEVEL) return 1.0;
+        if (currentLevel >= maxLevel) return 1.0;
         if (currentLevel == 0) {
-            return (double) count / THRESHOLDS[1];
+            return (double) count / thresholds[1];
         }
 
-        long currentThreshold = THRESHOLDS[currentLevel];
-        long nextThreshold = THRESHOLDS[currentLevel + 1];
+        long currentThreshold = thresholds[currentLevel];
+        long nextThreshold = thresholds[currentLevel + 1];
         long progressInLevel = count - currentThreshold;
         long levelRange = nextThreshold - currentThreshold;
 
@@ -116,10 +160,12 @@ public final class CollectionRegistry {
 
     public static long getRemainingToNextLevel(long count) {
         int currentLevel = getLevelFromCount(count);
+        long[] thresholds = getThresholds();
+        int maxLevel = getMaxLevel();
 
-        if (currentLevel >= MAX_LEVEL) return 0;
+        if (currentLevel >= maxLevel) return 0;
 
-        long nextThreshold = THRESHOLDS[currentLevel + 1];
+        long nextThreshold = thresholds[currentLevel + 1];
         return Math.max(0, nextThreshold - count);
     }
 
@@ -127,7 +173,8 @@ public final class CollectionRegistry {
      * Get the amount needed for just this level (not cumulative)
      */
     public static long getAmountForLevel(int level) {
-        if (level <= 1) return THRESHOLDS[1];
-        return THRESHOLDS[level] - THRESHOLDS[level - 1];
+        long[] thresholds = getThresholds();
+        if (level <= 1) return thresholds[1];
+        return thresholds[level] - thresholds[level - 1];
     }
 }

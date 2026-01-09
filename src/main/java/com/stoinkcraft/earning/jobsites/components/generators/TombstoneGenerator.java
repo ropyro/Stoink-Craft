@@ -1,6 +1,7 @@
 package com.stoinkcraft.earning.jobsites.components.generators;
 
 import com.stoinkcraft.StoinkCore;
+import com.stoinkcraft.config.ConfigLoader;
 import com.stoinkcraft.earning.jobsites.JobSite;
 import com.stoinkcraft.earning.jobsites.components.JobSiteGenerator;
 import com.stoinkcraft.earning.jobsites.components.JobSiteHologram;
@@ -36,10 +37,6 @@ public class TombstoneGenerator extends JobSiteGenerator {
     private JobSiteHologram hologram;
     private final String hologramId;
     private static final Vector HOLOGRAM_OFFSET = new Vector(-0.2, 2, 0.5);
-
-    // Base spawn interval (1 tick = 1 second in your system)
-    private static final int BASE_SPAWN_INTERVAL_SECONDS = 30; // 30 seconds
-    private static final int MIN_SPAWN_INTERVAL_SECONDS = 8;   // 8 seconds minimum
 
     public TombstoneGenerator(Location tombstoneLocation, JobSite parent, int index) {
         super(parent, false); // Disabled by default until purchased
@@ -214,9 +211,11 @@ public class TombstoneGenerator extends JobSiteGenerator {
 
     private int getSpawnIntervalTicks() {
         int speedLevel = getGraveyardData().getLevel("spawn_speed");
-        // Each level reduces by 2.2 seconds
-        int interval = BASE_SPAWN_INTERVAL_SECONDS - (int)(speedLevel * 2.2);
-        return Math.max(MIN_SPAWN_INTERVAL_SECONDS, interval);
+        int baseInterval = ConfigLoader.getGenerators().getTombstoneBaseSpawnInterval();
+        int minInterval = ConfigLoader.getGenerators().getTombstoneMinSpawnInterval();
+        double reductionPerLevel = ConfigLoader.getGenerators().getTombstoneSpawnSpeedReductionPerLevel();
+        int interval = baseInterval - (int)(speedLevel * reductionPerLevel);
+        return Math.max(minInterval, interval);
     }
 
     // ==================== Attunement ====================

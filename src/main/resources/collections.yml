@@ -1,0 +1,73 @@
+
+# StoinkCore Collections Configuration
+# This file controls the progression system for resource collections.
+# After making changes, use /stoinkcore reload to apply them without restarting.
+
+collections:
+  # Maximum collection level
+  max-level: 27
+
+  # Cumulative thresholds for each collection level
+  # These represent the total amount of items needed to reach each level
+  # Designed for collaborative play:
+  #   Solo: ~2-3 hours per level early, ~8-10 hours per level late
+  #   5-player team: ~30 min per level early, ~2 hours per level late
+  thresholds:
+    1: 100      # Tutorial
+    2: 250      # Getting started
+    3: 450
+    4: 700
+    5: 1000     # Early milestone
+    6: 1400
+    7: 1900
+    8: 2500
+    9: 3200
+    10: 4000    # Mid-early milestone
+    11: 5000
+    12: 6200
+    13: 7600
+    14: 9200
+    15: 11000   # Midgame
+    16: 13200
+    17: 15800
+    18: 18800
+    19: 22200
+    20: 26000   # Late midgame
+    21: 30500
+    22: 35500
+    23: 41000
+    24: 47500
+    25: 55000   # Endgame
+    26: 64000
+    27: 75000   # Mastery
+
+  # XP rewards granted when reaching each level
+  # Scale meaningfully but not explosively
+  xp-rewards:
+    1: 50
+    2: 75
+    3: 100
+    4: 130
+    5: 165
+    6: 200
+    7: 240
+    8: 285
+    9: 335
+    10: 400
+    11: 470
+    12: 550
+    13: 640
+    14: 740
+    15: 850
+    16: 975
+    17: 1100
+    18: 1250
+    19: 1425
+    20: 1625
+    21: 1850
+    22: 2100
+    23: 2400
+    24: 2750
+    25: 3150
+    26: 3600
+    27: 5000    # Mastery bonus

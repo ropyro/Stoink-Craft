@@ -67,7 +67,7 @@ public interface Unlockable {
         UnlockableProgress progress = getJobSite().getData()
                 .getUnlockableProgress(getUnlockableId());
 
-        onUnlockTick(progress.getRemainingSeconds());
+        onUnlockTick(progress.getRemainingMillis());
 
         if (progress.isFinished()) {
             progress.markUnlocked();

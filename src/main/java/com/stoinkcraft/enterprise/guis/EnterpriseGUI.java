@@ -1,5 +1,9 @@
 package com.stoinkcraft.enterprise.guis;
 
+import com.stoinkcraft.StoinkCore;
+import com.stoinkcraft.earning.jobsites.JobSiteManager;
+import com.stoinkcraft.earning.jobsites.JobSiteRequirements;
+import com.stoinkcraft.earning.jobsites.JobSiteType;
 import com.stoinkcraft.enterprise.Enterprise;
 import com.stoinkcraft.enterprise.EnterpriseManager;
 import com.stoinkcraft.enterprise.Role;
@@ -29,15 +33,23 @@ import java.util.UUID;
 
 public class EnterpriseGUI {
 
+    // Styling constants (matching JobSiteGuiHelper)
+    private static final String BULLET = " §7• ";
+    private static final String CHECKMARK = "§a✔ ";
+    private static final String CROSS = "§c✖ ";
+    private static final String ARROW = "§e▶ ";
+    private static final String DIVIDER = " ";
+
     private final Player opener;
     private final Enterprise enterprise;
+    private Window currentWindow;
 
-    public EnterpriseGUI(Player opener, Enterprise enterprise){
+    public EnterpriseGUI(Player opener, Enterprise enterprise) {
         this.opener = opener;
         this.enterprise = enterprise;
     }
 
-    public void openWindow(){
+    public void openWindow() {
         String netWorth = ChatUtils.formatMoney(enterprise.getNetWorth());
         String balance = ChatUtils.formatMoney(enterprise.getBankBalance());
 
@@ -52,26 +64,21 @@ public class EnterpriseGUI {
                 .addIngredient('#', new SimpleItem(new ItemBuilder(Material.BLACK_STAINED_GLASS_PANE)
                         .setDisplayName(" ")))
                 .addIngredient('?', new SimpleItem(new ItemBuilder(Material.OAK_SIGN)
-                        .setDisplayName("§8§l» §a§lEnterprise Help §8»")
-                        .addLoreLines(" ")
-                        .addLoreLines("§a§lHow to earn money §8»")
-                        .addLoreLines(" §a• §fWhen in an enterprise completing tasks makes money")
-                        .addLoreLines("   §ffor you, and the enterprise!")
-                        .addLoreLines(" §a• §fTo see the available tasks do §a/market")
-                        .addLoreLines(" §a• §fCurrent Split: Player, §a%" + 100*SCConstants.PLAYER_PAY_SPLIT_PERCENTAGE + " §fEnterprise, §a%" + (100-100*SCConstants.PLAYER_PAY_SPLIT_PERCENTAGE))
-                        .addLoreLines(" ")
-                        .addLoreLines("§a§lCommands §8»")
-                        .addLoreLines(" §a• §f/enterprise - opens this menu")
-                        .addLoreLines(" §a• §f/enterprise resign - lets you leave an enterprise")
-                        .addLoreLines(" §a• §f/enterprise warp [name] - teleports to an enterprise")
-                        .addLoreLines(" §a• §f/enterprise info [name] - returns enterprise information")
-                        .addLoreLines(" ")
-                        .addLoreLines("§a§lCEO Commands §8»")
-                        .addLoreLines(" §a• §f/enterprise setwarp - sets the public warp for the enterprise")
-                        .addLoreLines(" §a• §f/enterprise disband - sets the public warp for the enterprise")
-                        .addLoreLines(" §a• §f/enterprise invite <player> - invite new members")
-                        .addLoreLines(" ")
-                        .addLoreLines("ID: " + enterprise.getID())
+                        .setDisplayName("§8§l» §a§lEnterprise Help §8«")
+                        .addLoreLines(DIVIDER)
+                        .addLoreLines("§e§lHow to earn money")
+                        .addLoreLines(BULLET + "§fComplete tasks at your job sites")
+                        .addLoreLines(BULLET + "§fView available tasks with §a/market")
+                        .addLoreLines(BULLET + "§fSplit: Player §a" + (int)(100*SCConstants.getPlayerPaySplit()) + "% §f| Enterprise §a" + (100-(int)(100*SCConstants.getPlayerPaySplit())) + "%")
+                        .addLoreLines(DIVIDER)
+                        .addLoreLines("§e§lJob Sites")
+                        .addLoreLines(BULLET + "§fFarmland is free to start")
+                        .addLoreLines(BULLET + "§fUnlock more sites as you level up")
+                        .addLoreLines(DIVIDER)
+                        .addLoreLines("§e§lCommands")
+                        .addLoreLines(BULLET + "§f/enterprise §7- opens this menu")
+                        .addLoreLines(BULLET + "§f/enterprise warp [name] §7- teleport")
+                        .addLoreLines(BULLET + "§f/enterprise info [name] §7- view info")
                 ))
                 .addIngredient('A', new SimpleItem(new ItemBuilder(Material.BOOK)
                         .setDisplayName(" §aHiring coming soon... ")))
@@ -85,12 +92,12 @@ public class EnterpriseGUI {
                         meta.setOwningPlayer(opener);
                         openerskull.setItemMeta(meta);
 
-                        ItemBuilder openerhead = new ItemBuilder(openerskull)
-                                .setDisplayName(" §aMembers List")
-                                .addLoreLines(" ")
-                                .addLoreLines(" §a(!) §fClick here to view the members list §a(!)");
-
-                        return openerhead;
+                        return new ItemBuilder(openerskull)
+                                .setDisplayName("§aMembers List")
+                                .addLoreLines(DIVIDER)
+                                .addLoreLines("§7View all enterprise members")
+                                .addLoreLines(DIVIDER)
+                                .addLoreLines(ARROW + "Click to open");
                     }
 
                     @Override
@@ -103,19 +110,21 @@ public class EnterpriseGUI {
                     @Override
                     public ItemProvider getItemProvider() {
                         return new ItemBuilder(Material.GOLD_INGOT)
-                                .setDisplayName(" §aNetworth §f(§a" + netWorth + "§f)")
-                                .addLoreLines(" ")
-                                .addLoreLines(" §a(!) §fClick here to invest bank funds into networth §a(!)");
+                                .setDisplayName("§aNetworth §f(§a" + netWorth + "§f)")
+                                .addLoreLines(DIVIDER)
+                                .addLoreLines("§7Invest bank funds to grow networth")
+                                .addLoreLines(DIVIDER)
+                                .addLoreLines(ARROW + "Click to invest §7(CEO only)");
                     }
 
                     @Override
                     public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull InventoryClickEvent inventoryClickEvent) {
                         player.closeInventory();
-                        if(enterprise.getMemberRole(player.getUniqueId()).equals(Role.CEO)){
+                        if (enterprise.getMemberRole(player.getUniqueId()).equals(Role.CEO)) {
                             player.sendMessage("§7Your enterprise bank currently has: §a" + balance);
                             player.sendMessage("§7Please enter the amount you would like to invest");
                             ChatInvestAction.awaitingInvestment.add(player.getUniqueId());
-                        }else{
+                        } else {
                             player.sendMessage("§cYou must be the CEO to invest enterprise funds.");
                         }
                     }
@@ -123,12 +132,12 @@ public class EnterpriseGUI {
                 .addIngredient('S', new AbstractItem() {
                     @Override
                     public ItemProvider getItemProvider() {
-                        ItemStack item = new ItemStack(Material.BRICKS);
-
-                        ItemBuilder openerhead = new ItemBuilder(item)
-                                .setDisplayName("§aTeleport to Skyrise");
-
-                        return openerhead;
+                        return new ItemBuilder(Material.BRICKS)
+                                .setDisplayName("§aSkyrise")
+                                .addLoreLines(DIVIDER)
+                                .addLoreLines("§7Your enterprise headquarters")
+                                .addLoreLines(DIVIDER)
+                                .addLoreLines(ARROW + "Click to teleport");
                     }
 
                     @Override
@@ -136,70 +145,179 @@ public class EnterpriseGUI {
                         enterprise.getJobSiteManager().getSkyriseSite().teleportPlayer(player);
                     }
                 })
-        .addIngredient('Q', new AbstractItem() {
-            @Override
-            public ItemProvider getItemProvider() {
-                ItemStack item = new ItemStack(Material.DIAMOND_PICKAXE);
-
-                ItemBuilder openerhead = new ItemBuilder(item)
-                        .setDisplayName("§aTeleport to Quarry");
-
-                return openerhead;
-            }
-
-            @Override
-            public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull InventoryClickEvent inventoryClickEvent) {
-                enterprise.getJobSiteManager().getQuarrySite().teleportPlayer(player);
-            }
-        })
-                .addIngredient('G', new AbstractItem() {
-                    @Override
-                    public ItemProvider getItemProvider() {
-                        ItemStack item = new ItemStack(Material.SKELETON_SKULL);
-
-                        ItemBuilder openerhead = new ItemBuilder(item)
-                                .setDisplayName("§aTeleport to Graveyard");
-
-                        return openerhead;
-                    }
-
-                    @Override
-                    public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull InventoryClickEvent inventoryClickEvent) {
-                        enterprise.getJobSiteManager().getGraveyardSite().teleportPlayer(player);
-                    }
-                })
-                .addIngredient('F', new AbstractItem() {
-                    @Override
-                    public ItemProvider getItemProvider() {
-                        ItemStack item = new ItemStack(Material.WHEAT);
-
-                        ItemBuilder openerhead = new ItemBuilder(item)
-                                .setDisplayName("§aTeleport to Farmland");
-
-                        return openerhead;
-                    }
-
-                    @Override
-                    public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull InventoryClickEvent inventoryClickEvent) {
-                        enterprise.getJobSiteManager().getFarmlandSite().teleportPlayer(player);
-                    }
-                })
+                .addIngredient('F', createJobSiteItem(JobSiteType.FARMLAND))
+                .addIngredient('Q', createJobSiteItem(JobSiteType.QUARRY))
+                .addIngredient('G', createJobSiteItem(JobSiteType.GRAVEYARD))
                 .build();
 
-        if(enterprise.isBoosted()){
+        if (enterprise.isBoosted()) {
             gui.setItem(4, 4, new SimpleItem(new ItemBuilder(Material.FIRE_CHARGE)
                     .setDisplayName(" §6§l" + enterprise.getActiveBooster().getMultiplier() + "x booster active!")
-                    .addLoreLines(" ")
-                    .addLoreLines(" §7• Time Left: ")
-                    .addLoreLines(" ")));
+                    .addLoreLines(DIVIDER)
+                    .addLoreLines(BULLET + "§7Time Left: ")
+                    .addLoreLines(DIVIDER)));
         }
 
-        Window window = Window.single()
+        currentWindow = Window.single()
                 .setViewer(opener)
                 .setTitle("§8" + enterprise.getName())
                 .setGui(gui)
                 .build();
-        window.open();
+        currentWindow.open();
+    }
+
+    /**
+     * Creates a job site item that shows locked/unlocked state with proper UX
+     */
+    private AbstractItem createJobSiteItem(JobSiteType type) {
+        return new AbstractItem() {
+            @Override
+            public ItemProvider getItemProvider() {
+                JobSiteManager manager = enterprise.getJobSiteManager();
+                JobSiteRequirements req = JobSiteRequirements.forType(type);
+
+                if (req == null) {
+                    return new ItemBuilder(Material.BARRIER).setDisplayName("§cUnknown Job Site");
+                }
+
+                boolean unlocked = manager.isJobSiteUnlocked(type);
+                boolean canPurchase = manager.canPurchaseJobSite(type);
+                JobSiteType prereqType = req.getPrerequisite();
+                int prereqLevel = 0;
+                if (prereqType != null && manager.getJobSite(prereqType) != null) {
+                    prereqLevel = manager.getJobSite(prereqType).getLevel();
+                }
+
+                ItemBuilder item = new ItemBuilder(req.getIcon());
+
+                if (unlocked) {
+                    // Unlocked - show teleport option
+                    item.setDisplayName("§a" + req.getDisplayName());
+                    item.addLoreLines(DIVIDER);
+                    item.addLoreLines("§7" + req.getDescriptionLine1());
+                    if (req.getDescriptionLine2() != null && !req.getDescriptionLine2().isEmpty()) {
+                        item.addLoreLines("§7" + req.getDescriptionLine2());
+                    }
+                    item.addLoreLines(DIVIDER);
+
+                    // Show level for unlocked sites
+                    int siteLevel = manager.getJobSite(type).getLevel();
+                    item.addLoreLines(BULLET + "§fLevel: §a" + siteLevel);
+                    item.addLoreLines(DIVIDER);
+
+                    item.addLoreLines(CHECKMARK + "§aUnlocked");
+                    item.addLoreLines(ARROW + "Click to teleport");
+
+                } else if (canPurchase) {
+                    // Can purchase - show buy option
+                    item.setDisplayName("§e" + req.getDisplayName() + " §8(Available)");
+                    item.addLoreLines(DIVIDER);
+                    item.addLoreLines("§7" + req.getDescriptionLine1());
+                    if (req.getDescriptionLine2() != null && !req.getDescriptionLine2().isEmpty()) {
+                        item.addLoreLines("§7" + req.getDescriptionLine2());
+                    }
+                    item.addLoreLines(DIVIDER);
+
+                    item.addLoreLines("§e§lPurchase Requirements");
+                    item.addLoreLines(BULLET + "§fCost: §6$" + String.format("%,d", req.getCost()));
+                    if (req.getRequiredPreReqLevel() > 0 && prereqType != null) {
+                        String prereqName = prereqType.name().charAt(0) + prereqType.name().substring(1).toLowerCase();
+                        item.addLoreLines(CHECKMARK + "§a" + prereqName + " Level " + req.getRequiredPreReqLevel() + " §7(yours: " + prereqLevel + ")");
+                    }
+                    item.addLoreLines(DIVIDER);
+
+                    item.addLoreLines(CHECKMARK + "§aReady to purchase!");
+                    item.addLoreLines(ARROW + "Click to buy");
+
+                } else {
+                    // Locked - show requirements
+                    item.setMaterial(Material.GRAY_DYE); // Override icon to show locked
+                    item.setDisplayName("§c" + req.getDisplayName() + " §8(Locked)");
+                    item.addLoreLines(DIVIDER);
+                    item.addLoreLines("§7" + req.getDescriptionLine1());
+                    if (req.getDescriptionLine2() != null && !req.getDescriptionLine2().isEmpty()) {
+                        item.addLoreLines("§7" + req.getDescriptionLine2());
+                    }
+                    item.addLoreLines(DIVIDER);
+
+                    item.addLoreLines("§c§lRequirements");
+                    item.addLoreLines(BULLET + "§fCost: §6$" + String.format("%,d", req.getCost()));
+
+                    // Show level requirement with status
+                    if (req.getRequiredPreReqLevel() > 0 && prereqType != null) {
+                        String prereqName = prereqType.name().charAt(0) + prereqType.name().substring(1).toLowerCase();
+                        if (prereqLevel >= req.getRequiredPreReqLevel()) {
+                            item.addLoreLines(CHECKMARK + "§a" + prereqName + " Level " + req.getRequiredPreReqLevel());
+                        } else {
+                            item.addLoreLines(CROSS + "§c" + prereqName + " Level " + req.getRequiredPreReqLevel() + " §7(yours: " + prereqLevel + ")");
+                        }
+                    }
+
+                    // Show prerequisite requirement
+                    if (req.getPrerequisite() != null && !manager.isJobSiteUnlocked(req.getPrerequisite())) {
+                        item.addLoreLines(CROSS + "§cRequires " + req.getPrerequisite().name() + " unlocked");
+                    }
+
+                    item.addLoreLines(DIVIDER);
+                    item.addLoreLines("§8Level up Farmland to unlock");
+                }
+
+                return item;
+            }
+
+            @Override
+            public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull InventoryClickEvent event) {
+                JobSiteManager manager = enterprise.getJobSiteManager();
+                JobSiteRequirements req = JobSiteRequirements.forType(type);
+
+                if (req == null) return;
+
+                boolean unlocked = manager.isJobSiteUnlocked(type);
+
+                if (unlocked) {
+                    // Teleport to the job site
+                    manager.getJobSite(type).teleportPlayer(player);
+                } else if (manager.canPurchaseJobSite(type)) {
+                    // Try to purchase
+                    int cost = req.getCost();
+
+                    if (!StoinkCore.getEconomy().has(player, cost)) {
+                        sendError(player, "Insufficient funds! Need §6$" + String.format("%,d", cost));
+                        return;
+                    }
+
+                    if (manager.purchaseJobSite(type, player)) {
+                        sendSuccess(player, req.getDisplayName() + " purchased and built!");
+                        enterprise.sendEnterpriseMessage(
+                                "",
+                                "§a§l" + req.getDisplayName() + " Unlocked!",
+                                "",
+                                "§7" + player.getName() + " purchased a new job site.",
+                                ""
+                        );
+                        openWindow(); // Refresh the GUI
+                    } else {
+                        sendError(player, "Unable to purchase job site.");
+                    }
+                } else {
+                    // Show why it's locked
+                    String reason = manager.getPurchaseBlockReason(type);
+                    if (reason != null) {
+                        sendError(player, reason);
+                    } else {
+                        sendError(player, "Requirements not met.");
+                    }
+                }
+            }
+        };
+    }
+
+    private void sendSuccess(Player p, String message) {
+        ChatUtils.sendMessage(p, "§a✔ " + message);
+    }
+
+    private void sendError(Player p, String message) {
+        ChatUtils.sendMessage(p, "§c✖ " + message);
     }
 
     @NotNull
@@ -209,29 +327,29 @@ public class EnterpriseGUI {
             @Override
             public ItemProvider getItemProvider() {
                 return new ItemBuilder(Material.CHEST)
-                        .setDisplayName(" §aBank Balance: §f(§a$" + balance + "§f)")
-                        .addLoreLines(" ")
-                        .addLoreLines(" §a• §fBank balance will be taxed daily at, %" + (SCConstants.ENTERPRISE_DAILY_TAX*100))
-                        .addLoreLines("   §fTime until next taxation: " + EnterpriseManager.getTimeUntilNextTaxation())
-                        .addLoreLines(" §a• §fBank balance after daily tax: §c$" + ChatUtils.formatMoney(enterprise.getBankBalance()*(1-SCConstants.ENTERPRISE_DAILY_TAX)))
-                        .addLoreLines(" ")
-                        .addLoreLines(" §a(!) §bLeft §fclick here to §bwithdraw §fbank funds §a(!)")
-                        .addLoreLines(" §a(!) §bRight §fclick here to §bdeposit §fbank funds §a(!)");
+                        .setDisplayName("§aBank Balance: §f(§a$" + balance + "§f)")
+                        .addLoreLines(DIVIDER)
+                        .addLoreLines(BULLET + "§fBank taxed daily at §c" + (int)(SCConstants.getEnterpriseDailyTax()*100) + "%")
+                        .addLoreLines(BULLET + "§fNext taxation: " + EnterpriseManager.getTimeUntilNextTaxation())
+                        .addLoreLines(BULLET + "§fAfter tax: §c$" + ChatUtils.formatMoney(enterprise.getBankBalance()*(1-SCConstants.getEnterpriseDailyTax())))
+                        .addLoreLines(DIVIDER)
+                        .addLoreLines("§b[Left-Click]§f Withdraw §7(CEO only)")
+                        .addLoreLines("§b[Right-Click]§f Deposit");
             }
 
             @Override
             public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull InventoryClickEvent event) {
                 player.closeInventory();
-                if(clickType.equals(ClickType.RIGHT)){
+                if (clickType.equals(ClickType.RIGHT)) {
                     player.sendMessage("§7Your enterprise bank currently has: §a" + balance);
                     player.sendMessage("§7Please enter the amount you would like to deposit");
                     ChatDepositAction.awaitingDeposit.add(player.getUniqueId());
-                }else if(clickType.equals(ClickType.LEFT)){
-                    if(enterprise.getMemberRole(player.getUniqueId()).equals(Role.CEO)){
+                } else if (clickType.equals(ClickType.LEFT)) {
+                    if (enterprise.getMemberRole(player.getUniqueId()).equals(Role.CEO)) {
                         player.sendMessage("§7Your enterprise bank currently has: §a" + balance);
                         player.sendMessage("§7Please enter the amount you would like to withdraw");
                         ChatWithdrawAction.awaitingWithdrawal.add(player.getUniqueId());
-                    }else{
+                    } else {
                         player.sendMessage("§cYou must be the CEO to withdraw enterprise funds.");
                     }
                 }
@@ -241,7 +359,7 @@ public class EnterpriseGUI {
         return chestItem;
     }
 
-    public void openMembersList(){
+    public void openMembersList() {
         Gui gui = Gui.normal()
                 .setStructure(
                         "# # # # # # # # #",
@@ -251,12 +369,14 @@ public class EnterpriseGUI {
                 .addIngredient('#', new SimpleItem(new ItemBuilder(Material.BLACK_STAINED_GLASS_PANE)
                         .setDisplayName(" ")))
                 .addIngredient('X', new SimpleItem(new ItemBuilder(Material.RED_STAINED_GLASS_PANE)
-                        .setDisplayName(" §cThis member slot is locked ")))
+                        .setDisplayName("§cLocked Slot")
+                        .addLoreLines("§7Expand capacity to unlock")))
                 .addIngredient('<', new AbstractItem() {
                     @Override
                     public ItemProvider getItemProvider() {
-                        return new ItemBuilder(Material.BARRIER)
-                                .setDisplayName(" §cReturn to Enterprise Menu ");
+                        return new ItemBuilder(Material.ARROW)
+                                .setDisplayName("§c« Back")
+                                .addLoreLines("§7Return to Enterprise Menu");
                     }
 
                     @Override
@@ -272,16 +392,15 @@ public class EnterpriseGUI {
         openerskull.setItemMeta(meta);
 
         ItemBuilder openerhead = new ItemBuilder(openerskull)
-                .setDisplayName(" §aYOU ")
-                .addLoreLines(" ")
-                .addLoreLines(" §a• §fRole: " + enterprise.getMemberRole(opener.getUniqueId()))
-                .addLoreLines(" ");
+                .setDisplayName("§a" + opener.getName() + " §7(You)")
+                .addLoreLines(DIVIDER)
+                .addLoreLines(BULLET + "§fRole: §a" + enterprise.getMemberRole(opener.getUniqueId()))
+                .addLoreLines(DIVIDER);
 
         gui.addItems(new SimpleItem(openerhead));
 
-        // Add top enterprises to slots 1–6
         for (UUID uuid : enterprise.getMembers().keySet()) {
-            if(uuid.equals(opener.getUniqueId()) || uuid.equals(SCConstants.serverCEO)) continue;
+            if (uuid.equals(opener.getUniqueId()) || uuid.equals(SCConstants.serverCEO)) continue;
             OfflinePlayer member = Bukkit.getOfflinePlayer(uuid);
 
             ItemStack memberSkull = new ItemStack(Material.PLAYER_HEAD);
@@ -290,10 +409,10 @@ public class EnterpriseGUI {
             memberSkull.setItemMeta(memberSkullMeta);
 
             ItemBuilder memberHead = new ItemBuilder(memberSkull)
-                    .setDisplayName(" §a" + member.getName())
-                    .addLoreLines(" ")
-                    .addLoreLines(" §a• §fRole: " + enterprise.getMemberRole(uuid))
-                    .addLoreLines(" ");
+                    .setDisplayName("§a" + member.getName())
+                    .addLoreLines(DIVIDER)
+                    .addLoreLines(BULLET + "§fRole: §a" + enterprise.getMemberRole(uuid))
+                    .addLoreLines(DIVIDER);
 
             gui.addItems(new SimpleItem(memberHead));
         }

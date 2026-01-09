@@ -32,7 +32,8 @@ public class QuarrySite extends JobSite {
     public static final Vector MINER_BOB_OFFSET =
             new Vector(-0.5, 0, 4.5);
 
-    // Base regen time: 2 hours (reduced from 3 for better pacing)
+    // Deprecated - use ConfigLoader.getGenerators().getMineBaseRegenIntervalSeconds() instead
+    @Deprecated
     public static final long DEFAULT_REGEN_INTERVAL_SECONDS = 60L * 60L * 2L; // 7200 seconds
 
     // XP per geode block mined (bonus XP for finding geodes)

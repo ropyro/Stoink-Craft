@@ -1,6 +1,7 @@
 package com.stoinkcraft.enterprise.commands.enterprisecmd.subcommands.admin;
 
 import com.stoinkcraft.StoinkCore;
+import com.stoinkcraft.config.ConfigLoader;
 import com.stoinkcraft.enterprise.commands.SubCommand;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -33,9 +34,9 @@ public class ReloadSubCMD implements SubCommand {
 
         player.sendMessage("Reloading StoinkCore...");
 
-        //TODO: reload logic
+        ConfigLoader.getInstance().reload();
 
-        player.sendMessage("StoinkCore successfully reloaded!");
+        player.sendMessage("StoinkCore reloaded!");
 
     }
 }

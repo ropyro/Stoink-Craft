@@ -2,6 +2,8 @@ package com.stoinkcraft.earning.jobsites.components.unlockable;
 
 import com.google.gson.annotations.Expose;
 
+import java.util.concurrent.TimeUnit;
+
 public class UnlockableProgress {
 
     @Expose
@@ -27,14 +29,17 @@ public class UnlockableProgress {
         this.buildDurationMillis = durationMillis;
     }
 
-    public long getRemainingSeconds() {
+    public long getRemainingMillis() {
         if (state != UnlockableState.BUILDING) return 0;
         long elapsed = System.currentTimeMillis() - buildStartTime;
         return Math.max(0, buildDurationMillis - elapsed);
     }
+    public long getRemainingSeconds() {
+        return TimeUnit.MILLISECONDS.toSeconds(getRemainingMillis());
+    }
 
     public boolean isFinished() {
-        return state == UnlockableState.BUILDING && getRemainingSeconds() <= 0;
+        return state == UnlockableState.BUILDING && getRemainingMillis() <= 0;
     }
 
     public void markUnlocked() {

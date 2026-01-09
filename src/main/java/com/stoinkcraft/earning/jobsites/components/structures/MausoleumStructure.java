@@ -226,7 +226,7 @@ public class MausoleumStructure extends JobSiteStructure {
 
         // Reward money
         StoinkCore.getEconomy().depositPlayer(killer, MONEY_PER_SPIDER);
-        ChatUtils.sendMessage(killer, "§a§l🕷 +$" + MONEY_PER_SPIDER + " +" + XP_PER_SPIDER + "xp");
+        killer.sendMessage("§a§l+$" + MONEY_PER_SPIDER + " +" + XP_PER_SPIDER + " Graveyard XP" + " §2🕷 Horde Spider");
 
         // Check if horde is cleared
         cleanupDeadSpiders();

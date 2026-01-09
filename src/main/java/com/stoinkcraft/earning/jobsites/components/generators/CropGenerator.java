@@ -11,6 +11,7 @@ import com.sk89q.worldedit.world.block.BlockState;
 import com.sk89q.worldedit.world.block.BlockType;
 import com.sk89q.worldedit.world.block.BlockTypes;
 import com.stoinkcraft.StoinkCore;
+import com.stoinkcraft.config.ConfigLoader;
 import com.stoinkcraft.earning.jobsites.JobSite;
 import com.stoinkcraft.earning.jobsites.components.JobSiteGenerator;
 import com.stoinkcraft.earning.jobsites.protection.ProtectedZone;
@@ -35,11 +36,6 @@ public class CropGenerator extends JobSiteGenerator implements ProtectedZone {
     private final CuboidRegion dirtLayerRegion;
 
     private final String regionName;
-
-    // Base growth chance per upgrade level:
-    // Level 1 = 2%
-    // Level 10 = 20%
-    private static final double BASE_GROWTH_CHANCE = 0.015; // 1.5% per tick per level
 
     public CropGenerator(Location corner1, Location corner2, JobSite parent, String regionName) {
         super(parent);
@@ -109,7 +105,8 @@ public class CropGenerator extends JobSiteGenerator implements ProtectedZone {
 
         if (level <= 0) return;
 
-        double chance = BASE_GROWTH_CHANCE * level; // 2% per level
+        double baseChance = ConfigLoader.getGenerators().getCropBaseGrowthChance();
+        double chance = baseChance * level;
 
         Bukkit.getScheduler().runTaskAsynchronously(StoinkCore.getInstance(), () -> {
             com.sk89q.worldedit.world.World weWorld = FaweAPI.getWorld(bukkitWorld.getName());

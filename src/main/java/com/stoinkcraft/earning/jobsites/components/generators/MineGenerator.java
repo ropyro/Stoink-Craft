@@ -9,6 +9,7 @@ import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.world.block.BlockType;
 import com.sk89q.worldedit.world.block.BlockTypes;
+import com.stoinkcraft.config.ConfigLoader;
 import com.stoinkcraft.earning.jobsites.JobSite;
 import com.stoinkcraft.earning.jobsites.JobSiteType;
 import com.stoinkcraft.earning.jobsites.components.JobSiteGenerator;
@@ -18,7 +19,6 @@ import com.stoinkcraft.earning.jobsites.protection.ProtectionQuery;
 import com.stoinkcraft.earning.jobsites.protection.ProtectionResult;
 import com.stoinkcraft.earning.jobsites.sites.quarry.OreSet;
 import com.stoinkcraft.earning.jobsites.sites.quarry.QuarryData;
-import com.stoinkcraft.earning.jobsites.sites.quarry.QuarrySite;
 import com.stoinkcraft.utils.ChatUtils;
 import eu.decentsoftware.holograms.api.DHAPI;
 import org.bukkit.*;
@@ -36,11 +36,6 @@ public class MineGenerator extends JobSiteGenerator implements ProtectedZone {
 
     private final CuboidRegion cuboidRegion;
     private final String regionName;
-
-    // Geode settings
-    private static final double GEODE_SPAWN_CHANCE = 0.025; // 2.5% of blocks
-    private static final BlockType GEODE_BLOCK = BlockTypes.AMETHYST_BLOCK;
-    private static final BlockType GEODE_CLUSTER = BlockTypes.AMETHYST_CLUSTER;
 
     public MineGenerator(
             Location corner1,
@@ -148,6 +143,7 @@ public class MineGenerator extends JobSiteGenerator implements ProtectedZone {
 
     private void spawnGeodes() {
         Random random = new Random();
+        double geodeSpawnChance = ConfigLoader.getGenerators().getMineGeodeSpawnChance();
 
         BlockVector3 min = cuboidRegion.getMinimumPoint();
         BlockVector3 max = cuboidRegion.getMaximumPoint();
@@ -155,7 +151,7 @@ public class MineGenerator extends JobSiteGenerator implements ProtectedZone {
         for (int x = min.x(); x <= max.x(); x++) {
             for (int y = min.y(); y <= max.y(); y++) {
                 for (int z = min.z(); z <= max.z(); z++) {
-                    if (random.nextDouble() < GEODE_SPAWN_CHANCE) {
+                    if (random.nextDouble() < geodeSpawnChance) {
                         Location loc = new Location(bukkitWorld, x, y, z);
                         Block block = loc.getBlock();
 
@@ -224,11 +220,12 @@ public class MineGenerator extends JobSiteGenerator implements ProtectedZone {
         QuarryData data = getQuarryData();
         int speedLevel = data.getLevel("regen_speed");
 
-        long base = QuarrySite.DEFAULT_REGEN_INTERVAL_SECONDS; // 7200
-        long reductionPerLevel = 60L * 10L; // 10 minutes = 600 seconds
+        long base = ConfigLoader.getGenerators().getMineBaseRegenIntervalSeconds();
+        long reductionPerLevel = ConfigLoader.getGenerators().getMineRegenSpeedReductionPerLevel();
+        long minInterval = ConfigLoader.getGenerators().getMineMinRegenIntervalSeconds();
         long reduction = speedLevel * reductionPerLevel;
 
-        return Math.max(60L * 30L, base - reduction); // Minimum 30 minutes
+        return Math.max(minInterval, base - reduction);
     }
 
     public long getRemainingSeconds() {

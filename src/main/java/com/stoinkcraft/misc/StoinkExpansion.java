@@ -364,8 +364,8 @@ public class StoinkExpansion extends PlaceholderExpansion {
                 }
                 case BUILDING -> {
                     long timeRemaining = graveyard.getData()
-                            .getUnlockableProgress(mausoleum.getUnlockableId()).getRemainingSeconds();
-                    yield "Mausoleum: §eBuilding Time Remaining: §a" + ChatUtils.formatDurationSeconds(timeRemaining);
+                            .getUnlockableProgress(mausoleum.getUnlockableId()).getRemainingMillis();
+                    yield "Mausoleum: §eBuilding Time Remaining: §a" + ChatUtils.formatDuration(timeRemaining);
                 }
                 case UNLOCKED -> {
                     if (mausoleum.isHordeActive()) {

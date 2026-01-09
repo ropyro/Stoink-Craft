@@ -85,7 +85,7 @@ public class CollectionsGui {
     private SimpleItem createCollectionListHelp() {
         int totalCollections = CollectionType.getByJobSiteType(jobSite.getType()).size();
         int completedCollections = (int) CollectionType.getByJobSiteType(jobSite.getType()).stream()
-                .filter(type -> jobSite.getData().getCollectionLevel(type) >= CollectionRegistry.MAX_LEVEL)
+                .filter(type -> jobSite.getData().getCollectionLevel(type) >= CollectionRegistry.getMaxLevel())
                 .count();
 
         return new SimpleItem(new ItemBuilder(Material.OAK_SIGN)
@@ -98,7 +98,7 @@ public class CollectionsGui {
                 .addLoreLines(SUB_HEADER + "How It Works §8«")
                 .addLoreLines(BULLET + "§fCollect resources to §alevel up")
                 .addLoreLines(BULLET + "§fEach level grants §eJobsite XP")
-                .addLoreLines(BULLET + "§fMax level: §6" + CollectionRegistry.MAX_LEVEL)
+                .addLoreLines(BULLET + "§fMax level: §6" + CollectionRegistry.getMaxLevel())
                 .addLoreLines(DIVIDER)
                 .addLoreLines(ARROW + "Click a collection for details")
         );
@@ -110,7 +110,7 @@ public class CollectionsGui {
             public ItemProvider getItemProvider() {
                 long count = jobSite.getData().getCollectionCount(type);
                 int level = jobSite.getData().getCollectionLevel(type);
-                boolean maxed = level >= CollectionRegistry.MAX_LEVEL;
+                boolean maxed = level >= CollectionRegistry.getMaxLevel();
 
                 ItemBuilder item = new ItemBuilder(type.getIcon());
 
@@ -127,7 +127,7 @@ public class CollectionsGui {
 
                 // Progress section
                 item.addLoreLines(SUB_HEADER + "Progress §8«");
-                item.addLoreLines(BULLET + "§fLevel: §a" + level + "§7/§f" + CollectionRegistry.MAX_LEVEL);
+                item.addLoreLines(BULLET + "§fLevel: §a" + level + "§7/§f" + CollectionRegistry.getMaxLevel());
                 item.addLoreLines(BULLET + "§fCollected: §e" + NUMBER_FORMAT.format(count));
 
                 if (!maxed) {
@@ -177,7 +177,7 @@ public class CollectionsGui {
         Gui gui = builder.build();
 
         // Add level items (1-27, fits in 3 rows of 9)
-        for (int level = 1; level <= CollectionRegistry.MAX_LEVEL; level++) {
+        for (int level = 1; level <= CollectionRegistry.getMaxLevel(); level++) {
             gui.addItems(createLevelItem(type, level, currentLevel, count));
         }
 
@@ -191,7 +191,7 @@ public class CollectionsGui {
                 .addLoreLines(SUB_HEADER + "Level Rewards §8«")
                 .addLoreLines(BULLET + "§fEach level grants §aJobsite XP")
                 .addLoreLines(BULLET + "§fXP scales with level")
-                .addLoreLines(BULLET + "§fMax Level: §6" + CollectionRegistry.MAX_LEVEL)
+                .addLoreLines(BULLET + "§fMax Level: §6" + CollectionRegistry.getMaxLevel())
                 .addLoreLines(DIVIDER)
                 .addLoreLines(SUB_HEADER + "Legend §8«")
                 .addLoreLines(BULLET + "§a■ §7Completed")
@@ -203,7 +203,7 @@ public class CollectionsGui {
     private SimpleItem createSummaryItem(CollectionType type) {
         long count = jobSite.getData().getCollectionCount(type);
         int level = jobSite.getData().getCollectionLevel(type);
-        boolean maxed = level >= CollectionRegistry.MAX_LEVEL;
+        boolean maxed = level >= CollectionRegistry.getMaxLevel();
 
         // Calculate total XP earned from this collection
         int totalXpEarned = 0;
@@ -217,7 +217,7 @@ public class CollectionsGui {
 
         item.addLoreLines(SUB_HEADER + "Statistics §8«");
         item.addLoreLines(BULLET + "§fTotal Collected: §e" + NUMBER_FORMAT.format(count));
-        item.addLoreLines(BULLET + "§fCurrent Level: §a" + level + "§7/§f" + CollectionRegistry.MAX_LEVEL);
+        item.addLoreLines(BULLET + "§fCurrent Level: §a" + level + "§7/§f" + CollectionRegistry.getMaxLevel());
         item.addLoreLines(BULLET + "§fXP Earned: §a" + NUMBER_FORMAT.format(totalXpEarned));
         item.addLoreLines(DIVIDER);
 
