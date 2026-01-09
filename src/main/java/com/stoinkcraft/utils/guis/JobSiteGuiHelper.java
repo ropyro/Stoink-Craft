@@ -207,7 +207,6 @@ public class JobSiteGuiHelper {
     // ==================== Messages ====================
 
     public static void sendSuccess(Player p, String message) {
-        p.closeInventory();
         ChatUtils.sendMessage(p, "§a✔ " + message);
     }
 
