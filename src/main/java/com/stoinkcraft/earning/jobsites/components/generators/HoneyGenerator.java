@@ -9,6 +9,7 @@ import com.stoinkcraft.earning.jobsites.protection.ProtectionAction;
 import com.stoinkcraft.earning.jobsites.protection.ProtectionQuery;
 import com.stoinkcraft.earning.jobsites.protection.ProtectionResult;
 import com.stoinkcraft.earning.jobsites.sites.farmland.FarmlandSite;
+import com.stoinkcraft.utils.ChatUtils;
 import com.stoinkcraft.utils.TimeUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -127,9 +128,11 @@ public class HoneyGenerator extends JobSiteGenerator implements ProtectedZone {
         int percent = (int) ((honeyLevel / (double) ConfigLoader.getGenerators().getHoneyMaxHoney()) * 100);
         List<String> lines = List.of();
         if (!site.areBeeHivesBuilt()) {
-            lines = List.of("");
+            lines = List.of();
         } else if(percent == 100){
                 lines = List.of("#ICON: HONEYCOMB");
+        } else {
+            lines = List.of(getProgressBar());
         }
         hologram.setLines(0, lines);
     }
@@ -137,11 +140,17 @@ public class HoneyGenerator extends JobSiteGenerator implements ProtectedZone {
     private String getProgressBar() {
         int percent = (int) ((honeyLevel / (double) ConfigLoader.getGenerators().getHoneyMaxHoney()) * 100);
 
-        int bars = percent / 10;
-        String bar = ChatColor.GOLD + "█".repeat(bars)
-                + ChatColor.GRAY + "█".repeat(10 - bars);
+        int timeRemaining = (ConfigLoader.getGenerators().getHoneyMaxHoney() - honeyLevel) * getGenerationIntervalTicks() - ticksSinceLastHoney;
 
-        return bar + ChatColor.WHITE + " " + percent + "%";
+        return ChatColor.GOLD + ChatUtils.formatDurationSeconds(timeRemaining);
+    }
+
+    private String getHoneyBar() {
+        int maxHoney = ConfigLoader.getGenerators().getHoneyMaxHoney();
+        String bar = ChatColor.GOLD + "█".repeat(honeyLevel)
+                + ChatColor.GRAY + "█".repeat(maxHoney - honeyLevel);
+
+        return bar; // + ChatColor.WHITE + " " + percent + "%";
     }
 
     private void readHoneyFromBlock() {
