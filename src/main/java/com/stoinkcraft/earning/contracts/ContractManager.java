@@ -68,7 +68,8 @@ public class ContractManager {
             feedbackManager.clearIfFinished(context.getPlayer(), contract);
 
         }
-        if(!getContracts(enterprise).stream().anyMatch(ac -> !ac.isCompleted())){
+
+        if(!getContracts(enterprise, jobSiteType).stream().anyMatch(ac -> !ac.isCompleted())){
             regenerateContracts(enterprise, jobSiteType);
         }
     }
