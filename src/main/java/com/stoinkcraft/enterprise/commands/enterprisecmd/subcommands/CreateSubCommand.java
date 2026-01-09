@@ -1,6 +1,7 @@
 package com.stoinkcraft.enterprise.commands.enterprisecmd.subcommands;
 
 import com.stoinkcraft.StoinkCore;
+import com.stoinkcraft.config.ConfigLoader;
 import com.stoinkcraft.enterprise.commands.SubCommand;
 import com.stoinkcraft.enterprise.Enterprise;
 import com.stoinkcraft.enterprise.EnterpriseManager;
@@ -41,8 +42,10 @@ public class CreateSubCommand implements SubCommand {
             return;
         }
 
-        if(StoinkCore.getEconomy().getBalance(player) < SCConstants.ENTERPRISE_FOUNDING_COST){
-            ChatUtils.sendMessage(player,"Insufficient funds. Founding enterprise costs: " + ChatUtils.formatMoney(SCConstants.ENTERPRISE_FOUNDING_COST));
+        double cost = ConfigLoader.getEconomy().getEnterpriseFoundingCost();
+        String formattedCost = ChatUtils.formatMoney(cost);
+        if(StoinkCore.getEconomy().getBalance(player) < cost){
+            ChatUtils.sendMessage(player,"Insufficient funds. Founding enterprise costs: " + formattedCost);
             return;
         }
 
@@ -54,13 +57,13 @@ public class CreateSubCommand implements SubCommand {
                 entName.append(args[i] + " ");
         }
 
-        new ConfirmationGUI(player, "Create Enterprise for $10k",
+        new ConfirmationGUI(player, "Create Enterprise for " + formattedCost,
                 () -> {
                     String name = entName.toString();
                     Enterprise e = new Enterprise(name, player.getUniqueId());
                     EnterpriseManager.getEnterpriseManager().createEnterprise(e);
 
-                    StoinkCore.getEconomy().withdrawPlayer(player, SCConstants.ENTERPRISE_FOUNDING_COST);
+                    StoinkCore.getEconomy().withdrawPlayer(player, cost);
 
                     ChatUtils.sendMessage(player,ChatColor.GREEN + "Enterprise '" + name + "' created.");
                 }, () ->{
