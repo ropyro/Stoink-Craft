@@ -75,11 +75,13 @@ public class ActiveContract {
     public void addProgress(UUID playerId, int amount) {
         if (!canProgress()) return;
 
-        progress += amount;
-        contributions.merge(playerId, amount, Integer::sum);
+        int remaining = definition.targetAmount() - progress;
+        int actualAmount = Math.min(amount, remaining);
+
+        progress += actualAmount;
+        contributions.merge(playerId, actualAmount, Integer::sum);
 
         if (progress >= definition.targetAmount()) {
-            progress = definition.targetAmount();
             completed = true;
             onCompleted();
         }

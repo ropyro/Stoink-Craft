@@ -53,7 +53,7 @@ public class ContractManager {
     public void handleContext(Enterprise enterprise, ContractContext context) {
         JobSiteType jobSiteType = context.getJobSiteType();
         for (ActiveContract contract : getContracts(enterprise, context.getJobSiteType())) {
-            if (!contract.canProgress()) continue;
+            if (!contract.canProgress() || contract.isCompleted()) continue;
 
             ContractTrigger trigger = contract.getDefinition().trigger();
             if (!trigger.matches(context)) continue;
@@ -67,6 +67,7 @@ public class ContractManager {
             feedbackManager.showBossBar(context.getPlayer(), contract);
             feedbackManager.clearIfFinished(context.getPlayer(), contract);
 
+            break;
         }
 
         if(!getContracts(enterprise, jobSiteType).stream().anyMatch(ac -> !ac.isCompleted())){

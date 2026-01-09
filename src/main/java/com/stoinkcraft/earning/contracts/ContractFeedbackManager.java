@@ -17,28 +17,38 @@ import java.util.*;
 public class ContractFeedbackManager {
 
     private static final long INACTIVITY_TIMEOUT_MS = 10_000; // 10 seconds
-    private final Map<UUID, BossBar> activeBars = new HashMap<>();
-    private final Map<UUID, Long> lastUpdate = new HashMap<>();
+    private static final int MAX_BARS_PER_PLAYER = 4; // Limit to prevent UI clutter
+
+    // Map<PlayerId, Map<ContractId, BossBar>>
+    private final Map<UUID, Map<String, BossBar>> activeBars = new HashMap<>();
+    // Map<PlayerId, Map<ContractId, LastUpdateTime>>
+    private final Map<UUID, Map<String, Long>> lastUpdate = new HashMap<>();
 
 
     /* =======================
        Boss Bar Progress
        ======================= */
     public void showBossBar(Player player, ActiveContract contract) {
+        UUID playerId = player.getUniqueId();
+        String contractId = contract.getDefinition().id();
 
-        BossBar bar = activeBars.computeIfAbsent(
-                player.getUniqueId(),
-                uuid -> Bukkit.createBossBar(
-                        "",
-                        BarColor.GREEN,
-                        BarStyle.SOLID
-                )
-        );
+        Map<String, BossBar> playerBars = activeBars.computeIfAbsent(
+                playerId, k -> new LinkedHashMap<>()); // LinkedHashMap preserves insertion order
+
+        Map<String, Long> playerUpdates = lastUpdate.computeIfAbsent(
+                playerId, k -> new HashMap<>());
+
+        // Get or create bar for this specific contract
+        BossBar bar = playerBars.computeIfAbsent(contractId, id -> {
+            // Enforce max bars limit - remove oldest if at capacity
+            if (playerBars.size() >= MAX_BARS_PER_PLAYER) {
+                removeOldestBar(playerBars, playerUpdates);
+            }
+            return Bukkit.createBossBar("", BarColor.GREEN, BarStyle.SOLID);
+        });
 
         ContractDefinition def = contract.getDefinition();
-
-        double progress =
-                (double) contract.getProgress() / contract.getTarget();
+        double progress = (double) contract.getProgress() / contract.getTarget();
 
         bar.setTitle("§e" + def.displayName()
                 + " §7(" + contract.getProgress()
@@ -48,7 +58,7 @@ public class ContractFeedbackManager {
         bar.addPlayer(player);
         bar.setVisible(true);
 
-        lastUpdate.put(player.getUniqueId(), System.currentTimeMillis());
+        playerUpdates.put(contractId, System.currentTimeMillis());
 
         if (contract.isCompleted()) {
             bar.setColor(BarColor.BLUE);
@@ -57,20 +67,78 @@ public class ContractFeedbackManager {
     }
 
     /**
-     * Clears the boss bar for a player.
+     * Removes the oldest (least recently updated) bar when at capacity.
      */
-    public void clear(Player player) {
-        BossBar bar = activeBars.remove(player.getUniqueId());
-        if (bar != null) {
-            bar.removeAll();
+    private void removeOldestBar(Map<String, BossBar> playerBars, Map<String, Long> playerUpdates) {
+        String oldestId = playerUpdates.entrySet().stream()
+                .min(Map.Entry.comparingByValue())
+                .map(Map.Entry::getKey)
+                .orElse(playerBars.keySet().iterator().next());
+
+        BossBar oldBar = playerBars.remove(oldestId);
+        if (oldBar != null) {
+            oldBar.removeAll();
+        }
+        playerUpdates.remove(oldestId);
+    }
+
+    /**
+     * Clears a specific contract's boss bar for a player.
+     */
+    public void clearContract(Player player, ActiveContract contract) {
+        clearContract(player.getUniqueId(), contract.getDefinition().id());
+    }
+
+    /**
+     * Clears a specific contract's boss bar by IDs.
+     */
+    private void clearContract(UUID playerId, String contractId) {
+        Map<String, BossBar> playerBars = activeBars.get(playerId);
+        if (playerBars != null) {
+            BossBar bar = playerBars.remove(contractId);
+            if (bar != null) {
+                bar.removeAll();
+            }
+
+            // Clean up empty maps
+            if (playerBars.isEmpty()) {
+                activeBars.remove(playerId);
+            }
+        }
+
+        Map<String, Long> playerUpdates = lastUpdate.get(playerId);
+        if (playerUpdates != null) {
+            playerUpdates.remove(contractId);
+
+            if (playerUpdates.isEmpty()) {
+                lastUpdate.remove(playerId);
+            }
         }
     }
 
     /**
-     * Clears all active boss bars
+     * Clears all boss bars for a player.
      */
-    public void clearAll(){
-        activeBars.keySet().stream().forEach(uuid -> activeBars.remove(uuid).removeAll());
+    public void clear(Player player) {
+        UUID playerId = player.getUniqueId();
+
+        Map<String, BossBar> playerBars = activeBars.remove(playerId);
+        if (playerBars != null) {
+            playerBars.values().forEach(BossBar::removeAll);
+        }
+
+        lastUpdate.remove(playerId);
+    }
+
+    /**
+     * Clears all active boss bars for all players.
+     */
+    public void clearAll() {
+        activeBars.values().forEach(playerBars ->
+                playerBars.values().forEach(BossBar::removeAll)
+        );
+        activeBars.clear();
+        lastUpdate.clear();
     }
 
     /**
@@ -78,36 +146,53 @@ public class ContractFeedbackManager {
      */
     public void clearIfFinished(Player player, ActiveContract contract) {
         if (contract.isCompleted() || contract.isExpired()) {
-            clear(player);
+            clearContract(player, contract);
         }
     }
 
     public void startCleanupTask(JavaPlugin plugin) {
-
         Bukkit.getScheduler().runTaskTimer(plugin, () -> {
-
             long now = System.currentTimeMillis();
 
-            Iterator<Map.Entry<UUID, Long>> it = lastUpdate.entrySet().iterator();
-            while (it.hasNext()) {
+            Iterator<Map.Entry<UUID, Map<String, Long>>> playerIt = lastUpdate.entrySet().iterator();
 
-                Map.Entry<UUID, Long> entry = it.next();
+            while (playerIt.hasNext()) {
+                Map.Entry<UUID, Map<String, Long>> playerEntry = playerIt.next();
+                UUID playerId = playerEntry.getKey();
+                Map<String, Long> contractUpdates = playerEntry.getValue();
+                Map<String, BossBar> playerBars = activeBars.get(playerId);
 
-                if (now - entry.getValue() < INACTIVITY_TIMEOUT_MS) {
+                if (playerBars == null) {
+                    playerIt.remove();
                     continue;
                 }
 
-                UUID playerId = entry.getKey();
-                Player player = Bukkit.getPlayer(playerId);
+                // Check each contract's bar for this player
+                Iterator<Map.Entry<String, Long>> contractIt = contractUpdates.entrySet().iterator();
 
-                if (player != null) {
-                    clear(player);
+                while (contractIt.hasNext()) {
+                    Map.Entry<String, Long> contractEntry = contractIt.next();
+
+                    if (now - contractEntry.getValue() < INACTIVITY_TIMEOUT_MS) {
+                        continue;
+                    }
+
+                    // Inactive - remove this contract's bar
+                    String contractId = contractEntry.getKey();
+                    BossBar bar = playerBars.remove(contractId);
+                    if (bar != null) {
+                        bar.removeAll();
+                    }
+                    contractIt.remove();
                 }
 
-                it.remove();
+                // Clean up player entry if no more active contracts
+                if (contractUpdates.isEmpty()) {
+                    playerIt.remove();
+                    activeBars.remove(playerId);
+                }
             }
-
-        }, 40L, 40L); // every 2 seconds
+        }, 40L, 40L);
     }
 
     /* =======================
