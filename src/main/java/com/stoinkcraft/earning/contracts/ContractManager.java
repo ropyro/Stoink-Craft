@@ -9,6 +9,8 @@ import com.stoinkcraft.earning.jobsites.JobSiteType;
 import com.stoinkcraft.utils.ContractTimeUtil;
 
 import java.util.*;
+import java.util.Comparator;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -52,11 +54,17 @@ public class ContractManager {
 
     public void handleContext(Enterprise enterprise, ContractContext context) {
         JobSiteType jobSiteType = context.getJobSiteType();
-        for (ActiveContract contract : getContracts(enterprise, context.getJobSiteType())) {
-            if (!contract.canProgress() || contract.isCompleted()) continue;
 
+        // Find the matching contract with the lowest targetAmount
+        Optional<ActiveContract> lowestContract = getContracts(enterprise, context.getJobSiteType()).stream()
+                .filter(ActiveContract::canProgress)
+                .filter(c -> !c.isCompleted())
+                .filter(c -> c.getDefinition().trigger().matches(context))
+                .min(Comparator.comparingInt(c -> c.getDefinition().targetAmount()));
+
+        if (lowestContract.isPresent()) {
+            ActiveContract contract = lowestContract.get();
             ContractTrigger trigger = contract.getDefinition().trigger();
-            if (!trigger.matches(context)) continue;
 
             contract.addProgress(
                     context.getPlayer().getUniqueId(),
@@ -66,8 +74,6 @@ public class ContractManager {
             ContractFeedbackManager feedbackManager = StoinkCore.getInstance().getContractFeedbackManager();
             feedbackManager.showBossBar(context.getPlayer(), contract);
             feedbackManager.clearIfFinished(context.getPlayer(), contract);
-
-            break;
         }
 
         if(!getContracts(enterprise, jobSiteType).stream().anyMatch(ac -> !ac.isCompleted())){
