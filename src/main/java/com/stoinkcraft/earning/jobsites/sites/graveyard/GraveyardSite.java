@@ -324,17 +324,13 @@ public class GraveyardSite extends JobSite {
     }
 
     // ==================== Soul Handling ====================
-
-    /**
-     * Called when a graveyard mob is killed - handles soul drops
-     */
     /**
      * Called when a graveyard mob is killed - handles soul drops
      */
     public void onMobKilled(Player killer, EntityType entityType) {
         if (Math.random() < getSoulDropChance()) {
             getData().addSouls(1);
-            ChatUtils.sendMessage(killer, ChatColor.LIGHT_PURPLE + "✦ +1 Soul");
+            killer.sendMessage(ChatColor.LIGHT_PURPLE + "+1 Soul " + ChatColor.DARK_PURPLE + "✦ Graveyard");
 
             ContractContext soulContext = new ContractContext(
                     killer,
