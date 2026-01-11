@@ -15,11 +15,11 @@ import org.bukkit.event.Listener;
 
 import java.util.UUID;
 
-public class JobSiteNPCListener implements Listener {
+public class NPCInteractListener implements Listener {
 
     private final StoinkCore plugin;
 
-    public JobSiteNPCListener(StoinkCore plugin) {
+    public NPCInteractListener(StoinkCore plugin) {
         this.plugin = plugin;
     }
 
