@@ -325,12 +325,10 @@ public class EnterpriseGUI {
                 return new ItemBuilder(Material.CHEST)
                         .setDisplayName("§aBank Balance: §f(§a$" + balance + "§f)")
                         .addLoreLines(DIVIDER)
-                        .addLoreLines(BULLET + "§fBank taxed daily at §c" + (int)(SCConstants.getEnterpriseDailyTax()*100) + "%")
-                        .addLoreLines(BULLET + "§fNext taxation: " + EnterpriseManager.getTimeUntilNextTaxation())
-                        .addLoreLines(BULLET + "§fAfter tax: §c$" + ChatUtils.formatMoney(enterprise.getBankBalance()*(1-SCConstants.getEnterpriseDailyTax())))
+                        .addLoreLines(BULLET + "Balanced accrued through daily/weekly contracts")
                         .addLoreLines(DIVIDER)
-                        .addLoreLines("§b[Left-Click]§f Withdraw §7(CEO only)")
-                        .addLoreLines("§b[Right-Click]§f Deposit");
+                        .addLoreLines("§c[Left-Click]§e Withdraw §7(CEO only)")
+                        .addLoreLines("§a[Right-Click]§e Deposit");
             }
 
             @Override

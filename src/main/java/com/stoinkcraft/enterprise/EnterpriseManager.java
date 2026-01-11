@@ -267,41 +267,4 @@ public class EnterpriseManager {
     }
 
 
-    private static Instant lastRotationTime;
-    private static final Duration ROTATION_INTERVAL = Duration.ofDays(1);
-
-    public static void startDailyTaxes(JavaPlugin plugin) {
-        lastRotationTime = Instant.now();
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                // Run heavy economy and file I/O async
-                Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-                    updateBankBalances(); // your method that handles tax logic
-                    lastRotationTime = Instant.now();
-                });
-            }
-        }.runTaskTimer(plugin, 20L * 60 * 60 * 24, 20L * 60 * 60 * 24); // 24 hours
-    }
-
-
-    public static String getTimeUntilNextTaxation() {
-        if (lastRotationTime == null) {
-            return "Unknown";
-        }
-
-        Instant nextRotation = lastRotationTime.plus(ROTATION_INTERVAL);
-        Duration remaining = Duration.between(Instant.now(), nextRotation);
-
-        if (remaining.isNegative()) {
-            return "00h 00m 00s";
-        }
-
-        long hours = remaining.toHours();
-        long minutes = remaining.toMinutesPart();
-        long seconds = remaining.toSecondsPart();
-
-        return String.format("%02dh %02dm %02ds", hours, minutes, seconds);
-    }
-
 }

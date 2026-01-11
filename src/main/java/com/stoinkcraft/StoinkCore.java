@@ -284,7 +284,7 @@ public class StoinkCore extends JavaPlugin {
             }
         }.runTaskTimerAsynchronously(this, 20L * 60 * 20, 20L * 60 * 20);
 
-        em.startDailyTaxes(this);
+        //em.startDailyTaxes(this);
     }
 
     public static StoinkCore getInstance() {
