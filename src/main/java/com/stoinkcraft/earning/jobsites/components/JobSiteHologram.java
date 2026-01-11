@@ -3,6 +3,7 @@ package com.stoinkcraft.earning.jobsites.components;
 import com.stoinkcraft.earning.jobsites.JobSite;
 import eu.decentsoftware.holograms.api.DHAPI;
 import eu.decentsoftware.holograms.api.holograms.Hologram;
+import eu.decentsoftware.holograms.event.HologramClickEvent;
 import org.bukkit.Location;
 import org.bukkit.util.Vector;
 
@@ -12,12 +13,14 @@ public class JobSiteHologram implements JobSiteComponent{
 
     private JobSite parent;
     private String id;
+    private String name;
     private Vector offset;
     private List<String> lines;
 
-    public JobSiteHologram(JobSite parent, String id, Vector offset, List<String> lines) {
+    public JobSiteHologram(JobSite parent, String name, Vector offset, List<String> lines) {
         this.parent = parent;
-        this.id = id;
+        this.name = name;
+        this.id = parent.getEnterprise().getID() + "_" + parent.getType() + "_" + name;
         this.offset = offset;
         this.lines = lines;
     }
@@ -43,6 +46,10 @@ public class JobSiteHologram implements JobSiteComponent{
 
     @Override
     public void levelUp() {
+
+    }
+
+    public void onHologramInteract(HologramClickEvent event){
 
     }
 

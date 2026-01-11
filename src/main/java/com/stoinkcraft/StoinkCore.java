@@ -265,8 +265,8 @@ public class StoinkCore extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new BlockBreakListener(), this);
         getServer().getPluginManager().registerEvents(new EntityDeathListener(), this);
         getServer().getPluginManager().registerEvents(new PlayerInteractListener(), this);
-        //Farmland
-        getServer().getPluginManager().registerEvents(new JobSiteNPCListener(this), this);
+        getServer().getPluginManager().registerEvents(new NPCInteractListener(this), this);
+        getServer().getPluginManager().registerEvents(new HologramClickListener(this), this);
     }
 
     private void startTasks(){
@@ -321,23 +321,6 @@ public class StoinkCore extends JavaPlugin {
             EnterpriseManager.getEnterpriseManager().recordPriceSnapshots();
         }, 0L, 20L * 60 * 5);
     }
-
-//    private void startAutoSaveTask() {
-//        new BukkitRunnable() {
-//            @Override
-//            public void run() {
-//                try {
-//                    EnterpriseStorage.saveAllEnterprises();
-//                    ShareStorage.saveShares();
-//                    getLogger().info("[AutoSave] Enterprises and shares saved successfully.");
-//                } catch (Exception e) {
-//                    getLogger().severe("[AutoSave] Failed to save enterprises/shares: " + e.getMessage());
-//                    e.printStackTrace();
-//                }
-//            }
-//        }.runTaskTimerAsynchronously(this, 20L * 60L * 5L, 20L * 60L * 5L); // every 5 minutes
-//    }
-
 
     public void updateTopCeoNpcs() {
         // Run async for data sorting and lookups
