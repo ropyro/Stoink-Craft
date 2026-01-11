@@ -24,7 +24,12 @@ public enum ProtectionAction {
     /**
      * Damaging or killing an entity
      */
-    KILL_ENTITY,
+    PVE,
+
+    /**
+     * Attacking or damaging another player
+     */
+    PVP,
 
     /**
      * Explosion damage to blocks (TNT, creepers, etc.)

@@ -10,19 +10,8 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Tag;
 import org.bukkit.block.Block;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.*;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityExplodeEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.inventory.EquipmentSlot;
-import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
@@ -57,18 +46,13 @@ public class ProtectionManager implements Listener {
 
         for (Enterprise enterprise : enterprises) {
             Collection<JobSite> jobSites = enterprise.getJobSiteManager().getAllJobSites();
-            //plugin.getLogger().info("[Protection] Enterprise " + enterprise.getName() + " has " + jobSites.size() + " jobsites");
 
             for (JobSite jobSite : jobSites) {
-               // plugin.getLogger().info("[Protection] Indexing jobsite: " + jobSite.getType() + " at " + jobSite.getSpawnPoint());
 
                 var region = jobSite.getRegion();
                 if (region == null) {
-                  //  plugin.getLogger().warning("[Protection] JobSite " + jobSite.getType() + " has NULL region!");
                     continue;
                 }
-
-                //plugin.getLogger().info("[Protection] Region bounds: " + region.getMinimumPoint() + " to " + region.getMaximumPoint());
 
                 indexJobSite(jobSite);
             }
@@ -151,13 +135,8 @@ public class ProtectionManager implements Listener {
      * Main protection check. Returns ALLOW if action should proceed, DENY if blocked.
      */
     public ProtectionResult checkProtection(@NotNull ProtectionQuery query, boolean sendDenyMessage) {
-//        plugin.getLogger().info("[Protection] Checking: " + query.player().getName() +
-//                " | Action: " + query.action() +
-//                " | Location: " + query.location().getBlockX() + "," + query.location().getBlockY() + "," + query.location().getBlockZ());
-
         // Bypass permission check
         if (query.player().hasPermission(BYPASS_PERMISSION)) {
-       //     plugin.getLogger().info("[Protection] Result: ALLOW (bypass permission)");
             return ProtectionResult.ALLOW;
         }
 
@@ -166,7 +145,6 @@ public class ProtectionManager implements Listener {
         Set<JobSite> jobSites = chunkIndex.get(chunkKey);
 
         if (jobSites == null || jobSites.isEmpty()) {
-         //   plugin.getLogger().info("[Protection] Result: ALLOW (no jobsites in chunk " + chunkKey + ")");
             return ProtectionResult.ALLOW;
         }
 
@@ -180,17 +158,12 @@ public class ProtectionManager implements Listener {
         }
 
         if (containingJobSite == null) {
-         //   plugin.getLogger().info("[Protection] Result: ALLOW (not inside any jobsite bounds)");
             return ProtectionResult.ALLOW;
         }
-
-      //  plugin.getLogger().info("[Protection] Found JobSite: " + containingJobSite.getType());
 
         // Check enterprise membership
         Enterprise enterprise = containingJobSite.getEnterprise();
         boolean isMember = enterprise.isMember(query.player().getUniqueId());
-
-       // plugin.getLogger().info("[Protection] Enterprise: " + enterprise.getName() + " | isMember: " + isMember);
 
         if (!isMember) {
             if (sendDenyMessage) {
@@ -199,7 +172,6 @@ public class ProtectionManager implements Listener {
                         ChatColor.RED + "You don't have permission to do that here!"
                 );
             }
-           // plugin.getLogger().info("[Protection] Result: DENY (not a member)");
             return ProtectionResult.DENY;
         }
 
@@ -207,9 +179,7 @@ public class ProtectionManager implements Listener {
         for (JobSiteComponent component : containingJobSite.getComponents()) {
             if (component instanceof ProtectedZone zone) {
                 ProtectionResult result = zone.checkProtection(query);
-               // plugin.getLogger().info("[Protection] Zone " + component.getClass().getSimpleName() + " returned: " + result);
                 if (result != ProtectionResult.ABSTAIN) {
-                   // plugin.getLogger().info("[Protection] Result: " + result);
                     return result;
                 }
             }
@@ -217,7 +187,6 @@ public class ProtectionManager implements Listener {
 
         // All zones abstained - apply default rules
         ProtectionResult defaultResult = applyDefaultRules(query);
-        //plugin.getLogger().info("[Protection] Result: " + defaultResult + " (default rules)");
         return defaultResult;
     }
 
@@ -237,7 +206,7 @@ public class ProtectionManager implements Listener {
             }
         }
 
-        if(query.action() == ProtectionAction.KILL_ENTITY) {
+        if(query.action() == ProtectionAction.PVE) {
             return ProtectionResult.ALLOW;
         }
 

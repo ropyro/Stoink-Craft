@@ -105,12 +105,24 @@ public class ProtectionListeners implements Listener {
 
         Entity target = event.getEntity();
 
-        ProtectionQuery query = ProtectionQuery.entityAction(
-                player,
-                target,
-                ProtectionAction.KILL_ENTITY,
-                player.getInventory().getItemInMainHand()
-        );
+
+        ProtectionQuery query;
+        //disable pvp
+        if(target instanceof Player){
+            query = ProtectionQuery.entityAction(
+                    player,
+                    target,
+                    ProtectionAction.PVP,
+                    player.getInventory().getItemInMainHand()
+            );
+        }else{
+            query = ProtectionQuery.entityAction(
+                    player,
+                    target,
+                    ProtectionAction.PVE,
+                    player.getInventory().getItemInMainHand()
+            );
+        }
 
         ProtectionResult result = protectionManager.checkProtection(query, true);
         if (result == ProtectionResult.DENY) {
