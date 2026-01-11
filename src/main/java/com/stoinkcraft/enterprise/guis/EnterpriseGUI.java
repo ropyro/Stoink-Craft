@@ -8,8 +8,8 @@ import com.stoinkcraft.enterprise.Enterprise;
 import com.stoinkcraft.enterprise.EnterpriseManager;
 import com.stoinkcraft.enterprise.Role;
 import com.stoinkcraft.enterprise.listeners.chatactions.ChatDepositAction;
-import com.stoinkcraft.enterprise.listeners.chatactions.ChatInvestAction;
 import com.stoinkcraft.enterprise.listeners.chatactions.ChatWithdrawAction;
+import com.stoinkcraft.enterprise.reputation.ReputationCalculator;
 import com.stoinkcraft.utils.ChatUtils;
 import com.stoinkcraft.utils.SCConstants;
 import org.bukkit.Bukkit;
@@ -109,24 +109,20 @@ public class EnterpriseGUI {
                 .addIngredient('D', new AbstractItem() {
                     @Override
                     public ItemProvider getItemProvider() {
+                        String multiplier = ReputationCalculator.getMultiplierDisplay(enterprise.getReputation());
                         return new ItemBuilder(Material.GOLD_INGOT)
                                 .setDisplayName("§aNetworth §f(§a" + netWorth + "§f)")
                                 .addLoreLines(DIVIDER)
-                                .addLoreLines("§7Invest bank funds to grow networth")
+                                .addLoreLines(BULLET + "§7Reputation Multiplier: §e" + multiplier)
+                                .addLoreLines(BULLET + "§7Bank Balance: §a$" + balance)
                                 .addLoreLines(DIVIDER)
-                                .addLoreLines(ARROW + "Click to invest §7(CEO only)");
+                                .addLoreLines("§7Complete contracts to increase reputation")
+                                .addLoreLines("§7Expired contracts decrease reputation");
                     }
 
                     @Override
                     public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull InventoryClickEvent inventoryClickEvent) {
-                        player.closeInventory();
-                        if (enterprise.getMemberRole(player.getUniqueId()).equals(Role.CEO)) {
-                            player.sendMessage("§7Your enterprise bank currently has: §a" + balance);
-                            player.sendMessage("§7Please enter the amount you would like to invest");
-                            ChatInvestAction.awaitingInvestment.add(player.getUniqueId());
-                        } else {
-                            player.sendMessage("§cYou must be the CEO to invest enterprise funds.");
-                        }
+                        // Informational only - no action
                     }
                 })
                 .addIngredient('S', new AbstractItem() {

@@ -23,5 +23,7 @@ public class ContractSaveData {
     @Expose
     public boolean weekly;
     @Expose
+    public boolean bonus;
+    @Expose
     public Map<UUID, Integer> contributions = new HashMap<>();
 }

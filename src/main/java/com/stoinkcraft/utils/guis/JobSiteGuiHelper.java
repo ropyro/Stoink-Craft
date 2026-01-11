@@ -613,8 +613,12 @@ public class JobSiteGuiHelper {
         // Expiration
         builder.addLoreLines(DIVIDER);
         builder.addLoreLines(subHeader(theme, "Time"));
-        String timeText = contract.isWeekly() ? "Weekly - " : "Daily - ";
-        builder.addLoreLines(BULLET + "§f" + timeText + "§e" + formatTimeRemaining(contract.getExpirationTime()));
+        if(contract.isBonus()){
+            builder.addLoreLines(BULLET + "§aBonus Contract");
+        }else{
+            String timeText = contract.isWeekly() ? "Weekly - " : "Daily - ";
+            builder.addLoreLines(BULLET + "§f" + timeText + "§e" + formatTimeRemaining(contract.getExpirationTime()));
+        }
 
         // Rewards
         builder.addLoreLines(DIVIDER);

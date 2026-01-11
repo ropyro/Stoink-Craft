@@ -150,14 +150,11 @@ public class StoinkCore extends JavaPlugin {
         if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
             new StoinkExpansion(this).register();
         }
-
-       // WorldGuard.getInstance().getPlatform().getEventBus().register(this);
-
     }
 
     private void initManagers(){
         dm = new DailyManager();
-        em = new EnterpriseManager(this, 2);
+        em = new EnterpriseManager(this, 3);
         sm = new ShareManager();
         ewm = new EnterpriseWorldManager();
         epm = new EnterprisePlotManager(ewm);
@@ -295,22 +292,28 @@ public class StoinkCore extends JavaPlugin {
     }
 
     public void startContractResetTask() {
+        // Immediately clean up any expired contracts from before plugin start
+        getContractManager().handleDailyReset();
+        getContractManager().handleWeeklyReset();
 
+        // Calculate initial delay until next contract expiry (midnight)
         long now = System.currentTimeMillis();
+        long initialDelay = ContractTimeUtil.nextDay() - now;
+        long dailyPeriod = 24L * 60 * 60 * 1000; // 24 hours in ms
 
-        long dailyDelay = ContractTimeUtil.nextDay() - now;
-        long weeklyDelay = ContractTimeUtil.nextWeek() - now;
+        // Convert to ticks (1 tick = 50ms)
+        long initialDelayTicks = initialDelay / 50;
+        long periodTicks = dailyPeriod / 50;
 
-        // Daily
-        Bukkit.getScheduler().runTaskLater(this, () -> {
+        // Repeating daily reset task - starts at next midnight, repeats every 24 hours
+        Bukkit.getScheduler().runTaskTimer(this, () -> {
             getContractManager().handleDailyReset();
-            startContractResetTask(); // reschedule next day
-        }, dailyDelay / 50);
 
-        // Weekly
-        Bukkit.getScheduler().runTaskLater(this, () -> {
-            getContractManager().handleWeeklyReset();
-        }, weeklyDelay / 50);
+            // Check if it's also Monday for weekly reset
+            if (java.time.LocalDate.now().getDayOfWeek() == java.time.DayOfWeek.MONDAY) {
+                getContractManager().handleWeeklyReset();
+            }
+        }, initialDelayTicks, periodTicks);
     }
 
     private void startPriceSnapshotRecording(){

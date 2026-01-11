@@ -189,7 +189,7 @@ public class ContractPoolLoader {
                 "farmland_cow_basic",
                 new MobKillTrigger(EntityType.COW),
                 JobSiteType.FARMLAND,
-                10,  // Barn level
+                0,  // Barn level
                 8,
                 Map.of(),
                 new CompositeReward(List.of(
@@ -205,7 +205,7 @@ public class ContractPoolLoader {
                 "farmland_cow_medium",
                 new MobKillTrigger(EntityType.COW),
                 JobSiteType.FARMLAND,
-                15,
+                5,
                 20,
                 Map.of(),
                 new CompositeReward(List.of(
@@ -222,7 +222,7 @@ public class ContractPoolLoader {
                 "farmland_sheep_basic",
                 new MobKillTrigger(EntityType.SHEEP),
                 JobSiteType.FARMLAND,
-                10,
+                0,
                 10,
                 Map.of("unlock_sheep", 1),
                 new CompositeReward(List.of(
@@ -238,7 +238,7 @@ public class ContractPoolLoader {
                 "farmland_sheep_medium",
                 new MobKillTrigger(EntityType.SHEEP),
                 JobSiteType.FARMLAND,
-                16,
+                0,
                 25,
                 Map.of("unlock_sheep", 1),
                 new CompositeReward(List.of(
@@ -255,7 +255,7 @@ public class ContractPoolLoader {
                 "farmland_pig_basic",
                 new MobKillTrigger(EntityType.PIG),
                 JobSiteType.FARMLAND,
-                14,
+                0,
                 10,
                 Map.of("unlock_pig", 1),
                 new CompositeReward(List.of(
@@ -271,7 +271,7 @@ public class ContractPoolLoader {
                 "farmland_pig_medium",
                 new MobKillTrigger(EntityType.PIG),
                 JobSiteType.FARMLAND,
-                20,
+                0,
                 25,
                 Map.of("unlock_pig", 1),
                 new CompositeReward(List.of(
@@ -288,7 +288,7 @@ public class ContractPoolLoader {
                 "farmland_chicken_basic",
                 new MobKillTrigger(EntityType.CHICKEN),
                 JobSiteType.FARMLAND,
-                18,
+                0,
                 15,
                 Map.of("unlock_chicken", 1),
                 new CompositeReward(List.of(
@@ -304,7 +304,7 @@ public class ContractPoolLoader {
                 "farmland_chicken_medium",
                 new MobKillTrigger(EntityType.CHICKEN),
                 JobSiteType.FARMLAND,
-                24,
+                0,
                 35,
                 Map.of("unlock_chicken", 1),
                 new CompositeReward(List.of(
@@ -317,21 +317,21 @@ public class ContractPoolLoader {
         ));
 
         // --- HORSES (Requires unlock_horse @ Level 24) ---
-        daily.add(new ContractDefinition(
-                "farmland_horse_basic",
-                new MobKillTrigger(EntityType.HORSE),
-                JobSiteType.FARMLAND,
-                24,
-                6,
-                Map.of("unlock_horse", 1),
-                new CompositeReward(List.of(
-                        new MoneyReward(1500, 0.35),
-                        new JobSiteXpReward(JobSiteType.FARMLAND, 180)
-                )),
-                Material.LEATHER,
-                "Cull Horses",
-                List.of("Cull horses within your farmland.")
-        ));
+//        daily.add(new ContractDefinition(
+//                "farmland_horse_basic",
+//                new MobKillTrigger(EntityType.HORSE),
+//                JobSiteType.FARMLAND,
+//                24,
+//                6,
+//                Map.of("unlock_horse", 1),
+//                new CompositeReward(List.of(
+//                        new MoneyReward(1500, 0.35),
+//                        new JobSiteXpReward(JobSiteType.FARMLAND, 180)
+//                )),
+//                Material.LEATHER,
+//                "Cull Horses",
+//                List.of("Cull horses within your farmland.")
+//        ));
 
         /*
          * =========================

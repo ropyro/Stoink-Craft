@@ -1,6 +1,7 @@
 package com.stoinkcraft.earning.contracts.rewards;
 
 import com.stoinkcraft.StoinkCore;
+import com.stoinkcraft.config.ConfigLoader;
 import com.stoinkcraft.enterprise.Enterprise;
 import com.stoinkcraft.earning.contracts.ActiveContract;
 import org.bukkit.Bukkit;
@@ -13,11 +14,9 @@ import java.util.UUID;
 public class MoneyReward implements DescribableReward {
 
     private final double totalAmount;
-    private final double playerShare; // 0.0 - 1.0
 
     public MoneyReward(double totalAmount, double playerShare) {
         this.totalAmount = totalAmount;
-        this.playerShare = playerShare;
     }
 
     // Add these getters
@@ -26,23 +25,24 @@ public class MoneyReward implements DescribableReward {
     }
 
     public double getPlayerShare() {
-        return playerShare;
+        return ConfigLoader.getEconomy().getPlayerPaySplit();
     }
 
     public double getEnterpriseAmount() {
-        return totalAmount * (1 - playerShare);
+        return totalAmount * (1 - getPlayerShare());
     }
 
     public double getPlayerPoolAmount() {
-        return totalAmount * playerShare;
+        return totalAmount * getPlayerShare();
     }
 
     @Override
     public void apply(Enterprise enterprise, ActiveContract contract) {
-        double playerTotal = totalAmount * playerShare;
+        double playerTotal = totalAmount * getPlayerShare();
         double enterpriseTotal = totalAmount - playerTotal;
 
-        enterprise.increaseNetworth(enterpriseTotal);
+        // Add to bank balance - networth is now calculated from bankBalance * reputationMultiplier
+        enterprise.increaseBankBalance(enterpriseTotal);
 
         Map<UUID, Double> percentages = contract.getContributionPercentages();
 
@@ -56,7 +56,7 @@ public class MoneyReward implements DescribableReward {
     public List<String> getLore() {
         return List.of(
                 "§f$" + totalAmount,
-                "§7Player Share: " + (int)(playerShare * 100) + "%"
+                "§7Player Share: " + (int)(getPlayerShare() * 100) + "%"
         );
     }
 }

@@ -144,6 +144,7 @@ public abstract class JobSite {
     }
 
     public boolean contains(Location loc) {
+        if (region == null) return false;
         return region.contains(RegionUtils.toBlockVector3(loc));
     }
 

@@ -20,6 +20,18 @@ public class EconomyConfig {
     private double enterpriseDailyTax;
     private int maxShares;
 
+    // Reputation settings
+    private double reputationMinMultiplier;
+    private double reputationMaxMultiplier;
+    private double reputationMidpoint;
+    private double reputationScalingFactor;
+    private double reputationMinValue;
+    private double reputationMaxValue;
+    private double dailyContractCompleteRep;
+    private double dailyContractExpireRep;
+    private double weeklyContractCompleteRep;
+    private double weeklyContractExpireRep;
+
     public EconomyConfig(JavaPlugin plugin, File configFile) {
         this.logger = plugin.getLogger();
         load(configFile);
@@ -31,8 +43,20 @@ public class EconomyConfig {
         // Load values with fallbacks to hardcoded defaults
         playerPaySplit = config.getDouble("economy.player-pay-split-percentage", 0.25);
         enterpriseFoundingCost = config.getDouble("economy.enterprise-founding-cost", 10000.0);
-        enterpriseDailyTax = config.getDouble("economy.enterprise-daily-tax", 0.35);
+        enterpriseDailyTax = config.getDouble("economy.enterprise-daily-tax", 0.0);
         maxShares = config.getInt("economy.max-shares", 100);
+
+        // Reputation settings
+        reputationMinMultiplier = config.getDouble("economy.reputation.min-multiplier", 0.75);
+        reputationMaxMultiplier = config.getDouble("economy.reputation.max-multiplier", 1.25);
+        reputationMidpoint = config.getDouble("economy.reputation.midpoint", 100.0);
+        reputationScalingFactor = config.getDouble("economy.reputation.scaling-factor", 0.01);
+        reputationMinValue = config.getDouble("economy.reputation.min-value", 0.0);
+        reputationMaxValue = config.getDouble("economy.reputation.max-value", 200.0);
+        dailyContractCompleteRep = config.getDouble("economy.reputation.daily-contract.complete", 10.0);
+        dailyContractExpireRep = config.getDouble("economy.reputation.daily-contract.expire", -15.0);
+        weeklyContractCompleteRep = config.getDouble("economy.reputation.weekly-contract.complete", 25.0);
+        weeklyContractExpireRep = config.getDouble("economy.reputation.weekly-contract.expire", -35.0);
 
         validate();
 
@@ -77,5 +101,45 @@ public class EconomyConfig {
 
     public int getMaxShares() {
         return maxShares;
+    }
+
+    public double getReputationMinMultiplier() {
+        return reputationMinMultiplier;
+    }
+
+    public double getReputationMaxMultiplier() {
+        return reputationMaxMultiplier;
+    }
+
+    public double getReputationMidpoint() {
+        return reputationMidpoint;
+    }
+
+    public double getReputationScalingFactor() {
+        return reputationScalingFactor;
+    }
+
+    public double getReputationMinValue() {
+        return reputationMinValue;
+    }
+
+    public double getReputationMaxValue() {
+        return reputationMaxValue;
+    }
+
+    public double getDailyContractCompleteRep() {
+        return dailyContractCompleteRep;
+    }
+
+    public double getDailyContractExpireRep() {
+        return dailyContractExpireRep;
+    }
+
+    public double getWeeklyContractCompleteRep() {
+        return weeklyContractCompleteRep;
+    }
+
+    public double getWeeklyContractExpireRep() {
+        return weeklyContractExpireRep;
     }
 }

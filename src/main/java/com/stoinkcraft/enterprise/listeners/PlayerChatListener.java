@@ -16,7 +16,6 @@ public class PlayerChatListener implements Listener {
     public PlayerChatListener(StoinkCore plugin){
         this.plugin = plugin;
         chatActionList.add(new ChatDepositAction(plugin));
-        chatActionList.add(new ChatInvestAction(plugin));
         chatActionList.add(new ChatWithdrawAction(plugin));
         chatActionList.add(new EnterpriseChatAction(plugin));
     }

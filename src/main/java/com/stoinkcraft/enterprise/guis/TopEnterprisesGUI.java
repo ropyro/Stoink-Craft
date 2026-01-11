@@ -3,6 +3,7 @@ package com.stoinkcraft.enterprise.guis;
 import com.stoinkcraft.enterprise.Enterprise;
 import com.stoinkcraft.enterprise.EnterpriseManager;
 import com.stoinkcraft.enterprise.ServerEnterprise;
+import com.stoinkcraft.enterprise.reputation.ReputationCalculator;
 import com.stoinkcraft.utils.ChatUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -70,6 +71,7 @@ public class TopEnterprisesGUI {
         public ItemProvider getItemProvider() {
             String displayName = "§e#" + rank + " §a" + e.getName() + " §f(§a" + ChatUtils.formatMoney(e.getNetWorth()) + "§f)";
             String netWorth = String.format("%.2f", e.getNetWorth());
+            double reputation = e.getReputation();
             String balance = String.format("%.2f", e.getBankBalance());
 
             ItemStack skull = new ItemStack(Material.PLAYER_HEAD);
@@ -92,6 +94,8 @@ public class TopEnterprisesGUI {
                         item.addLoreLines(" ")
                                 .addLoreLines(" §a• §fBalance: §a$" + balance)
                                 .addLoreLines(" §a• §fNet Worth: §a$" + netWorth)
+                                .addLoreLines(" §a• §fRepuation: §a" + reputation)
+                                .addLoreLines(" §a• §fNetworth Multiplier: §a" + ReputationCalculator.getMultiplier(reputation) + "x")
                                 .addLoreLines(" ")
                                 .addLoreLines(" §a• §fCEO: §a" + Bukkit.getOfflinePlayer(e.getCeo()).getName())
                                 .addLoreLines(" §a• §fEmployees §a" + e.getMembers().keySet().size() + "/" + EnterpriseManager.getEnterpriseManager().getMaximumEmployees() + "§f:");

@@ -13,12 +13,43 @@ economy:
   # Default: 10000.0
   enterprise-founding-cost: 10000.0
 
-  # Daily tax rate on enterprise funds that aren't invested
+  # Daily tax rate on enterprise bank balance
+  # Set to 0.0 to disable (replaced by reputation system)
   # Range: 0.0 to 1.0 (0% to 100%)
-  # Default: 0.35 (35% daily tax encourages active management)
-  enterprise-daily-tax: 0.35
+  # Default: 0.0
+  enterprise-daily-tax: 0.0
 
   # Maximum number of shares an enterprise can have
   # Must be a positive integer
   # Default: 100
   max-shares: 100
+
+  # Reputation System
+  # NetWorth is calculated as: bankBalance * reputationMultiplier
+  # Completing contracts increases reputation, expired contracts decrease it
+  reputation:
+    # Multiplier range for networth calculation
+    # At min reputation, multiplier approaches min-multiplier
+    # At max reputation, multiplier approaches max-multiplier
+    min-multiplier: 0.75
+    max-multiplier: 1.25
+
+    # Reputation score where multiplier equals 1.0x (neutral)
+    midpoint: 100.0
+
+    # How quickly the multiplier approaches min/max (sigmoid curve steepness)
+    scaling-factor: 0.01
+
+    # Hard caps on reputation values
+    min-value: 0.0
+    max-value: 200.0
+
+    # Reputation points for daily contracts
+    daily-contract:
+      complete: 10.0    # Points gained for completing a daily contract
+      expire: -15.0     # Points lost when a daily contract expires
+
+    # Reputation points for weekly contracts (higher impact)
+    weekly-contract:
+      complete: 25.0    # Points gained for completing a weekly contract
+      expire: -35.0     # Points lost when a weekly contract expires

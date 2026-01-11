@@ -23,7 +23,7 @@ public class EnterpriseTypeAdapter implements JsonSerializer<Enterprise>, JsonDe
         jsonObject.addProperty("name", enterprise.getName());
         jsonObject.add("ceo", context.serialize(enterprise.getCeo()));
         jsonObject.addProperty("bankBalance", enterprise.getBankBalance());
-        jsonObject.addProperty("netWorth", enterprise.getNetWorth());
+        jsonObject.addProperty("reputation", enterprise.getReputation());
         jsonObject.addProperty("outstandingShares", enterprise.getOutstandingShares());
         jsonObject.add("enterpriseID", context.serialize(enterprise.getID()));
         jsonObject.addProperty("plotIndex", enterprise.getPlotIndex());
@@ -51,7 +51,10 @@ public class EnterpriseTypeAdapter implements JsonSerializer<Enterprise>, JsonDe
         String name = jsonObject.get("name").getAsString();
         UUID ceo = context.deserialize(jsonObject.get("ceo"), UUID.class);
         double bankBalance = jsonObject.get("bankBalance").getAsDouble();
-        double netWorth = jsonObject.get("netWorth").getAsDouble();
+        // Read reputation (defaults to 0 for old data without this field)
+        double reputation = jsonObject.has("reputation")
+                ? jsonObject.get("reputation").getAsDouble()
+                : 0.0;
         int outstandingShares = jsonObject.get("outstandingShares").getAsInt();
         UUID enterpriseID = context.deserialize(jsonObject.get("enterpriseID"), UUID.class);
 
@@ -63,10 +66,10 @@ public class EnterpriseTypeAdapter implements JsonSerializer<Enterprise>, JsonDe
         // Create appropriate instance
         Enterprise enterprise;
         if ("SERVER".equals(enterpriseType)) {
-            enterprise = new ServerEnterprise(name, ceo, bankBalance, netWorth,
+            enterprise = new ServerEnterprise(name, ceo, bankBalance, reputation,
                     outstandingShares, activeBooster, enterpriseID);
         } else {
-            enterprise = new Enterprise(name, ceo, bankBalance, netWorth,
+            enterprise = new Enterprise(name, ceo, bankBalance, reputation,
                     outstandingShares, activeBooster, enterpriseID);
         }
 

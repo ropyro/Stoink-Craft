@@ -231,7 +231,7 @@ public class FarmlandSite extends JobSite {
                 2,                     // +2 per level
                 // Level 1 @ JS3, Level 2 @ JS5... Level 10 @ JS21
                 lvl -> 2000 + (lvl * 2000),  // 4000, 6000, 8000... 22000
-                site -> site.getData().getUnlockableState("barn") == UnlockableState.UNLOCKED,
+                site -> true,
                 (site, lvl) -> {}
         ));
 
@@ -248,7 +248,7 @@ public class FarmlandSite extends JobSite {
                 2,
                 // Level 1 @ JS4, Level 2 @ JS6... Level 10 @ JS22
                 lvl -> 3000 + (lvl * 2500),  // 5500, 8000, 10500... 28000
-                site -> site.getData().getUnlockableState("barn") == UnlockableState.UNLOCKED,
+                site -> true,
                 (site, lvl) -> {}
         ));
 
@@ -328,12 +328,8 @@ public class FarmlandSite extends JobSite {
             public void onRightClick(NPCRightClickEvent event) {
                 super.onRightClick(event);
                 Player player = event.getClicker();
-                if(TimeUtils.isDay(getSpawnPoint().getWorld())){
-                    new FarmlandGui(farmlandSite, player).openWindow();
-                    ChatUtils.sendMessage(player,ChatColor.GREEN + "Opening Farmland Upgrades...");
-                }else{
-                    ChatUtils.sendMessage(player,ChatColor.RED + "It's night time silly the crops are sleeping...");
-                }
+                new FarmlandGui(farmlandSite, player).openWindow();
+                ChatUtils.sendMessage(player,ChatColor.GREEN + "Opening Farmland Upgrades...");
             }
         };
     }

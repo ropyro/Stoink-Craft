@@ -2,6 +2,7 @@ package com.stoinkcraft.earning.contracts;
 
 import com.stoinkcraft.StoinkCore;
 import com.stoinkcraft.enterprise.Enterprise;
+import com.stoinkcraft.enterprise.reputation.ReputationCalculator;
 import com.stoinkcraft.earning.contracts.triggers.ContractTrigger;
 import com.stoinkcraft.earning.jobsites.JobSite;
 import com.stoinkcraft.earning.jobsites.JobSiteManager;
@@ -103,7 +104,21 @@ public class ContractManager {
              contracts.entrySet().iterator(); it.hasNext(); ) {
 
             Map.Entry<UUID, List<ActiveContract>> entry = it.next();
+            UUID enterpriseId = entry.getKey();
             List<ActiveContract> list = entry.getValue();
+
+            Enterprise enterprise = StoinkCore.getInstance()
+                    .getEnterpriseManager().getEnterpriseByID(enterpriseId);
+
+            // Apply reputation penalty for expired non-bonus contracts before removing
+            if (enterprise != null) {
+                for (ActiveContract contract : list) {
+                    if (contract.isExpired() && !contract.isCompleted() && !contract.isBonus()) {
+                        double repLoss = ReputationCalculator.getExpiryReputation(contract.isWeekly());
+                        enterprise.removeReputation(repLoss);
+                    }
+                }
+            }
 
             list.removeIf(ActiveContract::isExpired);
 
@@ -169,6 +184,10 @@ public class ContractManager {
     }
 
     public int generateContracts(Enterprise enterprise, boolean weekly, JobSiteType type) {
+        return generateContracts(enterprise, weekly, type, false);
+    }
+
+    public int generateContracts(Enterprise enterprise, boolean weekly, JobSiteType type, boolean bonus) {
         AtomicInteger amountGenerated = new AtomicInteger();
 
         JobSiteManager jsm = enterprise.getJobSiteManager();
@@ -217,9 +236,9 @@ public class ContractManager {
                             ? ContractTimeUtil.nextWeek()
                             : ContractTimeUtil.nextDay();
 
-                    // Add directly to the list
+                    // Add directly to the list - mark as bonus if mid-cycle regeneration
                     enterpriseContracts.add(
-                            new ActiveContract(enterprise.getID(), def, expiry, weekly));
+                            new ActiveContract(enterprise.getID(), def, expiry, weekly, bonus));
                     amountGenerated.getAndIncrement();
                 });
         return amountGenerated.get();
@@ -233,13 +252,14 @@ public class ContractManager {
             enterpriseContracts.removeIf(c -> c.getDefinition().jobSiteType() == type);
         }
 
+        // Mid-cycle regeneration - mark as bonus contracts (no negative rep penalty if expired)
         int amountGenerated = 0;
-        amountGenerated += generateContracts(enterprise, false, type);
-        amountGenerated += generateContracts(enterprise, true, type);
+        amountGenerated += generateContracts(enterprise, false, type, true);
+        amountGenerated += generateContracts(enterprise, true, type, true);
 
         enterprise.sendEnterpriseMessage("§6§lAll " + type.getDisplayName() + " contracts were completed!",
                 " ",
-                "§a" + amountGenerated + " §7New contracts are now available",
+                "§a" + amountGenerated + " §7New bonus contracts are now available",
                 " ");
     }
 

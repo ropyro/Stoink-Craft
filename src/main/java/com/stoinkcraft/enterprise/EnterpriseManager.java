@@ -235,28 +235,16 @@ public class EnterpriseManager {
         return maximumEmployees;
     }
 
+    /**
+     * Daily bank balance update.
+     * Note: Daily tax has been replaced by the reputation system.
+     * NetWorth is now calculated as bankBalance * reputationMultiplier.
+     */
     public static void updateBankBalances() {
-        List<Enterprise> enterprises = EnterpriseManager.getEnterpriseManager().getEnterpriseList();
-
-        // Move funds from ServerEnterprises' balances into their net worth
-        enterprises.stream()
-                .filter(e -> e instanceof ServerEnterprise)
-                .forEach(e -> {
-                    double bankBalance = e.getBankBalance();
-                    if (bankBalance > 0) {
-                        e.increaseNetworth(bankBalance);
-                        e.setBankBalance(0);
-                    }
-                });
-
-        // Apply tax to private enterprises
-        enterprises.stream()
-                .filter(e -> !(e instanceof ServerEnterprise))
-                .forEach(e -> {
-                    double taxRate = SCConstants.ENTERPRISE_DAILY_TAX;
-                    double before = e.getBankBalance();
-                    e.setBankBalance(before * (1 - taxRate));
-                });
+        // Tax logic removed - reputation system now handles enterprise value incentives.
+        // NetWorth is calculated dynamically from bankBalance * reputationMultiplier.
+        // Completing contracts increases reputation (and thus networth multiplier).
+        // Letting contracts expire decreases reputation.
     }
 
 

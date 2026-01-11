@@ -10,10 +10,10 @@ public class ServerEnterprise extends Enterprise {
     }
 
     // Constructor for Gson deserialization - matches parent signature
-    public ServerEnterprise(String name, UUID ceo, double bankBalance, double netWorth,
+    public ServerEnterprise(String name, UUID ceo, double bankBalance, double reputation,
                             int outstandingShares, com.stoinkcraft.earning.boosters.Booster activeBooster,
                             UUID enterpriseID) {
-        super(name, ceo, bankBalance, netWorth, outstandingShares, activeBooster, enterpriseID);
+        super(name, ceo, bankBalance, reputation, outstandingShares, activeBooster, enterpriseID);
     }
 
     @Override

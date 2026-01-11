@@ -4,6 +4,7 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.stoinkcraft.earning.jobsites.JobSiteManager;
 import com.stoinkcraft.earning.boosters.Booster;
+import com.stoinkcraft.enterprise.reputation.ReputationCalculator;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -34,6 +35,9 @@ public class Enterprise {
     private double netWorth;
 
     @Expose
+    private double reputation = 0.0;
+
+    @Expose
     private Location warp;
 
     @Expose
@@ -58,12 +62,12 @@ public class Enterprise {
     private transient JobSiteManager jobSiteManager;
 
 
-    public Enterprise(String name, UUID ceo, double bankBalance, double netWorth,
+    public Enterprise(String name, UUID ceo, double bankBalance, double reputation,
                       int outstandingShares, Booster activeBooster, UUID enterpriseID) {
         this.name = name;
         this.ceo = ceo;
         this.bankBalance = bankBalance;
-        this.netWorth = netWorth;
+        this.reputation = reputation;
         this.outstandingShares = outstandingShares;
         this.activeBooster = activeBooster;
         this.enterpriseID = enterpriseID;
@@ -248,24 +252,64 @@ public class Enterprise {
         this.bankBalance -= value;
     }
 
+    /**
+     * @deprecated NetWorth is now calculated. Use increaseBankBalance() instead.
+     */
+    @Deprecated
     public void increaseNetworth(double value) {
-        this.netWorth += value;
+        // Redirect to bank balance since networth is now calculated
+        this.bankBalance += value;
     }
 
+    /**
+     * @deprecated NetWorth is now calculated. Use decreaseBankBalance() instead.
+     */
+    @Deprecated
     public void decreaseNetworth(double value) {
-        this.netWorth -= value;
+        // Redirect to bank balance since networth is now calculated
+        this.bankBalance -= value;
     }
 
     public void setBankBalance(double bankBalance) {
         this.bankBalance = bankBalance;
     }
 
+    /**
+     * NetWorth is now calculated dynamically based on bankBalance and reputation.
+     * Formula: netWorth = bankBalance * reputationMultiplier
+     */
     public double getNetWorth() {
-        return netWorth;
+        return ReputationCalculator.calculateNetWorth(this);
     }
 
+    /**
+     * @deprecated NetWorth is now calculated, not stored.
+     */
+    @Deprecated
     public void setNetWorth(double netWorth) {
-        this.netWorth = netWorth;
+        // No-op - networth is now calculated
+    }
+
+    public double getReputation() {
+        return reputation;
+    }
+
+    public void setReputation(double reputation) {
+        this.reputation = clampReputation(reputation);
+    }
+
+    public void addReputation(double amount) {
+        this.reputation = clampReputation(this.reputation + amount);
+    }
+
+    public void removeReputation(double amount) {
+        this.reputation = clampReputation(this.reputation - amount);
+    }
+
+    private double clampReputation(double value) {
+        double min = com.stoinkcraft.config.ConfigLoader.getEconomy().getReputationMinValue();
+        double max = com.stoinkcraft.config.ConfigLoader.getEconomy().getReputationMaxValue();
+        return Math.max(min, Math.min(max, value));
     }
 
     public List<UUID> getActiveEnterpriseChat() {

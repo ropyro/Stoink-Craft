@@ -118,6 +118,7 @@ public class ContractStorage {
                 data.progress,
                 data.completed,
                 data.weekly,
+                data.bonus,
                 data.contributions
         );
     }
