@@ -230,7 +230,7 @@ public class ContractFeedbackManager {
         int totalXp = extractTotalXp(def.reward());
 
         // Build progress string
-        String progress = buildProgressString(beforeLevel, afterLevel, xpGained, secondary);
+        //String progress = buildProgressString(beforeLevel, afterLevel, xpGained, secondary);
 
         // Build enterprise rewards string
         String enterpriseRewards = "§a+$" + formatCompact(enterpriseMoney) + " §8| §e+" + totalXp + " XP";
@@ -255,7 +255,7 @@ public class ContractFeedbackManager {
                     "§8§l» §7Contributors: " + contributors,
                     "§8§l» " + secondary + "Enterprise: §f" + enterpriseRewards,
                     "§8§l» " + secondary + "You Earned: §f" + yourRewards,
-                    "§8§l» §7Progress: " + progress,
+             //       "§8§l» §7Progress: " + progress,
                     ""
             };
         });
