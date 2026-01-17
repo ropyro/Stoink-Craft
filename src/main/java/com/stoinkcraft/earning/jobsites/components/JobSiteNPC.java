@@ -32,26 +32,30 @@ public class JobSiteNPC implements JobSiteComponent{
         this.skinSignature = skinSignature;
 
         this.citizensId = parent.getData().getNpcId(name);
+        // NPC lookup is deferred to initializeFromRegistry() which is called
+        // after CitizensEnableEvent fires and NPCs are loaded into the registry
+    }
 
+    /**
+     * Attempts to find the NPC in Citizens registry using the stored ID.
+     * Call this after CitizensEnableEvent has fired.
+     * If the NPC is not found, the stored ID is reset so build() will create a new one.
+     */
+    public void initializeFromRegistry() {
         JobSiteData data = parent.getData();
+        int storedId = data.getNpcId(name);
 
-        int storedId = parent.getData().getNpcId(name);
-        Bukkit.getLogger().info("[DEBUG] JobSiteNPC constructor - stored ID: " + storedId);
+        Bukkit.getLogger().info("[DEBUG] initializeFromRegistry for '" + name + "' - storedId: " + storedId);
 
         if (storedId != -1) {
-            NPC found = CitizensAPI.getNPCRegistry().getById(storedId);
-            Bukkit.getLogger().info("[DEBUG] NPC lookup result: " + (found != null ? "FOUND" : "NULL"));
-        }
-
-        if (data.getNpcId(name) != -1) {
             NPCRegistry registry = CitizensAPI.getNPCRegistry();
-            npc = registry.getById(data.getNpcId(name));
+            npc = registry.getById(storedId);
+            Bukkit.getLogger().info("[DEBUG] Registry lookup result for ID " + storedId + ": " + (npc != null ? "FOUND - " + npc.getName() : "NULL"));
             if (npc == null) {
+                // NPC was deleted or not found - reset ID so it gets recreated on build()
                 data.setNpc(name, -1);
             }
         }
-
-
     }
 
     @Override
@@ -120,8 +124,11 @@ public class JobSiteNPC implements JobSiteComponent{
     }
 
     public NPC getNpc() {
-        if(npc == null){
-            npc = CitizensAPI.getNPCRegistry().getById(parent.getData().getNpcId(name));
+        if (npc == null) {
+            int storedId = parent.getData().getNpcId(name);
+            if (storedId != -1) {
+                npc = CitizensAPI.getNPCRegistry().getById(storedId);
+            }
         }
         return npc;
     }

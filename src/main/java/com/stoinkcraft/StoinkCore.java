@@ -34,7 +34,6 @@ import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.trait.SkinTrait;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.*;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -131,10 +130,35 @@ public class StoinkCore extends JavaPlugin {
         ensureServerEnterprises();
         startTasks();
 
-        if(jobSitesLoaded)
-            indexProtectionRegions();
+        // Handle hot reload scenario: if Citizens is already fully loaded,
+        // CitizensEnableEvent won't fire again. Check on next tick if Citizens
+        // has NPCs in registry (indicating it's already initialized)
+        Bukkit.getScheduler().runTask(this, this::checkCitizensAlreadyLoaded);
 
         getLogger().info("StoinkCore loaded.");
+    }
+
+    /**
+     * Checks if Citizens was already loaded before StoinkCore (hot reload scenario).
+     * This handles the case where only StoinkCore is reloaded (not Citizens).
+     * We delay the check to give CitizensEnableEvent a chance to fire first.
+     */
+    private void checkCitizensAlreadyLoaded() {
+        // Delay check by 10 ticks to allow CitizensEnableEvent to fire if Citizens is also reloading
+        Bukkit.getScheduler().runTaskLater(this, () -> {
+            if (jobSitesLoaded) return; // Event already fired, we're good
+
+            try {
+                // If we get here, CitizensEnableEvent didn't fire - true hot reload of StoinkCore only
+                // Check if Citizens has NPCs loaded (indicating it's truly ready)
+                if (CitizensAPI.getNPCRegistry() != null && CitizensAPI.getNPCRegistry().iterator().hasNext()) {
+                    getLogger().info("Hot reload detected (StoinkCore only), Citizens has NPCs. Initializing...");
+                    onCitizensReady();
+                }
+            } catch (Exception e) {
+                // Citizens not ready yet, event listener will handle it
+            }
+        }, 10L);
     }
 
     private void hookLibraries(){
@@ -173,17 +197,10 @@ public class StoinkCore extends JavaPlugin {
 
         saveResourceFolder("schematics", false);
 
-        boolean citizensReady = isCitizensReady();
-
-        // Load enterprises - only load job sites if Citizens is already ready
-        EnterpriseStorageJson.loadAllEnterprises(citizensReady);
-
-        if (citizensReady) {
-            jobSitesLoaded = true;
-            getLogger().info("Citizens was already loaded, job sites initialized.");
-        } else {
-            getLogger().info("Waiting for Citizens to load before initializing job sites...");
-        }
+        // Load enterprises with job sites - NPCs are created as objects but not
+        // looked up in Citizens registry yet (deferred to CitizensEnableEvent)
+        EnterpriseStorageJson.loadAllEnterprises(true);
+        getLogger().info("Enterprises and job sites loaded. Waiting for CitizensEnableEvent to initialize NPCs...");
 
         ShareStorage.loadShares();
     }
@@ -199,26 +216,25 @@ public class StoinkCore extends JavaPlugin {
         getLogger().info("Protection regions successfully indexed!");
     }
 
-    private boolean isCitizensReady() {
-        Plugin citizens = Bukkit.getPluginManager().getPlugin("Citizens");
-        if (citizens != null && citizens.isEnabled()) {
-            try {
-                // Try to access registry - if it works, Citizens is ready
-                return CitizensAPI.getNPCRegistry() != null;
-            } catch (Exception e) {
-                return false;
-            }
-        }
-        return false;
-    }
-
+    /**
+     * Called by CitizensLoadListener when CitizensEnableEvent fires.
+     * This event fires AFTER Citizens has loaded all NPCs into the registry.
+     */
     public void onCitizensReady() {
         if (jobSitesLoaded) return;
         jobSitesLoaded = true;
 
-        getLogger().info("Citizens now ready, loading job sites...");
-        EnterpriseStorageJson.loadAllJobSitesDeferred();
+        getLogger().info("Citizens ready, initializing NPCs from registry...");
+
+        // Initialize NPCs from Citizens registry for all enterprises
+        for (Enterprise enterprise : em.getEnterpriseList()) {
+            if (enterprise.getJobSiteManager() != null) {
+                enterprise.getJobSiteManager().initializeNpcsFromRegistry();
+            }
+        }
+
         indexProtectionRegions();
+        getLogger().info("NPC initialization complete.");
     }
 
     private void ensureServerEnterprises() {

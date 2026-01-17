@@ -58,7 +58,8 @@ public class NPCInteractListener implements Listener {
 
         JobSiteNPC jobSiteNPC = (JobSiteNPC) jobSite.getComponents().stream()
                 .filter(component -> component instanceof JobSiteNPC)
-                .filter(n -> ((JobSiteNPC) n).getNpc().getId() == event.getNPC().getId())
+                .filter(n -> ((JobSiteNPC) n).getNpc().getId() == event.getNPC()
+                .getId())
                 .findFirst()
                 .orElse(null);
 

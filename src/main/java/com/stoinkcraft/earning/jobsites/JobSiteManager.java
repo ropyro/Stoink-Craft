@@ -158,6 +158,14 @@ public class JobSiteManager {
         return List.of(skyriseSite, quarrySite, farmlandSite, graveyardSite);
     }
 
+    /**
+     * Initialize all NPCs from Citizens registry for all job sites.
+     * Call this after CitizensEnableEvent has fired.
+     */
+    public void initializeNpcsFromRegistry() {
+        getAllJobSites().forEach(JobSite::initializeNpcsFromRegistry);
+    }
+
     public JobSite getJobSite(JobSiteType jobSiteType){
         switch (jobSiteType){
             case FARMLAND -> {

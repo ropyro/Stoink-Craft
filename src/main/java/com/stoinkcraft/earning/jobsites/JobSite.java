@@ -9,6 +9,7 @@ import com.stoinkcraft.StoinkCore;
 import com.stoinkcraft.enterprise.Enterprise;
 import com.stoinkcraft.earning.collections.CollectionManager;
 import com.stoinkcraft.earning.jobsites.components.JobSiteComponent;
+import com.stoinkcraft.earning.jobsites.components.JobSiteNPC;
 import com.stoinkcraft.earning.jobsites.components.JobSiteStructure;
 import com.stoinkcraft.earning.jobsites.components.unlockable.Unlockable;
 import com.stoinkcraft.utils.RegionUtils;
@@ -218,6 +219,17 @@ public abstract class JobSite {
 
     public List<JobSiteComponent> getComponents() {
         return components;
+    }
+
+    /**
+     * Initialize all NPC components from Citizens registry.
+     * Call this after CitizensEnableEvent has fired.
+     */
+    public void initializeNpcsFromRegistry() {
+        components.stream()
+                .filter(c -> c instanceof JobSiteNPC)
+                .map(c -> (JobSiteNPC) c)
+                .forEach(JobSiteNPC::initializeFromRegistry);
     }
 
     public Enterprise getEnterprise() {

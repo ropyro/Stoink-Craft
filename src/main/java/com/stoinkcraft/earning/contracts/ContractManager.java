@@ -130,6 +130,7 @@ public class ContractManager {
 
     public void generateContracts(Enterprise enterprise, boolean weekly) {
         JobSiteManager jsm = enterprise.getJobSiteManager();
+        if (jsm == null) return; // Job sites not loaded yet
 
         // Get or create the list directly - DO NOT call getContracts() to avoid recursion
         List<ActiveContract> enterpriseContracts =
