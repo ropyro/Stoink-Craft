@@ -38,7 +38,6 @@
 - **Dependencies:**
     - [Vault](https://github.com/MilkBowl/Vault) (Economy API)
     - FastAyncWorldEdit
-    - WorldGuard
     - DecentHolograms
     - PlaceHolderAPI
     - Citizens
