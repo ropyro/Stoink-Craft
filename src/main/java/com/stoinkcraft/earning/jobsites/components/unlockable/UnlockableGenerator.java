@@ -4,6 +4,7 @@ import com.stoinkcraft.earning.jobsites.JobSite;
 import com.stoinkcraft.earning.jobsites.components.JobSiteGenerator;
 
 import java.util.function.IntSupplier;
+import java.util.function.LongSupplier;
 import java.util.function.Predicate;
 
 public abstract class UnlockableGenerator extends JobSiteGenerator implements Unlockable {
@@ -14,15 +15,15 @@ public abstract class UnlockableGenerator extends JobSiteGenerator implements Un
             JobSite parent,
             String id,
             String displayName,
-            int requiredJobsiteLevel,
-            long buildTimeMillis,
+            IntSupplier requiredLevelSupplier,
+            LongSupplier buildTimeSupplier,
             IntSupplier costSupplier,
             Predicate<JobSite> unlockCondition
     ) {
         super(parent, false); // Start disabled until unlocked
         this.unlockConfig = new UnlockableConfig(
-                id, displayName, requiredJobsiteLevel,
-                buildTimeMillis, costSupplier, unlockCondition
+                id, displayName, requiredLevelSupplier,
+                buildTimeSupplier, costSupplier, unlockCondition
         );
     }
 

@@ -1,6 +1,8 @@
 package com.stoinkcraft.earning.jobsites.components.structures;
 
 import com.stoinkcraft.StoinkCore;
+import com.stoinkcraft.config.ConfigLoader;
+import com.stoinkcraft.config.StructureConfig;
 import com.stoinkcraft.earning.jobsites.JobSite;
 import com.stoinkcraft.earning.jobsites.JobSiteType;
 import com.stoinkcraft.earning.jobsites.components.JobSiteHologram;
@@ -24,17 +26,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 public class MausoleumStructure extends JobSiteStructure {
-
-    private static final File SCHEMATIC =
-            new File(StoinkCore.getInstance().getDataFolder(), "/schematics/mausoleum.schem");
-
-    public static final int REQUIRED_LEVEL = 15;
-    public static final int COST = 175_000;
-    public static final long BUILD_TIME_MILLIS = TimeUnit.MINUTES.toMillis(30); // 30 minutes
-    public static final int COMPLETION_XP = 1500;
 
     public static Vector constructionHologramOffset = new Vector(-35, 4, 23.3); // Adjust based on schematic
 
@@ -48,25 +41,17 @@ public class MausoleumStructure extends JobSiteStructure {
     private int cachedSpiderCount = -1;
     private boolean readyToSpawn = false;
 
-    // Base values
-    // Horde timing
-    private static final int BASE_HORDE_INTERVAL_SECONDS = 60 * 10; // 10 minutes base
-    private static final int MIN_HORDE_INTERVAL_SECONDS = 60 * 3;   // 3 minutes minimum
-    private static final int BASE_HORDE_SIZE = 6;
-    private static final int SPIDERS_PER_UPGRADE = 2;
-    private static final int MAX_HORDE_SIZE = 30;
-
-    // Rewards per spider
-    private static final int XP_PER_SPIDER = 12;
-    private static final int MONEY_PER_SPIDER = 40;
+    private static StructureConfig config() {
+        return ConfigLoader.getStructures();
+    }
 
     public MausoleumStructure(JobSite jobSite, Vector hordeSpawnOffset) {
         super(
                 "mausoleum",
                 "Mausoleum",
-                REQUIRED_LEVEL,
-                BUILD_TIME_MILLIS,
-                () -> COST,
+                () -> config().getMausoleumRequiredLevel(),
+                () -> config().getMausoleumBuildTimeMillis(),
+                () -> config().getMausoleumCost(),
                 site -> true,
                 jobSite
         );
@@ -145,11 +130,12 @@ public class MausoleumStructure extends JobSiteStructure {
     public void onUnlockComplete() {
         pasteStructure();
 
-        getJobSite().getData().incrementXp(COMPLETION_XP);
+        int completionXp = config().getMausoleumCompletionXp();
+        getJobSite().getData().incrementXp(completionXp);
         getJobSite().getEnterprise().sendEnterpriseMessage(
                 "§5§lMausoleum Construction Complete!",
                 "",
-                "§a+ " + COMPLETION_XP + " XP",
+                "§a+ " + completionXp + " XP",
                 "§7Spider hordes will now spawn periodically!",
                 ""
         );
@@ -221,12 +207,15 @@ public class MausoleumStructure extends JobSiteStructure {
      * Called when a mausoleum spider is killed
      */
     public void onSpiderKilled(Player killer) {
+        int xpPerSpider = config().getMausoleumXpPerSpider();
+        int moneyPerSpider = config().getMausoleumMoneyPerSpider();
+
         // Reward XP
-        getJobSite().getData().incrementXp(XP_PER_SPIDER);
+        getJobSite().getData().incrementXp(xpPerSpider);
 
         // Reward money
-        StoinkCore.getEconomy().depositPlayer(killer, MONEY_PER_SPIDER);
-        killer.sendMessage("§a+$" + MONEY_PER_SPIDER + " +" + XP_PER_SPIDER + " Graveyard XP" + " §2🕷 Horde Spider");
+        StoinkCore.getEconomy().depositPlayer(killer, moneyPerSpider);
+        killer.sendMessage("§a+$" + moneyPerSpider + " +" + xpPerSpider + " Graveyard XP" + " §2🕷 Horde Spider");
 
         // Check if horde is cleared
         cleanupDeadSpiders();
@@ -243,16 +232,21 @@ public class MausoleumStructure extends JobSiteStructure {
 
     private int getHordeIntervalTicks() {
         int speedLevel = getGraveyardData().getLevel("mausoleum_spawn_speed");
-        // Each level reduces by 42 seconds (0.7 minutes)
-        int interval = BASE_HORDE_INTERVAL_SECONDS - (speedLevel * 42);
-        return Math.max(MIN_HORDE_INTERVAL_SECONDS, interval);
+        int baseInterval = config().getMausoleumBaseHordeIntervalSeconds();
+        int reductionPerLevel = config().getMausoleumHordeIntervalReductionPerLevel();
+        int minInterval = config().getMausoleumMinHordeIntervalSeconds();
+        int interval = baseInterval - (speedLevel * reductionPerLevel);
+        return Math.max(minInterval, interval);
     }
 
 
     private int getHordeSize() {
         int sizeLevel = getGraveyardData().getLevel("mausoleum_horde_size");
-        int size = BASE_HORDE_SIZE + (sizeLevel * SPIDERS_PER_UPGRADE);
-        return Math.min(MAX_HORDE_SIZE, size);
+        int baseSize = config().getMausoleumBaseHordeSize();
+        int spidersPerUpgrade = config().getMausoleumSpidersPerUpgrade();
+        int maxSize = config().getMausoleumMaxHordeSize();
+        int size = baseSize + (sizeLevel * spidersPerUpgrade);
+        return Math.min(maxSize, size);
     }
 
     // ==================== Hologram ====================
@@ -307,7 +301,7 @@ public class MausoleumStructure extends JobSiteStructure {
             );
         } else {
             lines = List.of(
-                    ChatColor.RED + "" + ChatColor.BOLD + "Mausoleum Unlocked at Level: " + REQUIRED_LEVEL,
+                    ChatColor.RED + "" + ChatColor.BOLD + "Mausoleum Unlocked at Level: " + config().getMausoleumRequiredLevel(),
                     ChatColor.WHITE + "The Mausoleum spawns spider hordes for rewards!"
             );
         }
@@ -323,7 +317,8 @@ public class MausoleumStructure extends JobSiteStructure {
     }
 
     private void pasteStructure() {
-        SchematicUtils.pasteSchematic(SCHEMATIC, getJobSite().getSpawnPoint(), false);
+        File schematic = new File(StoinkCore.getInstance().getDataFolder(), "/schematics/" + config().getMausoleumSchematic());
+        SchematicUtils.pasteSchematic(schematic, getJobSite().getSpawnPoint(), false);
     }
 
     // ==================== Getters ====================

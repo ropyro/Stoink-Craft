@@ -86,11 +86,11 @@ public interface Unlockable {
     }
 
     default int getRequiredJobsiteLevel() {
-        return getUnlockConfig().requiredJobsiteLevel();
+        return getUnlockConfig().getRequiredJobsiteLevel();
     }
 
     default long getBuildTimeMillis() {
-        return getUnlockConfig().buildTimeMillis();
+        return getUnlockConfig().getBuildTimeMillis();
     }
 
     default int getCost() {

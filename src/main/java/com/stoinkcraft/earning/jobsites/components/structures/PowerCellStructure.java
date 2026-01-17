@@ -1,6 +1,8 @@
 package com.stoinkcraft.earning.jobsites.components.structures;
 
 import com.stoinkcraft.StoinkCore;
+import com.stoinkcraft.config.ConfigLoader;
+import com.stoinkcraft.config.StructureConfig;
 import com.stoinkcraft.earning.jobsites.JobSite;
 import com.stoinkcraft.earning.jobsites.JobSiteType;
 import com.stoinkcraft.earning.jobsites.components.JobSiteHologram;
@@ -16,12 +18,8 @@ import org.bukkit.util.Vector;
 
 import java.io.File;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 public class PowerCellStructure extends JobSiteStructure {
-
-    private static final File SCHEMATIC =
-            new File(StoinkCore.getInstance().getDataFolder(), "/schematics/powercell.schem");
 
     public static final Vector HOLOGRAM_OFFSET = new Vector(-25.5, 3, -0.5);
 
@@ -29,21 +27,19 @@ public class PowerCellStructure extends JobSiteStructure {
     private final String hologramId;
 
     // Haste effect settings
-    private static final int EFFECT_CHECK_INTERVAL = 3; // ticks (1 second)
     private int tickCounter = 0;
 
-    public static final int REQUIRED_LEVEL = 10;
-    public static final int COST = 75_000;
-    public static final long BUILD_TIME = TimeUnit.MINUTES.toMillis(20); // 20 minutes
-    public static final int COMPLETION_XP = 750;
+    private static StructureConfig config() {
+        return ConfigLoader.getStructures();
+    }
 
     public PowerCellStructure(JobSite jobSite) {
         super(
                 "powercell",
                 "Power Cell",
-                REQUIRED_LEVEL,
-                BUILD_TIME,
-                () -> COST,
+                () -> config().getPowercellRequiredLevel(),
+                () -> config().getPowercellBuildTimeMillis(),
+                () -> config().getPowercellCost(),
                 site -> true,
                 jobSite
         );
@@ -70,7 +66,8 @@ public class PowerCellStructure extends JobSiteStructure {
         // Apply haste effect to players in the quarry
         if (isUnlocked()) {
             tickCounter++;
-            if (tickCounter >= EFFECT_CHECK_INTERVAL) {
+            int effectCheckInterval = config().getPowercellEffectCheckIntervalTicks();
+            if (tickCounter >= effectCheckInterval) {
                 tickCounter = 0;
                 applyHasteToPlayers();
             }
@@ -82,7 +79,8 @@ public class PowerCellStructure extends JobSiteStructure {
         if (powerLevel <= 0) return;
 
         int hasteAmplifier = powerLevel - 1; // Haste I, II, or III (0-indexed)
-        int durationTicks = EFFECT_CHECK_INTERVAL*20 + 20; // Slightly longer than check interval
+        int effectCheckInterval = config().getPowercellEffectCheckIntervalTicks();
+        int durationTicks = effectCheckInterval + 20; // Slightly longer than check interval
 
         for (Player player : Bukkit.getOnlinePlayers()) {
             if (getJobSite().contains(player.getLocation())) {
@@ -128,11 +126,12 @@ public class PowerCellStructure extends JobSiteStructure {
     public void onUnlockComplete() {
         pasteStructure();
 
-        getJobSite().getData().incrementXp(COMPLETION_XP);
+        int completionXp = config().getPowercellCompletionXp();
+        getJobSite().getData().incrementXp(completionXp);
         getJobSite().getEnterprise().sendEnterpriseMessage(
                 "§6§lPower Cell Construction Complete!",
                 "",
-                "§a+ " + COMPLETION_XP + " XP",
+                "§a+ " + completionXp + " XP",
                 "§eMiners now receive Haste in the quarry!",
                 "§7Upgrade the Power Cell for stronger effects."
         );
@@ -149,7 +148,8 @@ public class PowerCellStructure extends JobSiteStructure {
     }
 
     private void pasteStructure() {
-        SchematicUtils.pasteSchematic(SCHEMATIC, getJobSite().getSpawnPoint(), false);
+        File schematic = new File(StoinkCore.getInstance().getDataFolder(), "/schematics/" + config().getPowercellSchematic());
+        SchematicUtils.pasteSchematic(schematic, getJobSite().getSpawnPoint(), false);
     }
 
     private void updateHologramForLevel() {

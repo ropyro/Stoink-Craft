@@ -120,6 +120,8 @@ public class StoinkCore extends JavaPlugin {
     public void onEnable() {
         INSTANCE = this;
 
+        ConfigLoader.initialize(this);
+
         registerCommands();
 
         hookLibraries();
@@ -164,10 +166,6 @@ public class StoinkCore extends JavaPlugin {
     }
 
     private void initFilesAndResources(){
-
-        // Initialize configuration system
-        ConfigLoader.initialize(this);
-
         File marketFile = new File(getDataFolder(), "market.yml");
         if(!marketFile.exists()){
             saveResource("market.yml", false);

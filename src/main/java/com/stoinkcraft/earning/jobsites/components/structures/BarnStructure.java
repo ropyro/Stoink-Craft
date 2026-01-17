@@ -1,6 +1,8 @@
 package com.stoinkcraft.earning.jobsites.components.structures;
 
 import com.stoinkcraft.StoinkCore;
+import com.stoinkcraft.config.ConfigLoader;
+import com.stoinkcraft.config.StructureConfig;
 import com.stoinkcraft.earning.jobsites.JobSite;
 import com.stoinkcraft.earning.jobsites.components.JobSiteHologram;
 import com.stoinkcraft.earning.jobsites.JobSiteType;
@@ -12,31 +14,25 @@ import org.bukkit.util.Vector;
 
 import java.io.File;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 public class BarnStructure extends JobSiteStructure {
-
-    private static final File SCHEMATIC =
-            new File(StoinkCore.getInstance().getDataFolder(), "/schematics/barn.schem");
 
     public static Vector constructionHologramOffset = new Vector(-5, 3, -8);
 
     private JobSiteHologram hologram;
     private final String hologramId;
 
-    public static final int REQUIRED_LEVEL = 10;
-    public static final int COST = 50_000;
-    public static final long BUILD_TIME = TimeUnit.MINUTES.toMillis(15); // 15 minutes
-    public static final int COMPLETION_XP = 500;
-
+    private static StructureConfig config() {
+        return ConfigLoader.getStructures();
+    }
 
     public BarnStructure(JobSite jobSite) {
         super(
                 "barn",
                 "Animal Barn",
-                REQUIRED_LEVEL,
-                BUILD_TIME,
-                () -> COST,
+                () -> config().getBarnRequiredLevel(),
+                () -> config().getBarnBuildTimeMillis(),
+                () -> config().getBarnCost(),
                 site -> true,
                 jobSite
         );
@@ -75,11 +71,12 @@ public class BarnStructure extends JobSiteStructure {
     @Override
     public void onUnlockComplete() {
         pasteStructure();
-        getJobSite().getData().incrementXp(COMPLETION_XP);
+        int completionXp = config().getBarnCompletionXp();
+        getJobSite().getData().incrementXp(completionXp);
         getJobSite().getEnterprise().sendEnterpriseMessage(
                 "§6§lBarn Construction Complete!",
                 "",
-                "§a+ " + COMPLETION_XP + " XP",
+                "§a+ " + completionXp + " XP",
                 ""
         );
         hologram.delete();
@@ -94,7 +91,8 @@ public class BarnStructure extends JobSiteStructure {
     }
 
     private void pasteStructure() {
-        SchematicUtils.pasteSchematic(SCHEMATIC, getJobSite().getSpawnPoint(), true);
+        File schematic = new File(StoinkCore.getInstance().getDataFolder(), "/schematics/" + config().getBarnSchematic());
+        SchematicUtils.pasteSchematic(schematic, getJobSite().getSpawnPoint(), true);
     }
 
     private void updateHologramForLevel() {

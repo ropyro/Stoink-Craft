@@ -1,0 +1,76 @@
+# StoinkCore Structure Configuration
+# This file controls build times, costs, rewards, and other settings for all structures.
+# After making changes, use /stoinkcore reload to apply them without restarting.
+
+structures:
+
+  # =============================================
+  # BARN (Farmland)
+  # =============================================
+  barn:
+    # JobSite level required to unlock
+    required-level: 10
+    # Cost in dollars to start construction
+    cost: 50000
+    # Build time in seconds (900 = 15 minutes)
+    build-time-seconds: 900
+    # XP awarded upon completion
+    completion-xp: 500
+    # Schematic file name (located in plugins/StoinkCore/schematics/)
+    schematic: "barn.schem"
+
+  # =============================================
+  # BEE HIVES (Farmland)
+  # =============================================
+  beehive:
+    required-level: 20
+    cost: 150000
+    # Build time in seconds (2700 = 45 minutes)
+    build-time-seconds: 2700
+    completion-xp: 2000
+    schematic: "beehives.schem"
+
+  # =============================================
+  # POWER CELL (Quarry)
+  # =============================================
+  powercell:
+    required-level: 10
+    cost: 75000
+    # Build time in seconds (1200 = 20 minutes)
+    build-time-seconds: 1200
+    completion-xp: 750
+    schematic: "powercell.schem"
+    # Interval in ticks to check/apply haste effect (20 ticks = 1 second)
+    effect-check-interval-ticks: 60
+
+  # =============================================
+  # MAUSOLEUM (Graveyard)
+  # =============================================
+  mausoleum:
+    required-level: 15
+    cost: 175000
+    # Build time in seconds (1800 = 30 minutes)
+    build-time-seconds: 1800
+    completion-xp: 1500
+    schematic: "mausoleum.schem"
+
+    # Horde spawning settings
+    horde:
+      # Base spawn interval in seconds (600 = 10 minutes)
+      base-interval-seconds: 600
+      # Minimum spawn interval in seconds (180 = 3 minutes)
+      min-interval-seconds: 180
+      # Seconds reduced per spawn speed upgrade level
+      interval-reduction-per-level: 42
+
+      # Base number of spiders per horde
+      base-size: 6
+      # Additional spiders per horde size upgrade level
+      spiders-per-upgrade: 2
+      # Maximum horde size cap
+      max-size: 30
+
+    # Rewards per spider killed
+    rewards:
+      xp-per-spider: 12
+      money-per-spider: 40

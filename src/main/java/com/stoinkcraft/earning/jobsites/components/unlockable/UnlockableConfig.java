@@ -3,22 +3,31 @@ package com.stoinkcraft.earning.jobsites.components.unlockable;
 import com.stoinkcraft.earning.jobsites.JobSite;
 
 import java.util.function.IntSupplier;
+import java.util.function.LongSupplier;
 import java.util.function.Predicate;
 
 public record UnlockableConfig(
         String id,
         String displayName,
-        int requiredJobsiteLevel,
-        long buildTimeMillis,
+        IntSupplier requiredLevelSupplier,
+        LongSupplier buildTimeSupplier,
         IntSupplier costSupplier,
         Predicate<JobSite> unlockCondition
 ) {
+    public int getRequiredJobsiteLevel() {
+        return requiredLevelSupplier.getAsInt();
+    }
+
+    public long getBuildTimeMillis() {
+        return buildTimeSupplier.getAsLong();
+    }
+
     public int getCost() {
         return costSupplier.getAsInt();
     }
 
     public boolean meetsRequirements(JobSite site) {
         return unlockCondition.test(site)
-                && site.getLevel() >= requiredJobsiteLevel;
+                && site.getLevel() >= getRequiredJobsiteLevel();
     }
 }

@@ -1,12 +1,11 @@
 package com.stoinkcraft.earning.contracts;
 
+import com.stoinkcraft.config.ConfigLoader;
 import com.stoinkcraft.earning.contracts.rewards.CompositeReward;
 import com.stoinkcraft.earning.contracts.rewards.JobSiteXpReward;
 import com.stoinkcraft.earning.contracts.rewards.MoneyReward;
 import com.stoinkcraft.earning.contracts.triggers.*;
 import com.stoinkcraft.earning.jobsites.JobSiteType;
-import com.stoinkcraft.earning.jobsites.components.structures.BeeHiveStructure;
-import com.stoinkcraft.earning.jobsites.components.structures.MausoleumStructure;
 import com.stoinkcraft.earning.jobsites.sites.graveyard.UndeadMobType;
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
@@ -343,7 +342,7 @@ public class ContractPoolLoader {
                 "farmland_honey_basic",
                 new HoneyHarvestTrigger(),
                 JobSiteType.FARMLAND,
-                BeeHiveStructure.REQUIRED_LEVEL,
+                ConfigLoader.getStructures().getBeehiveRequiredLevel(),
                 6,
                 Map.of(),
                 new CompositeReward(List.of(
@@ -573,7 +572,7 @@ public class ContractPoolLoader {
                 "farmland_honey_weekly",
                 new HoneyHarvestTrigger(),
                 JobSiteType.FARMLAND,
-                BeeHiveStructure.REQUIRED_LEVEL,
+                ConfigLoader.getStructures().getBeehiveRequiredLevel(),
                 50,
                 Map.of(),
                 new CompositeReward(List.of(
@@ -1581,7 +1580,7 @@ public class ContractPoolLoader {
                 "graveyard_spider_basic",
                 new SpiderKillTrigger(),
                 JobSiteType.GRAVEYARD,
-                MausoleumStructure.REQUIRED_LEVEL,
+                ConfigLoader.getStructures().getMausoleumRequiredLevel(),
                 10,
                 Map.of(),
                 new CompositeReward(List.of(
@@ -1753,7 +1752,7 @@ public class ContractPoolLoader {
                 "graveyard_spider_weekly",
                 new SpiderKillTrigger(),
                 JobSiteType.GRAVEYARD,
-                MausoleumStructure.REQUIRED_LEVEL,
+                ConfigLoader.getStructures().getMausoleumRequiredLevel(),
                 80,
                 Map.of(),
                 new CompositeReward(List.of(

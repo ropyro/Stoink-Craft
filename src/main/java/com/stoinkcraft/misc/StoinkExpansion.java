@@ -1,6 +1,7 @@
 package com.stoinkcraft.misc;
 
 import com.stoinkcraft.StoinkCore;
+import com.stoinkcraft.config.ConfigLoader;
 import com.stoinkcraft.enterprise.Enterprise;
 import com.stoinkcraft.enterprise.EnterpriseManager;
 import com.stoinkcraft.earning.jobsites.JobSite;
@@ -356,10 +357,10 @@ public class StoinkExpansion extends PlaceholderExpansion {
 
             return switch (state) {
                 case LOCKED -> {
-                    if(graveyard.getLevel() >= MausoleumStructure.REQUIRED_LEVEL){
+                    if(graveyard.getLevel() >= ConfigLoader.getStructures().getMausoleumRequiredLevel()){
                         yield "Mausoleum: §aReady to build";
                     }else{
-                        yield "Mausoleum: §cLocked §7(Lv. " + MausoleumStructure.REQUIRED_LEVEL + ")";
+                        yield "Mausoleum: §cLocked §7(Lv. " + ConfigLoader.getStructures().getMausoleumRequiredLevel() + ")";
                     }
                 }
                 case BUILDING -> {

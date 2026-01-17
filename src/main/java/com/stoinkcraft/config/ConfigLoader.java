@@ -20,8 +20,8 @@ public class ConfigLoader {
     private EconomyConfig economy;
     private CollectionConfig collections;
     private GeneratorConfig generators;
+    private StructureConfig structures;
     // Future config classes will be added here:
-    // private StructureConfig structures;
     // private JobSiteUpgradeConfig jobSiteUpgrades;
     // private ContractConfigLoader contracts;
 
@@ -81,6 +81,13 @@ public class ConfigLoader {
     }
 
     /**
+     * Get structure configuration.
+     */
+    public static StructureConfig getStructures() {
+        return getInstance().structures;
+    }
+
+    /**
      * Load all configuration files.
      */
     private void loadAll() {
@@ -90,6 +97,7 @@ public class ConfigLoader {
             loadEconomyConfig();
             loadCollectionsConfig();
             loadGeneratorsConfig();
+            loadStructuresConfig();
             // Future configs will be loaded here
             logger.info("All configurations loaded successfully!");
         } catch (Exception e) {
@@ -141,5 +149,17 @@ public class ConfigLoader {
         }
 
         generators = new GeneratorConfig(plugin, generatorsFile);
+    }
+
+    private void loadStructuresConfig() {
+        File structuresFile = new File(plugin.getDataFolder(), "structures.yml");
+
+        // Create default structures.yml if it doesn't exist
+        if (!structuresFile.exists()) {
+            plugin.saveResource("structures.yml", false);
+            logger.info("Created default structures.yml");
+        }
+
+        structures = new StructureConfig(plugin, structuresFile);
     }
 }

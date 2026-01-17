@@ -1,6 +1,8 @@
 package com.stoinkcraft.earning.jobsites.components.structures;
 
 import com.stoinkcraft.StoinkCore;
+import com.stoinkcraft.config.ConfigLoader;
+import com.stoinkcraft.config.StructureConfig;
 import com.stoinkcraft.earning.jobsites.JobSite;
 import com.stoinkcraft.earning.jobsites.JobSiteType;
 import com.stoinkcraft.earning.jobsites.components.JobSiteHologram;
@@ -13,29 +15,25 @@ import org.bukkit.util.Vector;
 
 import java.io.File;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 public class BeeHiveStructure extends JobSiteStructure {
-
-    private static final File SCHEMATIC =
-            new File(StoinkCore.getInstance().getDataFolder(), "/schematics/beehives.schem");
 
     public static Vector constructionHologramOffset = new Vector(-15, 3, -34);
 
     private JobSiteHologram hologram;
     private final String hologramId;
 
-    public static final int REQUIRED_LEVEL = 20;
-    public static final int COST = 150_000;
-    public static final long BUILD_TIME = TimeUnit.MINUTES.toMillis(45); // 45 minutes
-    public static final int COMPLETION_XP = 2000;
+    private static StructureConfig config() {
+        return ConfigLoader.getStructures();
+    }
+
     public BeeHiveStructure(JobSite jobSite) {
         super(
                 "beehive",
                 "Bee Hives",
-                REQUIRED_LEVEL,
-                BUILD_TIME,
-                () -> COST,
+                () -> config().getBeehiveRequiredLevel(),
+                () -> config().getBeehiveBuildTimeMillis(),
+                () -> config().getBeehiveCost(),
                 site -> true,
                 jobSite
         );
@@ -74,11 +72,12 @@ public class BeeHiveStructure extends JobSiteStructure {
     @Override
     public void onUnlockComplete() {
         pasteStructure();
-        getJobSite().getData().incrementXp(COMPLETION_XP);
+        int completionXp = config().getBeehiveCompletionXp();
+        getJobSite().getData().incrementXp(completionXp);
         getJobSite().getEnterprise().sendEnterpriseMessage(
                 "§6§lBee Hive Construction Complete!",
                 "",
-                "§a+ " + COMPLETION_XP + " XP",
+                "§a+ " + completionXp + " XP",
                 ""
         );
         hologram.delete();
@@ -93,7 +92,8 @@ public class BeeHiveStructure extends JobSiteStructure {
     }
 
     private void pasteStructure() {
-        SchematicUtils.pasteSchematic(SCHEMATIC, getJobSite().getSpawnPoint(), false);
+        File schematic = new File(StoinkCore.getInstance().getDataFolder(), "/schematics/" + config().getBeehiveSchematic());
+        SchematicUtils.pasteSchematic(schematic, getJobSite().getSpawnPoint(), false);
     }
 
     private void updateHologramForLevel() {

@@ -5,6 +5,7 @@ import com.stoinkcraft.earning.jobsites.components.unlockable.Unlockable;
 import com.stoinkcraft.earning.jobsites.components.unlockable.UnlockableConfig;
 
 import java.util.function.IntSupplier;
+import java.util.function.LongSupplier;
 import java.util.function.Predicate;
 
 public abstract class JobSiteStructure implements JobSiteComponent, Unlockable {
@@ -15,15 +16,15 @@ public abstract class JobSiteStructure implements JobSiteComponent, Unlockable {
     protected JobSiteStructure(
             String id,
             String displayName,
-            int requiredJobsiteLevel,
-            long buildTimeMillis,
+            IntSupplier requiredLevelSupplier,
+            LongSupplier buildTimeSupplier,
             IntSupplier costSupplier,
             Predicate<JobSite> unlockCondition,
             JobSite jobSite
     ) {
         this.unlockConfig = new UnlockableConfig(
-                id, displayName, requiredJobsiteLevel,
-                buildTimeMillis, costSupplier, unlockCondition
+                id, displayName, requiredLevelSupplier,
+                buildTimeSupplier, costSupplier, unlockCondition
         );
         this.jobSite = jobSite;
     }

@@ -2,6 +2,7 @@ package com.stoinkcraft.earning.jobsites.sites.graveyard;
 
 import com.fastasyncworldedit.core.FaweAPI;
 import com.stoinkcraft.StoinkCore;
+import com.stoinkcraft.config.ConfigLoader;
 import com.stoinkcraft.enterprise.Enterprise;
 import com.stoinkcraft.earning.contracts.ContractContext;
 import com.stoinkcraft.earning.jobsites.JobSite;
@@ -203,7 +204,7 @@ public class GraveyardSite extends JobSite {
                 "mausoleum_spawn_speed",
                 "Horde Frequency",
                 10,
-                MausoleumStructure.REQUIRED_LEVEL + 2, // JS 17
+                ConfigLoader.getStructures().getMausoleumRequiredLevel() + 2, // JS 17
                 2,                     // +2 per level
                 // Level 1 @ JS17, Level 2 @ JS19... Level 10 @ JS35
                 lvl -> 8000 + (lvl * 6000), // 14000, 20000, 26000... 68000
@@ -221,7 +222,7 @@ public class GraveyardSite extends JobSite {
                 "mausoleum_horde_size",
                 "Horde Size",
                 10,
-                MausoleumStructure.REQUIRED_LEVEL + 2, // JS 17
+                ConfigLoader.getStructures().getMausoleumRequiredLevel() + 2, // JS 17
                 2,                     // +2 per level
                 // Level 1 @ JS17, Level 2 @ JS19... Level 10 @ JS35
                 lvl -> 6000 + (lvl * 5000), // 11000, 16000, 21000... 56000
