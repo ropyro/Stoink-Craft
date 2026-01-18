@@ -142,7 +142,7 @@ public class CropGenerator extends JobSiteGenerator implements ProtectedZone {
     // UPGRADE INTEGRATION
     // ---------------------------------------
 
-    private int getGrowthSpeedLevel() {
+    protected int getGrowthSpeedLevel() {
         // directly read from upgrade map
         return ((FarmlandSite) getParent()).getData().getLevel("crop_growth_speed");
     }
@@ -155,7 +155,7 @@ public class CropGenerator extends JobSiteGenerator implements ProtectedZone {
         return ((FarmlandSite) getParent()).getData();
     }
 
-    private CropGeneratorType getCropType() {
+    protected CropGeneratorType getCropType() {
         return data().getCurrentCropType();
     }
 

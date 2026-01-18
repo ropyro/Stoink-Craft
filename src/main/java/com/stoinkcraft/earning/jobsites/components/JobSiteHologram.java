@@ -103,4 +103,12 @@ public class JobSiteHologram implements JobSiteComponent{
         }catch (IllegalArgumentException e){}
         return null;
     }
+
+    public JobSite getParent() {
+        return parent;
+    }
+
+    public String getId() {
+        return id;
+    }
 }

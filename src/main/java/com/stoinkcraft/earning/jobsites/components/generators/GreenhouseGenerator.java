@@ -1,15 +1,104 @@
 package com.stoinkcraft.earning.jobsites.components.generators;
 
-import com.google.gson.annotations.Expose;
 import com.stoinkcraft.earning.jobsites.JobSite;
+import com.stoinkcraft.earning.jobsites.sites.farmland.FarmlandData;
+import com.stoinkcraft.earning.jobsites.sites.farmland.FarmlandSite;
 import org.bukkit.Location;
 
-public class GreenhouseGenerator extends CropGenerator{
+/**
+ * A greenhouse generator that functions like a CropGenerator but has its own
+ * individual upgrades and crop type selection. Each farmland has 3 greenhouses,
+ * each unlocked at different levels.
+ */
+public class GreenhouseGenerator extends CropGenerator {
 
-    @Expose
-    public CropGeneratorType currentType = CropGeneratorType.WHEAT;
+    private final int greenhouseIndex;
 
-    public GreenhouseGenerator(Location corner1, Location corner2, JobSite parent, String regionName) {
+    public GreenhouseGenerator(Location corner1, Location corner2, JobSite parent, String regionName, int greenhouseIndex) {
         super(corner1, corner2, parent, regionName);
+        this.greenhouseIndex = greenhouseIndex;
+    }
+
+    public int getGreenhouseIndex() {
+        return greenhouseIndex;
+    }
+
+    /**
+     * Returns the upgrade key for this greenhouse's growth speed.
+     * e.g., "greenhouse_1_growth_speed", "greenhouse_2_growth_speed", etc.
+     */
+    public String getGrowthSpeedUpgradeKey() {
+        return "greenhouse_" + greenhouseIndex + "_growth_speed";
+    }
+
+    /**
+     * Returns the upgrade key for unlocking this greenhouse.
+     * Greenhouse 1 is always unlocked, so this is mainly for 2 and 3.
+     */
+    public String getUnlockUpgradeKey() {
+        return "unlock_greenhouse_" + greenhouseIndex;
+    }
+
+    /**
+     * Checks if this greenhouse is unlocked.
+     * Greenhouse 1 is always unlocked when the farmland is built.
+     */
+    public boolean isUnlocked() {
+        if (greenhouseIndex == 1) {
+            return true; // First greenhouse is always available
+        }
+        return getFarmlandData().getLevel(getUnlockUpgradeKey()) > 0;
+    }
+
+    @Override
+    public void tick() {
+        if (!isUnlocked()) {
+            return; // Don't tick if not unlocked
+        }
+        super.tick();
+    }
+
+    @Override
+    public void build() {
+        if (!isUnlocked()) {
+            return; // Don't build crops if not unlocked
+        }
+        super.build();
+    }
+
+    private FarmlandData getFarmlandData() {
+        return ((FarmlandSite) getParent()).getData();
+    }
+
+    /**
+     * Gets the growth speed level for this specific greenhouse.
+     */
+    @Override
+    protected int getGrowthSpeedLevel() {
+        return getFarmlandData().getLevel(getGrowthSpeedUpgradeKey());
+    }
+
+    /**
+     * Gets the crop type for this specific greenhouse.
+     */
+    @Override
+    protected CropGeneratorType getCropType() {
+        return getFarmlandData().getGreenhouseCropType(greenhouseIndex);
+    }
+
+    /**
+     * Sets the crop type for this specific greenhouse.
+     */
+    @Override
+    public void setCropType(CropGeneratorType type) {
+        getFarmlandData().setGreenhouseCropType(greenhouseIndex, type);
+        regenerateCrops();
+    }
+
+    /**
+     * Rebuilds the greenhouse if it becomes unlocked.
+     */
+    public void onUnlock() {
+        regenerateCrops();
     }
 }

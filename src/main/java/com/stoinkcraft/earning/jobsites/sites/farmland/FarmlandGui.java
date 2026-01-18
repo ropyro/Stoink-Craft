@@ -6,6 +6,7 @@ import com.stoinkcraft.earning.collections.CollectionsGui;
 import com.stoinkcraft.earning.contracts.ActiveContract;
 import com.stoinkcraft.earning.jobsites.*;
 import com.stoinkcraft.earning.jobsites.components.generators.CropGenerator;
+import com.stoinkcraft.earning.jobsites.components.generators.GreenhouseGenerator;
 import com.stoinkcraft.earning.jobsites.components.generators.HoneyGenerator;
 import com.stoinkcraft.earning.jobsites.components.generators.PassiveMobGenerator;
 import com.stoinkcraft.utils.SCConstants;
@@ -52,9 +53,9 @@ public class FarmlandGui {
                 )
                 .addIngredient('#', filler())
                 .addIngredient('?', createHelpItem())
-                .addIngredient('F', menuButton(Material.IRON_HOE, "§6Crops Manager",
-                        List.of("§7Manage your crop selection", "§7and growth upgrades", DIVIDER, ARROW + "Click to open"),
-                        this::openCropMenu))
+                .addIngredient('F', menuButton(Material.GLASS, "§6Greenhouses",
+                        List.of("§7Manage your 3 greenhouses", "§7Each with its own crops and upgrades", DIVIDER, ARROW + "Click to open"),
+                        this::openGreenhouseMenu))
                 .addIngredient('A', menuButton(Material.BEEF, "§6Animal Manager",
                         List.of("§7Manage your animal selection", "§7and spawn upgrades", DIVIDER, ARROW + "Click to open"),
                         this::openAnimalMenu))
@@ -126,64 +127,56 @@ public class FarmlandGui {
         );
     }
 
-    // ==================== Crop Menu ====================
+    // ==================== Greenhouse Menu ====================
 
-    private void openCropMenu() {
+    private void openGreenhouseMenu() {
         Gui gui = Gui.normal()
                 .setStructure(
                         "# # # # ? # # # #",
-                        "# W C P B # # G #",
+                        "# # 1 2 3 # # # #",
                         "# # # # # # # < #"
                 )
                 .addIngredient('#', filler())
-                .addIngredient('?', createSubMenuHelp(THEME, "Crops Manager",
-                        "Select which crop to grow and",
-                        "upgrade your growth speed."))
-                .addIngredient('W', createCropItem(Material.WHEAT, CropGenerator.CropGeneratorType.WHEAT, null))
-                .addIngredient('C', createCropItem(Material.CARROT, CropGenerator.CropGeneratorType.CARROT, "unlock_carrot"))
-                .addIngredient('P', createCropItem(Material.POTATO, CropGenerator.CropGeneratorType.POTATO, "unlock_potato"))
-                .addIngredient('B', createCropItem(Material.BEETROOT, CropGenerator.CropGeneratorType.BEETROOT, "unlock_beetroot"))
-                .addIngredient('G', createUpgradeItem(
-                        farmlandSite,
-                        "crop_growth_speed",
-                        Material.WATER_BUCKET,
-                        "Growth Speed",
-                        "Increases how fast crops grow",
-                        THEME,
-                        this::openCropMenu
-                ))
+                .addIngredient('?', createSubMenuHelp(THEME, "Greenhouses",
+                        "Manage your 3 greenhouses.",
+                        "Each has its own crop and upgrades."))
+                .addIngredient('1', createGreenhouseItem(1))
+                .addIngredient('2', createGreenhouseItem(2))
+                .addIngredient('3', createGreenhouseItem(3))
                 .addIngredient('<', backButton(this::openWindow))
                 .build();
 
-        open(gui, "§8Crops Manager");
+        open(gui, "§8Greenhouses");
     }
 
-    private AbstractItem createCropItem(Material mat, CropGenerator.CropGeneratorType type, String unlockUpgradeId) {
+    private AbstractItem createGreenhouseItem(int index) {
         return new AbstractItem() {
             @Override
             public ItemProvider getItemProvider() {
-                JobSiteUpgrade upgrade = unlockUpgradeId != null ? findUpgrade(farmlandSite, unlockUpgradeId) : null;
-                boolean unlocked = upgrade == null || farmlandSite.getData().getLevel(unlockUpgradeId) > 0;
-                boolean selected = farmlandSite.getData().getCurrentCropType() == type;
+                GreenhouseGenerator greenhouse = farmlandSite.getGreenhouse(index);
+                boolean unlocked = greenhouse != null && greenhouse.isUnlocked();
                 int jobsiteLevel = farmlandSite.getLevel();
 
-                ItemBuilder item = new ItemBuilder(mat);
+                ItemBuilder item = new ItemBuilder(unlocked ? Material.GREEN_STAINED_GLASS : Material.GRAY_STAINED_GLASS);
 
                 if (!unlocked) {
-                    int requiredLevel = upgrade.getRequiredJobsiteLevel(1);
+                    String unlockKey = "unlock_greenhouse_" + index;
+                    JobSiteUpgrade upgrade = findUpgrade(farmlandSite, unlockKey);
+                    int requiredLevel = upgrade != null ? upgrade.getRequiredJobsiteLevel(1) : 0;
+                    int cost = upgrade != null ? upgrade.cost(1) : 0;
 
-                    item.setDisplayName("§c" + formatName(type.name()) + " §8(Locked)");
-                    item.addLoreLines("§7Unlock this crop type");
+                    item.setDisplayName("§c§lGreenhouse " + index + " §8(Locked)");
+                    item.addLoreLines("§7Unlock this greenhouse");
                     item.addLoreLines(DIVIDER);
                     item.addLoreLines(subHeader(THEME, "Requirements"));
-                    item.addLoreLines(BULLET + "§fCost: §6$" + String.format("%,d", upgrade.cost(1)));
+                    item.addLoreLines(BULLET + "§fCost: §6$" + String.format("%,d", cost));
                     item.addLoreLines(BULLET + "§fRequired Level: §e" + requiredLevel);
                     item.addLoreLines(DIVIDER);
 
                     if (jobsiteLevel < requiredLevel) {
                         item.addLoreLines(CROSS + "§cYour level: §f" + jobsiteLevel);
-                    } else if (!upgrade.canPurchase(farmlandSite, 1)) {
-                        item.addLoreLines(CROSS + "§cPrevious crop not unlocked");
+                    } else if (upgrade != null && !upgrade.canPurchase(farmlandSite, 1)) {
+                        item.addLoreLines(CROSS + "§cPrevious greenhouse not unlocked");
                     } else {
                         item.addLoreLines(CHECKMARK + "§aReady to unlock!");
                     }
@@ -191,17 +184,18 @@ public class FarmlandGui {
                     item.addLoreLines(DIVIDER);
                     item.addLoreLines(ARROW + "Click to unlock");
 
-                } else if (selected) {
-                    item.setDisplayName("§a" + formatName(type.name()) + " §8(Active)");
-                    item.addLoreLines("§7Currently growing this crop");
-                    item.addLoreLines(DIVIDER);
-                    item.addLoreLines(CHECKMARK + "§aSelected");
-
                 } else {
-                    item.setDisplayName("§e" + formatName(type.name()));
-                    item.addLoreLines("§7Click to grow this crop");
+                    CropGenerator.CropGeneratorType cropType = farmlandSite.getData().getGreenhouseCropType(index);
+                    int growthLevel = farmlandSite.getData().getLevel(greenhouse.getGrowthSpeedUpgradeKey());
+
+                    item.setDisplayName("§a§lGreenhouse " + index);
+                    item.addLoreLines("§7Click to manage this greenhouse");
                     item.addLoreLines(DIVIDER);
-                    item.addLoreLines(ARROW + "Click to select");
+                    item.addLoreLines(subHeader(THEME, "Status"));
+                    item.addLoreLines(BULLET + "§fCrop: §a" + formatName(cropType.name()));
+                    item.addLoreLines(BULLET + "§fGrowth Level: §a" + growthLevel);
+                    item.addLoreLines(DIVIDER);
+                    item.addLoreLines(ARROW + "Click to manage");
                 }
 
                 return item;
@@ -209,21 +203,25 @@ public class FarmlandGui {
 
             @Override
             public void handleClick(@NotNull ClickType click, @NotNull Player p, @NotNull InventoryClickEvent e) {
-                JobSiteUpgrade upgrade = unlockUpgradeId != null ? findUpgrade(farmlandSite, unlockUpgradeId) : null;
-                boolean unlocked = upgrade == null || farmlandSite.getData().getLevel(unlockUpgradeId) > 0;
+                GreenhouseGenerator greenhouse = farmlandSite.getGreenhouse(index);
 
-                if (!unlocked) {
-                    if (farmlandSite.purchaseUpgrade(upgrade, p)) {
-                        sendSuccess(p, formatName(type.name()) + " unlocked!");
-                    } else {
-                        sendUpgradePurchaseError(p, farmlandSite, upgrade);
+                if (greenhouse == null || !greenhouse.isUnlocked()) {
+                    // Try to unlock
+                    String unlockKey = "unlock_greenhouse_" + index;
+                    JobSiteUpgrade upgrade = findUpgrade(farmlandSite, unlockKey);
+
+                    if (upgrade != null) {
+                        if (farmlandSite.purchaseUpgrade(upgrade, p)) {
+                            sendSuccess(p, "Greenhouse " + index + " unlocked!");
+                        } else {
+                            sendUpgradePurchaseError(p, farmlandSite, upgrade);
+                        }
                     }
+                    openGreenhouseMenu();
                 } else {
-                    farmlandSite.getCropGenerator().setCropType(type);
-                    sendSuccess(p, "Now growing " + formatName(type.name()) + "!");
+                    // Open specific greenhouse GUI
+                    new GreenhouseGui(farmlandSite, greenhouse, p).openWindow();
                 }
-
-                openCropMenu();
             }
         };
     }

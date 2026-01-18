@@ -5,9 +5,11 @@ import com.stoinkcraft.enterprise.Enterprise;
 import com.stoinkcraft.earning.jobsites.JobSite;
 import com.stoinkcraft.earning.jobsites.JobSiteType;
 import com.stoinkcraft.earning.jobsites.JobSiteUpgrade;
+import com.stoinkcraft.earning.jobsites.components.GreenhouseHologram;
 import com.stoinkcraft.earning.jobsites.components.JobSiteHologram;
 import com.stoinkcraft.earning.jobsites.components.JobSiteNPC;
 import com.stoinkcraft.earning.jobsites.components.generators.CropGenerator;
+import com.stoinkcraft.earning.jobsites.components.generators.GreenhouseGenerator;
 import com.stoinkcraft.earning.jobsites.components.generators.HoneyGenerator;
 import com.stoinkcraft.earning.jobsites.components.generators.PassiveMobGenerator;
 import com.stoinkcraft.earning.jobsites.components.structures.BarnStructure;
@@ -23,7 +25,9 @@ import org.bukkit.util.Vector;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class FarmlandSite extends JobSite {
 
@@ -42,12 +46,25 @@ public class FarmlandSite extends JobSite {
     public static Vector farmerJoeOffset = new Vector(-27, 0, -14); // Adjust as needed
 
     /**
-     * Crop generator
+     * Greenhouses (3 total, replacing single CropGenerator)
      */
-    private String cropRegionID;
-    private CropGenerator cropGenerator;
-    public static Vector cropGenCorner1Offset = new Vector(-25, 0, -16);
-    public static Vector cropGenCorner2Offset = new Vector(-54, 0, -45);
+    private Map<Integer, GreenhouseGenerator> greenhouses = new HashMap<>();
+    private Map<Integer, GreenhouseHologram> greenhouseHolograms = new HashMap<>();
+
+    // Greenhouse 1 - Always unlocked
+    public static Vector greenhouse1Corner1Offset = new Vector(-28, 1, -18);
+    public static Vector greenhouse1Corner2Offset = new Vector(-32, 1, -43);
+    public static Vector greenhouse1HologramOffset = new Vector(-29.5, 2F, -16.5);
+
+    // Greenhouse 2 - Unlocked at level 8
+    public static Vector greenhouse2Corner1Offset = new Vector(-35, 0, -16);
+    public static Vector greenhouse2Corner2Offset = new Vector(-44, 0, -25);
+    public static Vector greenhouse2HologramOffset = new Vector(-39.5, 3, -20.5);
+
+    // Greenhouse 3 - Unlocked at level 15
+    public static Vector greenhouse3Corner1Offset = new Vector(-45, 0, -16);
+    public static Vector greenhouse3Corner2Offset = new Vector(-54, 0, -25);
+    public static Vector greenhouse3HologramOffset = new Vector(-49.5, 3, -20.5);
 
     /**
      * Farm animal generator
@@ -115,9 +132,13 @@ public class FarmlandSite extends JobSite {
 
         welcomeHologramId = enterprise.getID() + "_" + JobSiteType.FARMLAND.name() + "_welcome";
 
-        cropRegionID = enterprise.getID() + "_" + JobSiteType.FARMLAND.name() + "_crops";
-        cropGenerator = new CropGenerator(spawnPoint.clone().add(cropGenCorner1Offset),
-                spawnPoint.clone().add(cropGenCorner2Offset), this, cropRegionID);
+        // Create 3 greenhouses with their holograms
+        createGreenhouse(1, spawnPoint, enterprise,
+                greenhouse1Corner1Offset, greenhouse1Corner2Offset, greenhouse1HologramOffset);
+        createGreenhouse(2, spawnPoint, enterprise,
+                greenhouse2Corner1Offset, greenhouse2Corner2Offset, greenhouse2HologramOffset);
+        createGreenhouse(3, spawnPoint, enterprise,
+                greenhouse3Corner1Offset, greenhouse3Corner2Offset, greenhouse3HologramOffset);
 
         mobRegionID = enterprise.getID() + "_" + JobSiteType.FARMLAND.name() + "_mobs";
         mobGenerator = new PassiveMobGenerator(
@@ -141,6 +162,23 @@ public class FarmlandSite extends JobSite {
         registerComponents();
     }
 
+    private void createGreenhouse(int index, Location spawnPoint, Enterprise enterprise,
+                                   Vector corner1Offset, Vector corner2Offset, Vector hologramOffset) {
+        String regionID = enterprise.getID() + "_" + JobSiteType.FARMLAND.name() + "_greenhouse_" + index;
+
+        GreenhouseGenerator greenhouse = new GreenhouseGenerator(
+                spawnPoint.clone().add(corner1Offset),
+                spawnPoint.clone().add(corner2Offset),
+                this,
+                regionID,
+                index
+        );
+        greenhouses.put(index, greenhouse);
+
+        GreenhouseHologram hologram = new GreenhouseHologram(this, greenhouse, hologramOffset);
+        greenhouseHolograms.put(index, hologram);
+    }
+
     private void registerComponents(){
         List<String> welcomeHologramLines = new ArrayList<>();
         welcomeHologramLines.add(ChatColor.AQUA + "" + ChatColor.BOLD + "Welcome to the Farmland");
@@ -150,7 +188,10 @@ public class FarmlandSite extends JobSite {
         welcomeHologramLines.add(ChatColor.WHITE + "crop grow speed and unlock new crops and animals!");
         addComponent(new JobSiteHologram(this, welcomeHologramId, welcomeHologramOffset, welcomeHologramLines));
 
-        addComponent(cropGenerator);
+        // Add all greenhouses and their holograms
+        greenhouses.values().forEach(this::addComponent);
+        greenhouseHolograms.values().forEach(this::addComponent);
+
         addComponent(mobGenerator);
         addComponent(farmerJoe);
         addComponent(barnStructure);
@@ -162,25 +203,88 @@ public class FarmlandSite extends JobSite {
     private void registerUpgrades() {
 
         // =========================
-        // CROP GROWTH SPEED
+        // GREENHOUSE UNLOCKS
         // =========================
-        // Affects how fast crops grow beyond vanilla rate
-        // Each level = +2% growth tick chance (base 2% at level 1)
+        // Greenhouse 1 is always unlocked
+        // Greenhouse 2 unlocks at level 8
+        // Greenhouse 3 unlocks at level 15
 
         upgrades.add(new JobSiteUpgrade(
-                "crop_growth_speed",
-                "Crop Growth Speed",
-                10,                    // max level
-                1,                     // base jobsite level
-                3,                     // +3 jobsite levels per upgrade
-                // Level 1 @ JS1, Level 2 @ JS4, Level 3 @ JS7... Level 10 @ JS28
-                lvl -> 1000 + (lvl * 1500),  // 2500, 4000, 5500... 16000
+                "unlock_greenhouse_2",
+                "Unlock Greenhouse 2",
+                1,
+                8,
+                0,
+                lvl -> 15_000,
+                site -> true,
+                (site, lvl) -> {
+                    // Trigger greenhouse unlock
+                    FarmlandSite farmland = (FarmlandSite) site;
+                    GreenhouseGenerator gh = farmland.getGreenhouse(2);
+                    GreenhouseHologram hologram = farmland.getGreenhouseHologram(2);
+                    if (gh != null) gh.onUnlock();
+                    if (hologram != null) hologram.onGreenhouseUnlock();
+                }
+        ));
+
+        upgrades.add(new JobSiteUpgrade(
+                "unlock_greenhouse_3",
+                "Unlock Greenhouse 3",
+                1,
+                15,
+                0,
+                lvl -> 40_000,
+                site -> site.getData().getLevel("unlock_greenhouse_2") > 0,
+                (site, lvl) -> {
+                    // Trigger greenhouse unlock
+                    FarmlandSite farmland = (FarmlandSite) site;
+                    GreenhouseGenerator gh = farmland.getGreenhouse(3);
+                    GreenhouseHologram hologram = farmland.getGreenhouseHologram(3);
+                    if (gh != null) gh.onUnlock();
+                    if (hologram != null) hologram.onGreenhouseUnlock();
+                }
+        ));
+
+        // =========================
+        // GREENHOUSE GROWTH SPEED (Individual per greenhouse)
+        // =========================
+        // Each greenhouse has its own growth speed upgrade
+
+        upgrades.add(new JobSiteUpgrade(
+                "greenhouse_1_growth_speed",
+                "Greenhouse 1 Growth Speed",
+                10,
+                1,
+                3,
+                lvl -> 1000 + (lvl * 1500),
                 site -> true,
                 (site, lvl) -> {}
         ));
 
+        upgrades.add(new JobSiteUpgrade(
+                "greenhouse_2_growth_speed",
+                "Greenhouse 2 Growth Speed",
+                10,
+                8,
+                3,
+                lvl -> 1500 + (lvl * 1800),
+                site -> site.getData().getLevel("unlock_greenhouse_2") > 0,
+                (site, lvl) -> {}
+        ));
+
+        upgrades.add(new JobSiteUpgrade(
+                "greenhouse_3_growth_speed",
+                "Greenhouse 3 Growth Speed",
+                10,
+                15,
+                3,
+                lvl -> 2000 + (lvl * 2200),
+                site -> site.getData().getLevel("unlock_greenhouse_3") > 0,
+                (site, lvl) -> {}
+        ));
+
         // =========================
-        // CROP UNLOCKS
+        // CROP UNLOCKS (shared across all greenhouses)
         // =========================
         // Single-purchase unlocks, spread across progression
 
@@ -361,9 +465,23 @@ public class FarmlandSite extends JobSite {
     public PassiveMobGenerator getMobGenerator() {
         return mobGenerator;
     }
-    public CropGenerator getCropGenerator() {
-        return cropGenerator;
+
+    public Map<Integer, GreenhouseGenerator> getGreenhouses() {
+        return greenhouses;
     }
+
+    public GreenhouseGenerator getGreenhouse(int index) {
+        return greenhouses.get(index);
+    }
+
+    public Map<Integer, GreenhouseHologram> getGreenhouseHolograms() {
+        return greenhouseHolograms;
+    }
+
+    public GreenhouseHologram getGreenhouseHologram(int index) {
+        return greenhouseHolograms.get(index);
+    }
+
     public BarnStructure getBarnStructure() {
         return barnStructure;
     }

@@ -131,8 +131,9 @@ public class BlockBreakListener implements Listener {
                     core,
                     () -> enterprise.getJobSiteManager()
                             .getFarmlandSite()
-                            .getCropGenerator()
-                            .replaceMissingCrops(),
+                            .getGreenhouses()
+                            .values()
+                            .forEach(greenhouse -> greenhouse.replaceMissingCrops()),
                     1L
             );
         }
