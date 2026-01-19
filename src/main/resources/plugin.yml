@@ -30,6 +30,21 @@ commands:
     usage: /pmenu
     description: Opens the player upgrade menua
     aliases: ['playermenu', 'playerupgrades', 'upgrades']
+  farmland:
+    description: Opens the Farmland job site menu
+    usage: /farmland
+    aliases: ['farm']
+    permission: stoinkcore.jobsite.farmland
+  quarry:
+    description: Opens the Quarry job site menu
+    usage: /quarry
+    aliases: ['mine']
+    permission: stoinkcore.jobsite.quarry
+  graveyard:
+    description: Opens the Graveyard job site menu
+    usage: /graveyard
+    aliases: ['grave', 'cemetery']
+    permission: stoinkcore.jobsite.graveyard
 
 permissions:
   stoinkcore.admin.*:
@@ -40,3 +55,19 @@ permissions:
   stoinkcore.admin.reload:
     description: Allow the use of the reload sub command
     default: op
+  stoinkcore.jobsite.*:
+    description: Access to all job site commands
+    default: true
+    children:
+      stoinkcore.jobsite.farmland: true
+      stoinkcore.jobsite.quarry: true
+      stoinkcore.jobsite.graveyard: true
+  stoinkcore.jobsite.farmland:
+    description: Access to the /farmland command
+    default: true
+  stoinkcore.jobsite.quarry:
+    description: Access to the /quarry command
+    default: true
+  stoinkcore.jobsite.graveyard:
+    description: Access to the /graveyard command
+    default: true
