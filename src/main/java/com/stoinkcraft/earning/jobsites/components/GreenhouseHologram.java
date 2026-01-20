@@ -6,6 +6,7 @@ import com.stoinkcraft.earning.jobsites.components.generators.GreenhouseGenerato
 import com.stoinkcraft.earning.jobsites.sites.farmland.FarmlandSite;
 import com.stoinkcraft.earning.jobsites.sites.farmland.GreenhouseGui;
 import com.stoinkcraft.utils.ChatUtils;
+import com.stoinkcraft.utils.TimeUtils;
 import eu.decentsoftware.holograms.event.HologramClickEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -61,19 +62,33 @@ public class GreenhouseHologram extends JobSiteHologram {
         FarmlandSite farmland = (FarmlandSite) getParent();
         int growthLevel = farmland.getData().getLevel(greenhouse.getGrowthSpeedUpgradeKey());
         CropGenerator.CropGeneratorType cropType = farmland.getData().getGreenhouseCropType(greenhouse.getGreenhouseIndex());
+        boolean isNight = !TimeUtils.isDay(farmland.getSpawnPoint().getWorld());
 
         List<String> lines = new ArrayList<>();
-        lines.add(ChatColor.GREEN + "" + ChatColor.BOLD + "Greenhouse " + greenhouse.getGreenhouseIndex());
-        lines.add(ChatColor.GRAY + "Crop: " + ChatColor.YELLOW + formatCropName(cropType));
-        lines.add(ChatColor.GRAY + "Growth Lvl: " + ChatColor.AQUA + growthLevel);
-        lines.add(ChatColor.DARK_GRAY + "[Click to manage]");
+        lines.add(ChatColor.DARK_GREEN + "✦ " + ChatColor.GREEN + "" + ChatColor.BOLD + "Greenhouse"  + ChatColor.DARK_GREEN + " ✦");
+        //lines.add("");
+        lines.add("#ICON: " + getCropMaterial(cropType));
+        lines.add(ChatColor.AQUA + "❖ " + ChatColor.WHITE + "Growth " + ChatColor.GRAY + "Lv." + ChatColor.AQUA + growthLevel);
+        //lines.add("");
+        if (isNight) {
+            lines.add(ChatColor.DARK_PURPLE + "☽ " + ChatColor.LIGHT_PURPLE + "The crops slumber...");
+        } else {
+            lines.add(ChatColor.GOLD + "☀ " + ChatColor.GREEN + "Crops are growing!");
+        }
+        //
+        // lines.add("");
+        lines.add(ChatColor.DARK_GRAY + "» " + ChatColor.GRAY + "Click to manage" + ChatColor.DARK_GRAY + " «");
 
         setLines(0, lines);
     }
 
-    private String formatCropName(CropGenerator.CropGeneratorType type) {
-        String name = type.name().toLowerCase();
-        return name.substring(0, 1).toUpperCase() + name.substring(1);
+    private String getCropMaterial(CropGenerator.CropGeneratorType type) {
+        return switch (type) {
+            case CARROT -> "CARROT";
+            case POTATO -> "POTATO";
+            case BEETROOT -> "BEETROOT";
+            default -> "WHEAT";
+        };
     }
 
     @Override

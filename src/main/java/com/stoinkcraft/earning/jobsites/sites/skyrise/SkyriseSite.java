@@ -34,8 +34,7 @@ public class SkyriseSite extends JobSite {
                 new File(StoinkCore.getInstance().getDataFolder(), "/schematics/building.schem"),
                 data, data.isBuilt());
 
-        String entryHologramName = enterprise.getID() + "_" + JobSiteType.SKYRISE.name() + "_entryway";
-        entryHologram = new JobSiteHologram(this, entryHologramName, new Vector(-5.5, 4, 0.5), getEntryHoloLines());
+        entryHologram = new JobSiteHologram(this, "entryway", new Vector(-5.5, 4, 0.5), getEntryHoloLines());
 
         farmerJoe = new JobSiteNPC(this, ChatColor.GREEN + "Farmer Joe", farmerJoeOffset, farmerJoeTexture, farmerJoeSignature){
             @Override

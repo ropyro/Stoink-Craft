@@ -54,7 +54,7 @@ public class FarmlandSite extends JobSite {
     // Greenhouse 1 - Always unlocked
     public static Vector greenhouse1Corner1Offset = new Vector(-28, 1, -18);
     public static Vector greenhouse1Corner2Offset = new Vector(-32, 1, -43);
-    public static Vector greenhouse1HologramOffset = new Vector(-29.5, 2F, -16.5);
+    public static Vector greenhouse1HologramOffset = new Vector(-29.5, 2.5, -15.5);
 
     // Greenhouse 2 - Unlocked at level 8
     public static Vector greenhouse2Corner1Offset = new Vector(-35, 0, -16);
@@ -186,7 +186,7 @@ public class FarmlandSite extends JobSite {
         welcomeHologramLines.add(ChatColor.WHITE + "to complete resource collection contracts!");
         welcomeHologramLines.add(ChatColor.WHITE + "Chat with Farmer Joe to upgrade your farmland's");
         welcomeHologramLines.add(ChatColor.WHITE + "crop grow speed and unlock new crops and animals!");
-        addComponent(new JobSiteHologram(this, welcomeHologramId, welcomeHologramOffset, welcomeHologramLines));
+        addComponent(new JobSiteHologram(this, "welcome", welcomeHologramOffset, welcomeHologramLines));
 
         // Add all greenhouses and their holograms
         greenhouses.values().forEach(this::addComponent);

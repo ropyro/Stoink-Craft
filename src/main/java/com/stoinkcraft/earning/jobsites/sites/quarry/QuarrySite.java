@@ -103,7 +103,7 @@ public class QuarrySite extends JobSite {
 
         addComponent(new JobSiteHologram(
                 this,
-                welcomeHologramId,
+                "welcome",
                 WELCOME_HOLOGRAM_OFFSET,
                 lines
         ));

@@ -20,6 +20,9 @@ import com.stoinkcraft.enterprise.commands.serverenterprisecmd.ServerEntCMD;
 import com.stoinkcraft.enterprise.commands.serverenterprisecmd.ServerEntTabCompleter;
 import com.stoinkcraft.misc.EnderChestListener;
 import com.stoinkcraft.misc.playerupgrades.PMenuCommand;
+import com.stoinkcraft.earning.jobsites.commands.FarmlandCommand;
+import com.stoinkcraft.earning.jobsites.commands.QuarryCommand;
+import com.stoinkcraft.earning.jobsites.commands.GraveyardCommand;
 import com.stoinkcraft.serialization.EnterpriseStorageJson;
 import com.stoinkcraft.enterprise.shares.SharesCMD;
 import com.stoinkcraft.enterprise.shares.ShareManager;
@@ -261,6 +264,9 @@ public class StoinkCore extends JavaPlugin {
         getCommand("shares").setExecutor(new SharesCMD());
         getCommand("daily").setExecutor(new DailyCMD());
         getCommand("pmenu").setExecutor(new PMenuCommand());
+        getCommand("farmland").setExecutor(new FarmlandCommand());
+        getCommand("quarry").setExecutor(new QuarryCommand());
+        getCommand("graveyard").setExecutor(new GraveyardCommand());
     }
 
     public void registerListeners(){

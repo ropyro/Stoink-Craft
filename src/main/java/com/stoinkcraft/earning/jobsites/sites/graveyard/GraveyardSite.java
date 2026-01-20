@@ -148,7 +148,7 @@ public class GraveyardSite extends JobSite {
         welcomeHologramLines.add(ChatColor.WHITE + "to complete combat contracts!");
         welcomeHologramLines.add(ChatColor.WHITE + "Chat with the Grave Keeper to purchase");
         welcomeHologramLines.add(ChatColor.WHITE + "tombstones and upgrade your graveyard!");
-        addComponent(new JobSiteHologram(this, welcomeHologramId, welcomeHologramOffset, welcomeHologramLines));
+        addComponent(new JobSiteHologram(this, "welcome", welcomeHologramOffset, welcomeHologramLines));
 
         tombstoneGenerators.forEach(this::addComponent);
         addComponent(graveKeeper);

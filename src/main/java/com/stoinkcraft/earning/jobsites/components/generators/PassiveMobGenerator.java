@@ -92,6 +92,7 @@ public class PassiveMobGenerator extends JobSiteGenerator {
             entity.setCustomName(ChatColor.YELLOW + mobType.getDisplayName());
             entity.setCustomNameVisible(false);
             entity.getAttribute(Attribute.JUMP_STRENGTH).setBaseValue(0);
+            entity.getAttribute(Attribute.MOVEMENT_SPEED).setBaseValue(10);
 
             spawnedMobs.add(entity.getUniqueId());
         });
@@ -155,6 +156,7 @@ public class PassiveMobGenerator extends JobSiteGenerator {
     // --------------------------------------------------
     // UPGRADE INTEGRATION
     // --------------------------------------------------
+
 
     private int getSpawnSpeedLevel() {
         return ((FarmlandSite) getParent()).getData().getLevel("mob_spawn_speed");
