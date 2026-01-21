@@ -276,21 +276,23 @@ public class JobSiteManager {
      * @return true if purchase was successful
      */
     public boolean purchaseJobSite(JobSiteType type, Player player) {
+        if (!enterprise.hasManagementPermission(player.getUniqueId())) return false;
+
         JobSiteRequirements req = JobSiteRequirements.forType(type);
         if (req == null) return false;
 
         // Check if can purchase
         if (!canPurchaseJobSite(type)) return false;
 
-        // Check funds
+        // Check enterprise bank funds
         int cost = req.getCost();
-        if (cost > 0 && !StoinkCore.getEconomy().has(player, cost)) {
+        if (cost > 0 && enterprise.getBankBalance() < cost) {
             return false;
         }
 
-        // Withdraw funds
+        // Withdraw from enterprise bank
         if (cost > 0) {
-            StoinkCore.getEconomy().withdrawPlayer(player, cost);
+            enterprise.decreaseBankBalance(cost);
         }
 
         // Build the job site

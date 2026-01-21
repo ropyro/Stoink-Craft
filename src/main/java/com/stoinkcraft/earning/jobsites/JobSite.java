@@ -14,6 +14,7 @@ import com.stoinkcraft.earning.jobsites.components.JobSiteStructure;
 import com.stoinkcraft.earning.jobsites.components.unlockable.Unlockable;
 import com.stoinkcraft.utils.RegionUtils;
 import com.stoinkcraft.utils.SchematicUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
@@ -82,6 +83,9 @@ public abstract class JobSite {
     }
 
     public void disband() {
+        if(containsActivePlayer()){
+            Bukkit.getOnlinePlayers().stream().filter(p -> contains(p.getLocation())).forEach(p -> p.chat("/spawn"));
+        }
         components.forEach(JobSiteComponent::disband);
         removeBuild();
         StoinkCore.getInstance().getProtectionManager().unindexJobSite(this);
@@ -154,6 +158,8 @@ public abstract class JobSite {
     }
 
     public boolean purchaseUpgrade(JobSiteUpgrade upgrade, Player player) {
+        if (!enterprise.hasManagementPermission(player.getUniqueId())) return false;
+
         JobSiteData d = getData();
         int current = d.getLevel(upgrade.id());
 
@@ -164,9 +170,9 @@ public abstract class JobSite {
         if (currentLevel < upgrade.requiredJobsiteLevel()) return false;
 
         int cost = upgrade.cost(current + 1);
-        if (!StoinkCore.getEconomy().has(player, cost)) return false;
+        if (enterprise.getBankBalance() < cost) return false;
 
-        StoinkCore.getEconomy().withdrawPlayer(player, cost);
+        enterprise.decreaseBankBalance(cost);
         d.setLevel(upgrade.id(), current + 1);
         upgrade.apply(this, current + 1);
 
@@ -177,12 +183,13 @@ public abstract class JobSite {
      * Purchase any Unlockable (structures, generators, etc.)
      */
     public boolean purchaseUnlockable(Unlockable unlockable, Player player) {
+        if (!enterprise.hasManagementPermission(player.getUniqueId())) return false;
         if (!unlockable.canUnlock()) return false;
 
         int cost = unlockable.getCost();
-        if (!StoinkCore.getEconomy().has(player, cost)) return false;
+        if (enterprise.getBankBalance() < cost) return false;
 
-        StoinkCore.getEconomy().withdrawPlayer(player, cost);
+        enterprise.decreaseBankBalance(cost);
         getData().startUnlock(unlockable);
 
         return true;
@@ -245,7 +252,7 @@ public abstract class JobSite {
     }
 
     public boolean containsActivePlayer() {
-        return enterprise.getOnlineMembers().stream()
+        return Bukkit.getOnlinePlayers().stream()
                 .anyMatch(p -> contains(p.getLocation()));
     }
 }

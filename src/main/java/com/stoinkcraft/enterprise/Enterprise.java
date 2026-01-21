@@ -44,6 +44,7 @@ public class Enterprise {
     private Booster activeBooster;
 
     @Expose
+
     private int outstandingShares;
 
     @Expose
@@ -226,6 +227,28 @@ public class Enterprise {
             }
         }
         return uuids;
+    }
+
+    public List<UUID> getExecutives() {
+        List<UUID> uuids = new ArrayList<>();
+        for (UUID uuid : members.keySet()) {
+            if (members.get(uuid).equals(Role.EXECUTIVE)) {
+                uuids.add(uuid);
+            }
+        }
+        return uuids;
+    }
+
+    public boolean hasManagementPermission(UUID member) {
+        Role role = getMemberRole(member);
+        return role != null && (role.equals(Role.CEO) || role.equals(Role.EXECUTIVE));
+    }
+
+    public boolean setMemberRole(UUID member, Role role) {
+        if (!isMember(member)) return false;
+        if (member.equals(ceo) && !role.equals(Role.CEO)) return false;
+        members.put(member, role);
+        return true;
     }
 
     public void setName(String name) {

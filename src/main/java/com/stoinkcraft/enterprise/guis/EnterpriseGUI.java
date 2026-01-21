@@ -277,8 +277,13 @@ public class EnterpriseGUI {
                     // Try to purchase
                     int cost = req.getCost();
 
-                    if (!StoinkCore.getEconomy().has(player, cost)) {
-                        sendError(player, "Insufficient funds! Need §6$" + String.format("%,d", cost));
+                    if (!enterprise.hasManagementPermission(player.getUniqueId())) {
+                        sendError(player, "Only Executives and the CEO can purchase job sites!");
+                        return;
+                    }
+
+                    if (enterprise.getBankBalance() < cost) {
+                        sendError(player, "Insufficient enterprise funds! Need §6$" + String.format("%,d", cost));
                         return;
                     }
 

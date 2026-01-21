@@ -363,10 +363,12 @@ public class JobSiteGuiHelper {
         int jobsiteLevel = jobSite.getLevel();
         int cost = upgrade.cost(nextLevel);
 
-        if (jobsiteLevel < requiredJSLevel) {
+        if (!jobSite.getEnterprise().hasManagementPermission(p.getUniqueId())) {
+            sendError(p, "Only Executives and the CEO can purchase upgrades!");
+        } else if (jobsiteLevel < requiredJSLevel) {
             sendError(p, "You need " + jobSite.getType().name() + " Level " + requiredJSLevel + "! (Currently: " + jobsiteLevel + ")");
-        } else if (!StoinkCore.getEconomy().has(p, cost)) {
-            sendError(p, "Insufficient funds! Need $" + String.format("%,d", cost));
+        } else if (jobSite.getEnterprise().getBankBalance() < cost) {
+            sendError(p, "Insufficient enterprise funds! Need $" + String.format("%,d", cost));
         } else if (!upgrade.canPurchase(jobSite, nextLevel)) {
             sendError(p, "Requirements not met!");
         } else {
@@ -554,10 +556,12 @@ public class JobSiteGuiHelper {
             case LOCKED -> {
                 if (jobSite.purchaseUnlockable(unlockable, player)) {
                     sendSuccess(player, unlockable.getDisplayName() + " construction started!");
+                } else if (!jobSite.getEnterprise().hasManagementPermission(player.getUniqueId())) {
+                    sendError(player, "Only Executives and the CEO can purchase structures!");
                 } else if (jobSite.getLevel() < unlockable.getRequiredJobsiteLevel()) {
                     sendError(player, "You need " + siteName + " Level " + unlockable.getRequiredJobsiteLevel() + "!");
-                } else if (!StoinkCore.getEconomy().has(player, unlockable.getCost())) {
-                    sendError(player, "You need $" + String.format("%,d", unlockable.getCost()) + "!");
+                } else if (jobSite.getEnterprise().getBankBalance() < unlockable.getCost()) {
+                    sendError(player, "Enterprise needs $" + String.format("%,d", unlockable.getCost()) + "!");
                 } else {
                     sendError(player, "Requirements not met!");
                 }
