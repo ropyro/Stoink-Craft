@@ -57,14 +57,14 @@ public class FarmlandSite extends JobSite {
     public static Vector greenhouse1HologramOffset = new Vector(-29.5, 2.5, -15.5);
 
     // Greenhouse 2 - Unlocked at level 8
-    public static Vector greenhouse2Corner1Offset = new Vector(-35, 0, -16);
-    public static Vector greenhouse2Corner2Offset = new Vector(-44, 0, -25);
-    public static Vector greenhouse2HologramOffset = new Vector(-39.5, 3, -20.5);
+    public static Vector greenhouse2Corner1Offset = new Vector(-38, 1, -18);
+    public static Vector greenhouse2Corner2Offset = new Vector(-42, 1, -43);
+    public static Vector greenhouse2HologramOffset = new Vector(-39.5, 2.5, -15.5);
 
     // Greenhouse 3 - Unlocked at level 15
-    public static Vector greenhouse3Corner1Offset = new Vector(-45, 0, -16);
-    public static Vector greenhouse3Corner2Offset = new Vector(-54, 0, -25);
-    public static Vector greenhouse3HologramOffset = new Vector(-49.5, 3, -20.5);
+    public static Vector greenhouse3Corner1Offset = new Vector(-48, 1, -18);
+    public static Vector greenhouse3Corner2Offset = new Vector(-52, 1, -43);
+    public static Vector greenhouse3HologramOffset = new Vector(-49.5, 2.5, -15.5);
 
     /**
      * Farm animal generator

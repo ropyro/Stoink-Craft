@@ -17,7 +17,6 @@ import java.util.UUID;
 
 public class HologramClickListener implements Listener {
 
-
     private final StoinkCore plugin;
 
     public HologramClickListener(StoinkCore plugin) {
@@ -38,7 +37,7 @@ public class HologramClickListener implements Listener {
         // Get the enterprise and job site
         Enterprise enterprise = plugin.getEnterpriseManager().getEnterpriseByID(UUID.fromString(enterpriseID));
         if (enterprise == null) {
-            //ChatUtils.sendMessage(player, ChatColor.RED + "Could not find associated enterprise!");
+            ChatUtils.sendMessage(player, ChatColor.RED + "Could not find associated enterprise!");
             return;
         }
 
@@ -63,5 +62,7 @@ public class HologramClickListener implements Listener {
 
         if(jobSiteHologram != null)
             jobSiteHologram.onHologramInteract(event);
+        else
+            ChatUtils.sendMessage(player, ChatColor.RED + "Jobsite hologram not found");
     }
 }

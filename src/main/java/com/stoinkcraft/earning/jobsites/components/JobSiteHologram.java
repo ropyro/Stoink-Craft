@@ -100,8 +100,9 @@ public class JobSiteHologram implements JobSiteComponent{
         try{
             if(DHAPI.getHologram(id) != null)
                 return DHAPI.getHologram(id);
+            else setHologram();
         }catch (IllegalArgumentException e){}
-        return null;
+        return getHologram();
     }
 
     public JobSite getParent() {
