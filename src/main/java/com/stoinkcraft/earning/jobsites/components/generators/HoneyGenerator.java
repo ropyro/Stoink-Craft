@@ -31,8 +31,6 @@ public class HoneyGenerator extends JobSiteGenerator implements ProtectedZone {
     private int honeyLevel = 0;
     private int ticksSinceLastHoney = 0;
 
-
-
     private JobSiteHologram hologram;
     private final String hologramId;
     private static final Vector HOLOGRAM_OFFSET = new Vector(0.5, 1.6, 0.5);
@@ -63,8 +61,8 @@ public class HoneyGenerator extends JobSiteGenerator implements ProtectedZone {
     }
 
     // =========================================================================
-// PROTECTION
-// =========================================================================
+    // PROTECTION
+    // =========================================================================
 
     @Override
     public @NotNull ProtectionResult checkProtection(@NotNull ProtectionQuery query) {

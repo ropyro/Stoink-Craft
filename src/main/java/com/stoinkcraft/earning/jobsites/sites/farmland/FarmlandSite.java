@@ -1,6 +1,7 @@
 package com.stoinkcraft.earning.jobsites.sites.farmland;
 
 import com.stoinkcraft.StoinkCore;
+import com.stoinkcraft.earning.jobsites.components.ambiance.BeeAmbience;
 import com.stoinkcraft.enterprise.Enterprise;
 import com.stoinkcraft.earning.jobsites.JobSite;
 import com.stoinkcraft.earning.jobsites.JobSiteType;
@@ -196,6 +197,7 @@ public class FarmlandSite extends JobSite {
         addComponent(farmerJoe);
         addComponent(barnStructure);
         addComponent(beeHiveStructure);
+        addComponent(new BeeAmbience(StoinkCore.getInstance(), this, honeyGenerators));
 
         honeyGenerators.forEach(gen -> addComponent(gen));
     }
