@@ -183,7 +183,7 @@ public class StoinkCore extends JavaPlugin {
 
     private void initManagers(){
         dm = new DailyManager();
-        em = new EnterpriseManager(this, 3);
+        em = new EnterpriseManager(this, 6);
         sm = new ShareManager();
         ewm = new EnterpriseWorldManager();
         epm = new EnterprisePlotManager(ewm);

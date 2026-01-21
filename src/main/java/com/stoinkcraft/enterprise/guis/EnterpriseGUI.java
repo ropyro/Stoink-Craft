@@ -362,14 +362,10 @@ public class EnterpriseGUI {
         Gui gui = Gui.normal()
                 .setStructure(
                         "# # # # # # # # #",
-                        "# . . . X X X X #",
-                        "# X X X X X X X #",
+                        "# . . . . . . . #",
                         "# # # # < # # # #")
                 .addIngredient('#', new SimpleItem(new ItemBuilder(Material.BLACK_STAINED_GLASS_PANE)
                         .setDisplayName(" ")))
-                .addIngredient('X', new SimpleItem(new ItemBuilder(Material.RED_STAINED_GLASS_PANE)
-                        .setDisplayName("§cLocked Slot")
-                        .addLoreLines("§7Expand capacity to unlock")))
                 .addIngredient('<', new AbstractItem() {
                     @Override
                     public ItemProvider getItemProvider() {

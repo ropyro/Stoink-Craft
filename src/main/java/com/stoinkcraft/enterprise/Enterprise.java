@@ -222,7 +222,7 @@ public class Enterprise {
     public List<UUID> getEmployees() {
         List<UUID> uuids = new ArrayList<>();
         for (UUID uuid : members.keySet()) {
-            if (members.get(uuid).equals(Role.EMPLOYEE)) {
+            if (!members.get(uuid).equals(Role.CEO)) {
                 uuids.add(uuid);
             }
         }
