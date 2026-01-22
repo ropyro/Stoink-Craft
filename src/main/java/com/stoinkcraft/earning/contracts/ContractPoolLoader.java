@@ -630,7 +630,7 @@ public class ContractPoolLoader {
 
         daily.add(new ContractDefinition(
                 "quarry_cobblestone_basic",
-                new BlockMineTrigger(Material.COBBLESTONE),
+                new BlockMineTrigger(Material.COBBLESTONE, Material.STONE),
                 JobSiteType.QUARRY,
                 1,
                 200,
