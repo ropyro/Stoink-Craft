@@ -66,7 +66,10 @@ public class MausoleumStructure extends JobSiteStructure {
     public void tick() {
         super.tick(); // Handles unlock progress
 
-        if (!isUnlocked() || !hordeSpiders.isEmpty()) return;
+        if (!isUnlocked() || !hordeSpiders.isEmpty()){
+            updateHologram();
+            return;
+        }
 
         // Clean up dead spiders
         cleanupDeadSpiders();
