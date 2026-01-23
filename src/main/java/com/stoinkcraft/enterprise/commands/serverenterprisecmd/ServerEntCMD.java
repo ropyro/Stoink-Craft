@@ -14,6 +14,8 @@ import com.stoinkcraft.items.StoinkItem;
 import com.stoinkcraft.items.StoinkItemRegistry;
 import com.stoinkcraft.items.booster.BoosterItem;
 import com.stoinkcraft.items.booster.BoosterTier;
+import com.stoinkcraft.items.quarry.MineBomb;
+import com.stoinkcraft.items.quarry.MineBombTier;
 import com.stoinkcraft.serialization.EnterpriseMigration;
 import com.stoinkcraft.serialization.EnterpriseStorageJson;
 import com.stoinkcraft.enterprise.shares.ShareStorage;
@@ -38,6 +40,48 @@ public class ServerEntCMD implements CommandExecutor {
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
         if(sender instanceof Player && !sender.hasPermission(SCConstants.SERVER_ENT_COMMAND)){
             sender.sendMessage("Error you do not have permission for this command.");
+        }
+
+        if (args.length >= 1 && args[0].equalsIgnoreCase("giveminebomb")) {
+            if (args.length >= 3) {
+                Player target = Bukkit.getPlayer(args[1]);
+                if (target == null) {
+                    sender.sendMessage("§cPlayer not found: " + args[1]);
+                    return true;
+                }
+
+                String tierName = args[2].toUpperCase();
+                MineBombTier tier;
+
+                try {
+                    tier = MineBombTier.valueOf(tierName);
+                } catch (IllegalArgumentException e) {
+                    sender.sendMessage("§cInvalid tier: " + args[2]);
+                    sender.sendMessage("§cValid tiers: SMALL, MEDIUM, LARGE");
+                    return true;
+                }
+
+                int amount = 1;
+                if (args.length >= 4) {
+                    try {
+                        amount = Integer.parseInt(args[3]);
+                    } catch (NumberFormatException e) {
+                        sender.sendMessage("§cInvalid amount: " + args[3]);
+                        return true;
+                    }
+                }
+
+                MineBomb bomb = new MineBomb(tier);
+                target.getInventory().addItem(bomb.createItemStack(amount));
+
+                ChatUtils.sendMessage(target, "§aYou received a " + tier.getDisplayName() + "!");
+                sender.sendMessage("§aGave " + amount + "x " + tier.getDisplayName() + " to " + target.getName());
+
+            } else {
+                sender.sendMessage("§cUsage: /serverent giveminebomb <player> <tier> [amount]");
+                sender.sendMessage("§cTiers: SMALL, MEDIUM, LARGE");
+            }
+            return true;
         }
 
         if (args.length >= 1 && args[0].equalsIgnoreCase("givefertilizer")) {

@@ -46,7 +46,6 @@ public class QuarrySite extends JobSite {
        COMPONENTS
        ========================= */
 
-    private final String welcomeHologramId;
     private final MineGenerator mineGenerator;
     private final String mineRegionID;
     private final JobSiteNPC minerBob;
@@ -64,9 +63,6 @@ public class QuarrySite extends JobSite {
                 data,
                 data.isBuilt()
         );
-
-        welcomeHologramId =
-                enterprise.getID() + "_" + JobSiteType.QUARRY.name() + "_welcome";
 
         mineRegionID =
                 enterprise.getID() + "_" + JobSiteType.QUARRY.name() + "_mine";
