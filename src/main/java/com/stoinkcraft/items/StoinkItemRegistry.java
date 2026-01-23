@@ -2,6 +2,7 @@ package com.stoinkcraft.items;
 
 import com.stoinkcraft.items.booster.BoosterItem;
 import com.stoinkcraft.items.booster.BoosterTier;
+import com.stoinkcraft.items.farmland.FertilizerBomb;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
@@ -24,6 +25,7 @@ public class StoinkItemRegistry {
         register(new BoosterItem(BoosterTier.SMALL));
         register(new BoosterItem(BoosterTier.MEDIUM));
         register(new BoosterItem(BoosterTier.LARGE));
+        register(new FertilizerBomb());
     }
 
     /**

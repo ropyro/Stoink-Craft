@@ -10,6 +10,8 @@ import com.stoinkcraft.enterprise.EnterpriseManager;
 import com.stoinkcraft.enterprise.ServerEnterprise;
 import com.stoinkcraft.earning.jobsites.sites.graveyard.GraveyardData;
 import com.stoinkcraft.earning.jobsites.sites.quarry.QuarryData;
+import com.stoinkcraft.items.StoinkItem;
+import com.stoinkcraft.items.StoinkItemRegistry;
 import com.stoinkcraft.items.booster.BoosterItem;
 import com.stoinkcraft.items.booster.BoosterTier;
 import com.stoinkcraft.serialization.EnterpriseMigration;
@@ -36,6 +38,36 @@ public class ServerEntCMD implements CommandExecutor {
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
         if(sender instanceof Player && !sender.hasPermission(SCConstants.SERVER_ENT_COMMAND)){
             sender.sendMessage("Error you do not have permission for this command.");
+        }
+
+        if (args.length >= 1 && args[0].equalsIgnoreCase("givefertilizer")) {
+            if (args.length >= 2) {
+                Player target = Bukkit.getPlayer(args[1]);
+                if (target == null) {
+                    sender.sendMessage("§cPlayer not found: " + args[1]);
+                    return true;
+                }
+
+                int amount = 1;
+                if (args.length >= 3) {
+                    try {
+                        amount = Integer.parseInt(args[2]);
+                    } catch (NumberFormatException e) {
+                        sender.sendMessage("§cInvalid amount: " + args[2]);
+                        return true;
+                    }
+                }
+
+                StoinkItem fertilizer = StoinkItemRegistry.getById("fertilizer_bomb");
+                if (fertilizer != null) {
+                    target.getInventory().addItem(fertilizer.createItemStack(amount));
+                    ChatUtils.sendMessage(target, "§aYou received a Fertilizer Bomb!");
+                    sender.sendMessage("§aGave " + amount + "x Fertilizer Bomb to " + target.getName());
+                }
+            } else {
+                sender.sendMessage("§cUsage: /serverent givefertilizer <player> [amount]");
+            }
+            return true;
         }
 
         if (args.length >= 1 && args[0].equalsIgnoreCase("givebooster")) {
