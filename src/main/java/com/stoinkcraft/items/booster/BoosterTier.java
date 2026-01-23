@@ -14,7 +14,7 @@ public enum BoosterTier {
             ChatColor.GREEN,
             Material.FIRE_CHARGE,
             1.5,
-            5 * 60 * 1000L // 5 minutes
+            30 * 60 * 1000L // 5 minutes
     ),
 
     MEDIUM(
@@ -23,7 +23,7 @@ public enum BoosterTier {
             ChatColor.GOLD,
             Material.BLAZE_POWDER,
             2.0,
-            10 * 60 * 1000L // 10 minutes
+            45 * 60 * 1000L // 10 minutes
     ),
 
     LARGE(
@@ -32,7 +32,7 @@ public enum BoosterTier {
             ChatColor.LIGHT_PURPLE,
             Material.NETHER_STAR,
             3.0,
-            15 * 60 * 1000L // 15 minutes
+            60 * 60 * 1000L // 15 minutes
     );
 
     private final String itemId;

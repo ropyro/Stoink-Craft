@@ -3,6 +3,7 @@ package com.stoinkcraft.items;
 import com.stoinkcraft.items.booster.BoosterItem;
 import com.stoinkcraft.items.booster.BoosterTier;
 import com.stoinkcraft.items.farmland.FertilizerBomb;
+import com.stoinkcraft.items.graveyard.SoulVoucherItem;
 import com.stoinkcraft.items.quarry.MineBomb;
 import com.stoinkcraft.items.quarry.MineBombTier;
 import org.bukkit.inventory.ItemStack;
@@ -31,6 +32,7 @@ public class StoinkItemRegistry {
         register(new MineBomb(MineBombTier.SMALL));
         register(new MineBomb(MineBombTier.MEDIUM));
         register(new MineBomb(MineBombTier.LARGE));
+        register(new SoulVoucherItem());
     }
 
     /**

@@ -67,13 +67,6 @@ public enum MineBombTier {
     }
 
     /**
-     * Allows runtime adjustment for balancing.
-     */
-    public void setRadius(int radius) {
-        this.radius = radius;
-    }
-
-    /**
      * Gets a tier by its item ID.
      */
     public static MineBombTier fromItemId(String itemId) {
