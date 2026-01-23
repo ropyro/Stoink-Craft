@@ -92,7 +92,7 @@ public class BarnStructure extends JobSiteStructure {
 
     private void pasteStructure() {
         File schematic = new File(StoinkCore.getInstance().getDataFolder(), "/schematics/" + config().getBarnSchematic());
-        SchematicUtils.pasteSchematic(schematic, getJobSite().getSpawnPoint(), true);
+        SchematicUtils.pasteSchematic(schematic, getJobSite().getSpawnPoint(), false);
     }
 
     private void updateHologramForLevel() {
