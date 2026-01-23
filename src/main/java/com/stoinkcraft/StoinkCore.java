@@ -11,10 +11,10 @@ import com.stoinkcraft.earning.contracts.ContractManager;
 import com.stoinkcraft.earning.listeners.*;
 import com.stoinkcraft.items.StoinkItemListener;
 import com.stoinkcraft.items.StoinkItemRegistry;
+import com.stoinkcraft.items.booster.BoosterManager;
 import com.stoinkcraft.misc.CitizensLoadListener;
 import com.stoinkcraft.misc.daily.DailyCMD;
 import com.stoinkcraft.misc.daily.DailyManager;
-import com.stoinkcraft.earning.boosters.BoostNoteInteractionListener;
 import com.stoinkcraft.enterprise.commands.TopCeoCMD;
 import com.stoinkcraft.enterprise.commands.enterprisecmd.EnterpriseCMD;
 import com.stoinkcraft.enterprise.commands.enterprisecmd.EnterpriseTabCompleter;
@@ -102,6 +102,10 @@ public class StoinkCore extends JavaPlugin {
     private ProtectionManager pm;
     public ProtectionManager getProtectionManager() {return pm;}
 
+    private BoosterManager boosterManager;
+    public BoosterManager getBoosterManager(){
+        return boosterManager;
+    }
 
     @Override
     public void onDisable() {
@@ -109,6 +113,7 @@ public class StoinkCore extends JavaPlugin {
 
         cfm.clearAll();
         StoinkItemRegistry.clear();
+        boosterManager.shutdown();
 
         EnterpriseStorageJson.saveAllEnterprises();
 
@@ -137,6 +142,7 @@ public class StoinkCore extends JavaPlugin {
         startTasks();
 
         StoinkItemRegistry.registerItems();
+        boosterManager.restoreBoostersOnStartup();
 
         Bukkit.getScheduler().runTask(this, this::checkCitizensAlreadyLoaded);
 
@@ -192,6 +198,7 @@ public class StoinkCore extends JavaPlugin {
         cm = new ContractManager(ContractPoolLoader.load());
         cfm = new ContractFeedbackManager();
         pm = new ProtectionManager(this);
+        boosterManager = new BoosterManager(this);
     }
 
     private void initFilesAndResources(){
@@ -278,7 +285,6 @@ public class StoinkCore extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new PlayerChatListener(this), this);
         //Misc listeners
         getServer().getPluginManager().registerEvents(new PhantomSpawnDisabler(), this);
-        getServer().getPluginManager().registerEvents(new BoostNoteInteractionListener(), this);
         getServer().getPluginManager().registerEvents(new EnderChestListener(), this);
         getServer().getPluginManager().registerEvents(new CitizensLoadListener(this), this);
         getServer().getPluginManager().registerEvents(new ProtectionListeners(this), this);

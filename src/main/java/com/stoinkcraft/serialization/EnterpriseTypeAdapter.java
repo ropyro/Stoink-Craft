@@ -3,7 +3,7 @@ package com.stoinkcraft.serialization;
 import com.google.gson.*;
 import com.stoinkcraft.enterprise.Enterprise;
 import com.stoinkcraft.enterprise.ServerEnterprise;
-import com.stoinkcraft.earning.boosters.Booster;
+import com.stoinkcraft.items.booster.Booster;
 import org.bukkit.Location;
 
 import java.lang.reflect.Type;

@@ -1,5 +1,6 @@
 package com.stoinkcraft.earning.contracts;
 
+import com.stoinkcraft.config.ConfigLoader;
 import com.stoinkcraft.enterprise.Enterprise;
 import com.stoinkcraft.earning.contracts.rewards.*;
 import com.stoinkcraft.earning.jobsites.JobSite;
@@ -223,14 +224,11 @@ public class ContractFeedbackManager {
         String contributors = buildContributorsString(contract);
 
         // Extract reward totals
-        double totalMoney = extractTotalMoney(def.reward());
-        double playerSharePercent = extractPlayerSharePercent(def.reward());
+        double totalMoney = extractTotalMoney(def.reward(), enterprise);
+        double playerSharePercent = ConfigLoader.getEconomy().getPlayerPaySplit();
         double enterpriseMoney = totalMoney * (1 - playerSharePercent);
         double playerPoolMoney = totalMoney * playerSharePercent;
         int totalXp = extractTotalXp(def.reward());
-
-        // Build progress string
-        //String progress = buildProgressString(beforeLevel, afterLevel, xpGained, secondary);
 
         // Build enterprise rewards string
         String enterpriseRewards = "§a+$" + formatCompact(enterpriseMoney) + " §8| §e+" + totalXp + " XP";
@@ -249,13 +247,16 @@ public class ContractFeedbackManager {
                 yourRewards = "§7None §8(no contribution)";
             }
 
+            String boosterSuffix = enterprise.hasActiveBooster()
+                    ? " §8(§a" + enterprise.getBoosterMultiplier() + "x boosted§8)"
+                    : "";
+
             return new String[]{
                     "",
                     "§8§l» " + primary + "§l" + icon + " Contract Complete! §8| " + secondary + def.displayName(),
                     "§8§l» §7Contributors: " + contributors,
-                    "§8§l» " + secondary + "Enterprise: §f" + enterpriseRewards,
-                    "§8§l» " + secondary + "You Earned: §f" + yourRewards,
-             //       "§8§l» §7Progress: " + progress,
+                    "§8§l» " + secondary + "Enterprise: §f" + enterpriseRewards + boosterSuffix,
+                    "§8§l» " + secondary + "You Earned: §f" + yourRewards + boosterSuffix,
                     ""
             };
         });
@@ -333,26 +334,14 @@ public class ContractFeedbackManager {
 
 // ==================== Reward Extraction Methods ====================
 
-    private double extractTotalMoney(Reward reward) {
+    private double extractTotalMoney(Reward reward, Enterprise enterprise) {
         if (reward instanceof MoneyReward money) {
-            return money.getTotalAmount();
-        } else if (reward instanceof CompositeReward composite) {
-            return composite.getRewards().stream()
-                    .mapToDouble(this::extractTotalMoney)
-                    .sum();
-        }
-        return 0;
-    }
-
-    private double extractPlayerSharePercent(Reward reward) {
-        if (reward instanceof MoneyReward money) {
-            return money.getPlayerShare();
+            return money.getBoostedTotal(enterprise);
         } else if (reward instanceof CompositeReward composite) {
             return composite.getRewards().stream()
                     .filter(r -> r instanceof MoneyReward)
-                    .map(r -> ((MoneyReward) r).getPlayerShare())
-                    .findFirst()
-                    .orElse(0.0);
+                    .mapToDouble(r -> ((MoneyReward) r).getBoostedTotal(enterprise))
+                    .sum();
         }
         return 0;
     }

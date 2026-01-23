@@ -1,5 +1,7 @@
 package com.stoinkcraft.items;
 
+import com.stoinkcraft.items.booster.BoosterItem;
+import com.stoinkcraft.items.booster.BoosterTier;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
@@ -19,7 +21,9 @@ public class StoinkItemRegistry {
 
 
     public static void registerItems(){
-
+        register(new BoosterItem(BoosterTier.SMALL));
+        register(new BoosterItem(BoosterTier.MEDIUM));
+        register(new BoosterItem(BoosterTier.LARGE));
     }
 
     /**

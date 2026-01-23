@@ -15,11 +15,10 @@ public class MoneyReward implements DescribableReward {
 
     private final double totalAmount;
 
-    public MoneyReward(double totalAmount, double playerShare) {
+    public MoneyReward(double totalAmount) {
         this.totalAmount = totalAmount;
     }
 
-    // Add these getters
     public double getTotalAmount() {
         return totalAmount;
     }
@@ -28,22 +27,31 @@ public class MoneyReward implements DescribableReward {
         return ConfigLoader.getEconomy().getPlayerPaySplit();
     }
 
-    public double getEnterpriseAmount() {
-        return totalAmount * (1 - getPlayerShare());
+    /**
+     * Gets the total amount after applying the enterprise's booster multiplier.
+     */
+    public double getBoostedTotal(Enterprise enterprise) {
+        return totalAmount * enterprise.getBoosterMultiplier();
     }
 
-    public double getPlayerPoolAmount() {
-        return totalAmount * getPlayerShare();
+    public double getEnterpriseAmount(Enterprise enterprise) {
+        return getBoostedTotal(enterprise) * (1 - getPlayerShare());
+    }
+
+    public double getPlayerPoolAmount(Enterprise enterprise) {
+        return getBoostedTotal(enterprise) * getPlayerShare();
     }
 
     @Override
     public void apply(Enterprise enterprise, ActiveContract contract) {
-        double playerTotal = totalAmount * getPlayerShare();
-        double enterpriseTotal = totalAmount - playerTotal;
+        double boostedTotal = getBoostedTotal(enterprise);
+        double playerTotal = boostedTotal * getPlayerShare();
+        double enterpriseTotal = boostedTotal - playerTotal;
 
-        // Add to bank balance - networth is now calculated from bankBalance * reputationMultiplier
+        // Add to bank balance
         enterprise.increaseBankBalance(enterpriseTotal);
 
+        // Distribute player share based on contributions
         Map<UUID, Double> percentages = contract.getContributionPercentages();
 
         percentages.forEach((uuid, percent) -> {
@@ -55,8 +63,27 @@ public class MoneyReward implements DescribableReward {
     @Override
     public List<String> getLore() {
         return List.of(
-                "§f$" + totalAmount,
-                "§7Player Share: " + (int)(getPlayerShare() * 100) + "%"
+                "§f$" + String.format("%.0f", totalAmount),
+                "§7Player Share: " + (int) (getPlayerShare() * 100) + "%"
+        );
+    }
+
+    /**
+     * Gets lore showing boosted amounts (for UI display).
+     */
+    public List<String> getBoostedLore(Enterprise enterprise) {
+        double multiplier = enterprise.getBoosterMultiplier();
+
+        if (multiplier == 1.0) {
+            return getLore();
+        }
+
+        double boosted = getBoostedTotal(enterprise);
+
+        return List.of(
+                "§f$" + String.format("%.0f", boosted) +
+                        " §7(§a" + multiplier + "x boosted§7)",
+                "§7Player Share: " + (int) (getPlayerShare() * 100) + "%"
         );
     }
 }

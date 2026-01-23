@@ -51,7 +51,7 @@ public class ContractPoolLoader {
                 48,
                 Map.of(),
                 new CompositeReward(List.of(
-                        new MoneyReward(300, 0.35),
+                        new MoneyReward(300),
                         new JobSiteXpReward(JobSiteType.FARMLAND, 40)
                 )),
                 Material.WHEAT,
@@ -67,7 +67,7 @@ public class ContractPoolLoader {
                 128,
                 Map.of(),
                 new CompositeReward(List.of(
-                        new MoneyReward(750, 0.35),
+                        new MoneyReward(750),
                         new JobSiteXpReward(JobSiteType.FARMLAND, 100)
                 )),
                 Material.WHEAT,
@@ -84,7 +84,7 @@ public class ContractPoolLoader {
                 48,
                 Map.of("unlock_carrot", 1),
                 new CompositeReward(List.of(
-                        new MoneyReward(400, 0.35),
+                        new MoneyReward(400),
                         new JobSiteXpReward(JobSiteType.FARMLAND, 50)
                 )),
                 Material.CARROT,
@@ -100,7 +100,7 @@ public class ContractPoolLoader {
                 128,
                 Map.of("unlock_carrot", 1),
                 new CompositeReward(List.of(
-                        new MoneyReward(1000, 0.35),
+                        new MoneyReward(1000),
                         new JobSiteXpReward(JobSiteType.FARMLAND, 130)
                 )),
                 Material.CARROT,
@@ -117,7 +117,7 @@ public class ContractPoolLoader {
                 64,
                 Map.of("unlock_potato", 1),
                 new CompositeReward(List.of(
-                        new MoneyReward(600, 0.35),
+                        new MoneyReward(600),
                         new JobSiteXpReward(JobSiteType.FARMLAND, 80)
                 )),
                 Material.POTATO,
@@ -133,7 +133,7 @@ public class ContractPoolLoader {
                 160,
                 Map.of("unlock_potato", 1),
                 new CompositeReward(List.of(
-                        new MoneyReward(1400, 0.35),
+                        new MoneyReward(1400),
                         new JobSiteXpReward(JobSiteType.FARMLAND, 180)
                 )),
                 Material.POTATO,
@@ -150,7 +150,7 @@ public class ContractPoolLoader {
                 64,
                 Map.of("unlock_beetroot", 1),
                 new CompositeReward(List.of(
-                        new MoneyReward(900, 0.35),
+                        new MoneyReward(900),
                         new JobSiteXpReward(JobSiteType.FARMLAND, 120)
                 )),
                 Material.BEETROOT,
@@ -166,7 +166,7 @@ public class ContractPoolLoader {
                 160,
                 Map.of("unlock_beetroot", 1),
                 new CompositeReward(List.of(
-                        new MoneyReward(2000, 0.35),
+                        new MoneyReward(2000),
                         new JobSiteXpReward(JobSiteType.FARMLAND, 260)
                 )),
                 Material.BEETROOT,
@@ -192,7 +192,7 @@ public class ContractPoolLoader {
                 8,
                 Map.of(),
                 new CompositeReward(List.of(
-                        new MoneyReward(400, 0.35),
+                        new MoneyReward(400),
                         new JobSiteXpReward(JobSiteType.FARMLAND, 50)
                 )),
                 Material.BEEF,
@@ -208,7 +208,7 @@ public class ContractPoolLoader {
                 20,
                 Map.of(),
                 new CompositeReward(List.of(
-                        new MoneyReward(1000, 0.35),
+                        new MoneyReward(1000),
                         new JobSiteXpReward(JobSiteType.FARMLAND, 120)
                 )),
                 Material.COOKED_BEEF,
@@ -225,7 +225,7 @@ public class ContractPoolLoader {
                 10,
                 Map.of("unlock_sheep", 1),
                 new CompositeReward(List.of(
-                        new MoneyReward(500, 0.35),
+                        new MoneyReward(500),
                         new JobSiteXpReward(JobSiteType.FARMLAND, 60)
                 )),
                 Material.MUTTON,
@@ -241,7 +241,7 @@ public class ContractPoolLoader {
                 25,
                 Map.of("unlock_sheep", 1),
                 new CompositeReward(List.of(
-                        new MoneyReward(1200, 0.35),
+                        new MoneyReward(1200),
                         new JobSiteXpReward(JobSiteType.FARMLAND, 140)
                 )),
                 Material.WHITE_WOOL,
@@ -258,7 +258,7 @@ public class ContractPoolLoader {
                 10,
                 Map.of("unlock_pig", 1),
                 new CompositeReward(List.of(
-                        new MoneyReward(600, 0.35),
+                        new MoneyReward(600),
                         new JobSiteXpReward(JobSiteType.FARMLAND, 75)
                 )),
                 Material.PORKCHOP,
@@ -274,7 +274,7 @@ public class ContractPoolLoader {
                 25,
                 Map.of("unlock_pig", 1),
                 new CompositeReward(List.of(
-                        new MoneyReward(1400, 0.35),
+                        new MoneyReward(1400),
                         new JobSiteXpReward(JobSiteType.FARMLAND, 170)
                 )),
                 Material.COOKED_PORKCHOP,
@@ -291,7 +291,7 @@ public class ContractPoolLoader {
                 15,
                 Map.of("unlock_chicken", 1),
                 new CompositeReward(List.of(
-                        new MoneyReward(700, 0.35),
+                        new MoneyReward(700),
                         new JobSiteXpReward(JobSiteType.FARMLAND, 90)
                 )),
                 Material.CHICKEN,
@@ -307,7 +307,7 @@ public class ContractPoolLoader {
                 35,
                 Map.of("unlock_chicken", 1),
                 new CompositeReward(List.of(
-                        new MoneyReward(1600, 0.35),
+                        new MoneyReward(1600),
                         new JobSiteXpReward(JobSiteType.FARMLAND, 200)
                 )),
                 Material.FEATHER,
@@ -324,7 +324,7 @@ public class ContractPoolLoader {
 //                6,
 //                Map.of("unlock_horse", 1),
 //                new CompositeReward(List.of(
-//                        new MoneyReward(1500, 0.35),
+//                        new MoneyReward(1500),
 //                        new JobSiteXpReward(JobSiteType.FARMLAND, 180)
 //                )),
 //                Material.LEATHER,
@@ -346,7 +346,7 @@ public class ContractPoolLoader {
                 6,
                 Map.of(),
                 new CompositeReward(List.of(
-                        new MoneyReward(800, 0.35),
+                        new MoneyReward(800),
                         new JobSiteXpReward(JobSiteType.FARMLAND, 100)
                 )),
                 Material.HONEYCOMB,
@@ -362,7 +362,7 @@ public class ContractPoolLoader {
                 15,
                 Map.of(),
                 new CompositeReward(List.of(
-                        new MoneyReward(1800, 0.35),
+                        new MoneyReward(1800),
                         new JobSiteXpReward(JobSiteType.FARMLAND, 220)
                 )),
                 Material.HONEYCOMB,
@@ -378,7 +378,7 @@ public class ContractPoolLoader {
                 28,
                 Map.of("honey_speed", 3),
                 new CompositeReward(List.of(
-                        new MoneyReward(3500, 0.35),
+                        new MoneyReward(3500),
                         new JobSiteXpReward(JobSiteType.FARMLAND, 400)
                 )),
                 Material.HONEYCOMB_BLOCK,
@@ -403,7 +403,7 @@ public class ContractPoolLoader {
                 350,
                 Map.of(),
                 new CompositeReward(List.of(
-                        new MoneyReward(2500, 0.35),
+                        new MoneyReward(2500),
                         new JobSiteXpReward(JobSiteType.FARMLAND, 300)
                 )),
                 Material.HAY_BLOCK,
@@ -419,7 +419,7 @@ public class ContractPoolLoader {
                 350,
                 Map.of("unlock_carrot", 1),
                 new CompositeReward(List.of(
-                        new MoneyReward(3500, 0.35),
+                        new MoneyReward(3500),
                         new JobSiteXpReward(JobSiteType.FARMLAND, 400)
                 )),
                 Material.GOLDEN_CARROT,
@@ -435,7 +435,7 @@ public class ContractPoolLoader {
                 400,
                 Map.of("unlock_potato", 1),
                 new CompositeReward(List.of(
-                        new MoneyReward(5000, 0.35),
+                        new MoneyReward(5000),
                         new JobSiteXpReward(JobSiteType.FARMLAND, 550)
                 )),
                 Material.BAKED_POTATO,
@@ -451,7 +451,7 @@ public class ContractPoolLoader {
                 400,
                 Map.of("unlock_beetroot", 1),
                 new CompositeReward(List.of(
-                        new MoneyReward(7000, 0.35),
+                        new MoneyReward(7000),
                         new JobSiteXpReward(JobSiteType.FARMLAND, 750)
                 )),
                 Material.BEETROOT_SOUP,
@@ -468,7 +468,7 @@ public class ContractPoolLoader {
                 600,
                 Map.of("unlock_potato", 1),
                 new CompositeReward(List.of(
-                        new MoneyReward(6000, 0.35),
+                        new MoneyReward(6000),
                         new JobSiteXpReward(JobSiteType.FARMLAND, 650)
                 )),
                 Material.COMPOSTER,
@@ -490,7 +490,7 @@ public class ContractPoolLoader {
                 40,
                 Map.of(),
                 new CompositeReward(List.of(
-                        new MoneyReward(3000, 0.35),
+                        new MoneyReward(3000),
                         new JobSiteXpReward(JobSiteType.FARMLAND, 350)
                 )),
                 Material.LEATHER,
@@ -506,7 +506,7 @@ public class ContractPoolLoader {
                 50,
                 Map.of("unlock_sheep", 1),
                 new CompositeReward(List.of(
-                        new MoneyReward(4000, 0.35),
+                        new MoneyReward(4000),
                         new JobSiteXpReward(JobSiteType.FARMLAND, 450)
                 )),
                 Material.WHITE_WOOL,
@@ -522,7 +522,7 @@ public class ContractPoolLoader {
                 50,
                 Map.of("unlock_pig", 1),
                 new CompositeReward(List.of(
-                        new MoneyReward(5000, 0.35),
+                        new MoneyReward(5000),
                         new JobSiteXpReward(JobSiteType.FARMLAND, 550)
                 )),
                 Material.COOKED_PORKCHOP,
@@ -538,7 +538,7 @@ public class ContractPoolLoader {
                 70,
                 Map.of("unlock_chicken", 1),
                 new CompositeReward(List.of(
-                        new MoneyReward(5500, 0.35),
+                        new MoneyReward(5500),
                         new JobSiteXpReward(JobSiteType.FARMLAND, 600)
                 )),
                 Material.FEATHER,
@@ -554,7 +554,7 @@ public class ContractPoolLoader {
                 100,
                 Map.of("unlock_chicken", 1),
                 new CompositeReward(List.of(
-                        new MoneyReward(8000, 0.35),
+                        new MoneyReward(8000),
                         new JobSiteXpReward(JobSiteType.FARMLAND, 850)
                 )),
                 Material.DIAMOND_SWORD,
@@ -576,7 +576,7 @@ public class ContractPoolLoader {
                 50,
                 Map.of(),
                 new CompositeReward(List.of(
-                        new MoneyReward(6000, 0.35),
+                        new MoneyReward(6000),
                         new JobSiteXpReward(JobSiteType.FARMLAND, 650)
                 )),
                 Material.HONEY_BLOCK,
@@ -592,7 +592,7 @@ public class ContractPoolLoader {
                 100,
                 Map.of("honey_speed", 5),
                 new CompositeReward(List.of(
-                        new MoneyReward(12000, 0.35),
+                        new MoneyReward(12000),
                         new JobSiteXpReward(JobSiteType.FARMLAND, 1200)
                 )),
                 Material.HONEY_BLOCK,
@@ -636,7 +636,7 @@ public class ContractPoolLoader {
                 200,
                 Map.of(),
                 new CompositeReward(List.of(
-                        new MoneyReward(350, 0.35),
+                        new MoneyReward(350),
                         new JobSiteXpReward(JobSiteType.QUARRY, 45)
                 )),
                 Material.COBBLESTONE,
@@ -652,7 +652,7 @@ public class ContractPoolLoader {
                 500,
                 Map.of(),
                 new CompositeReward(List.of(
-                        new MoneyReward(800, 0.35),
+                        new MoneyReward(800),
                         new JobSiteXpReward(JobSiteType.QUARRY, 100)
                 )),
                 Material.COBBLESTONE,
@@ -668,7 +668,7 @@ public class ContractPoolLoader {
                 50,
                 Map.of(),
                 new CompositeReward(List.of(
-                        new MoneyReward(400, 0.35),
+                        new MoneyReward(400),
                         new JobSiteXpReward(JobSiteType.QUARRY, 50)
                 )),
                 Material.COAL,
@@ -684,7 +684,7 @@ public class ContractPoolLoader {
                 120,
                 Map.of(),
                 new CompositeReward(List.of(
-                        new MoneyReward(900, 0.35),
+                        new MoneyReward(900),
                         new JobSiteXpReward(JobSiteType.QUARRY, 110)
                 )),
                 Material.COAL_BLOCK,
@@ -700,7 +700,7 @@ public class ContractPoolLoader {
                 30,
                 Map.of(),
                 new CompositeReward(List.of(
-                        new MoneyReward(500, 0.35),
+                        new MoneyReward(500),
                         new JobSiteXpReward(JobSiteType.QUARRY, 60)
                 )),
                 Material.RAW_IRON,
@@ -716,7 +716,7 @@ public class ContractPoolLoader {
                 80,
                 Map.of(),
                 new CompositeReward(List.of(
-                        new MoneyReward(1200, 0.35),
+                        new MoneyReward(1200),
                         new JobSiteXpReward(JobSiteType.QUARRY, 140)
                 )),
                 Material.IRON_BLOCK,
@@ -732,7 +732,7 @@ public class ContractPoolLoader {
                 10,
                 Map.of(),
                 new CompositeReward(List.of(
-                        new MoneyReward(800, 0.35),
+                        new MoneyReward(800),
                         new JobSiteXpReward(JobSiteType.QUARRY, 100)
                 )),
                 Material.DIAMOND,
@@ -748,7 +748,7 @@ public class ContractPoolLoader {
                 30,
                 Map.of(),
                 new CompositeReward(List.of(
-                        new MoneyReward(2000, 0.35),
+                        new MoneyReward(2000),
                         new JobSiteXpReward(JobSiteType.QUARRY, 240)
                 )),
                 Material.DIAMOND_BLOCK,
@@ -770,7 +770,7 @@ public class ContractPoolLoader {
                 60,
                 Map.of("unlock_stone_varieties", 1),
                 new CompositeReward(List.of(
-                        new MoneyReward(400, 0.35),
+                        new MoneyReward(400),
                         new JobSiteXpReward(JobSiteType.QUARRY, 50)
                 )),
                 Material.GRANITE,
@@ -786,7 +786,7 @@ public class ContractPoolLoader {
                 60,
                 Map.of("unlock_stone_varieties", 1),
                 new CompositeReward(List.of(
-                        new MoneyReward(400, 0.35),
+                        new MoneyReward(400),
                         new JobSiteXpReward(JobSiteType.QUARRY, 50)
                 )),
                 Material.DIORITE,
@@ -802,7 +802,7 @@ public class ContractPoolLoader {
                 60,
                 Map.of("unlock_stone_varieties", 1),
                 new CompositeReward(List.of(
-                        new MoneyReward(400, 0.35),
+                        new MoneyReward(400),
                         new JobSiteXpReward(JobSiteType.QUARRY, 50)
                 )),
                 Material.ANDESITE,
@@ -818,7 +818,7 @@ public class ContractPoolLoader {
                 200,
                 Map.of("unlock_stone_varieties", 1),
                 new CompositeReward(List.of(
-                        new MoneyReward(900, 0.35),
+                        new MoneyReward(900),
                         new JobSiteXpReward(JobSiteType.QUARRY, 110)
                 )),
                 Material.STONE,
@@ -840,7 +840,7 @@ public class ContractPoolLoader {
                 50,
                 Map.of("unlock_copper_collection", 1),
                 new CompositeReward(List.of(
-                        new MoneyReward(600, 0.35),
+                        new MoneyReward(600),
                         new JobSiteXpReward(JobSiteType.QUARRY, 75)
                 )),
                 Material.RAW_COPPER,
@@ -856,7 +856,7 @@ public class ContractPoolLoader {
                 120,
                 Map.of("unlock_copper_collection", 1),
                 new CompositeReward(List.of(
-                        new MoneyReward(1400, 0.35),
+                        new MoneyReward(1400),
                         new JobSiteXpReward(JobSiteType.QUARRY, 170)
                 )),
                 Material.COPPER_BLOCK,
@@ -878,7 +878,7 @@ public class ContractPoolLoader {
                 40,
                 Map.of("unlock_precious_metals", 1),
                 new CompositeReward(List.of(
-                        new MoneyReward(800, 0.35),
+                        new MoneyReward(800),
                         new JobSiteXpReward(JobSiteType.QUARRY, 100)
                 )),
                 Material.RAW_GOLD,
@@ -894,7 +894,7 @@ public class ContractPoolLoader {
                 100,
                 Map.of("unlock_precious_metals", 1),
                 new CompositeReward(List.of(
-                        new MoneyReward(1800, 0.35),
+                        new MoneyReward(1800),
                         new JobSiteXpReward(JobSiteType.QUARRY, 210)
                 )),
                 Material.GOLD_BLOCK,
@@ -910,7 +910,7 @@ public class ContractPoolLoader {
                 20,
                 Map.of("unlock_precious_metals", 1),
                 new CompositeReward(List.of(
-                        new MoneyReward(1000, 0.35),
+                        new MoneyReward(1000),
                         new JobSiteXpReward(JobSiteType.QUARRY, 120)
                 )),
                 Material.EMERALD,
@@ -932,7 +932,7 @@ public class ContractPoolLoader {
                 150,
                 Map.of("unlock_deep_minerals", 1),
                 new CompositeReward(List.of(
-                        new MoneyReward(600, 0.35),
+                        new MoneyReward(600),
                         new JobSiteXpReward(JobSiteType.QUARRY, 75)
                 )),
                 Material.DEEPSLATE,
@@ -948,7 +948,7 @@ public class ContractPoolLoader {
                 25,
                 Map.of("unlock_deep_minerals", 1),
                 new CompositeReward(List.of(
-                        new MoneyReward(750, 0.35),
+                        new MoneyReward(750),
                         new JobSiteXpReward(JobSiteType.QUARRY, 90)
                 )),
                 Material.LAPIS_LAZULI,
@@ -964,7 +964,7 @@ public class ContractPoolLoader {
                 25,
                 Map.of("unlock_deep_minerals", 1),
                 new CompositeReward(List.of(
-                        new MoneyReward(1500, 0.35),
+                        new MoneyReward(1500),
                         new JobSiteXpReward(JobSiteType.QUARRY, 180)
                 )),
                 Material.DEEPSLATE_DIAMOND_ORE,
@@ -980,7 +980,7 @@ public class ContractPoolLoader {
                 20,
                 Map.of("unlock_deep_minerals", 1),
                 new CompositeReward(List.of(
-                        new MoneyReward(700, 0.35),
+                        new MoneyReward(700),
                         new JobSiteXpReward(JobSiteType.QUARRY, 85)
                 )),
                 Material.REDSTONE,
@@ -1002,7 +1002,7 @@ public class ContractPoolLoader {
                 150,
                 Map.of("unlock_nether_resources", 1),
                 new CompositeReward(List.of(
-                        new MoneyReward(700, 0.35),
+                        new MoneyReward(700),
                         new JobSiteXpReward(JobSiteType.QUARRY, 85)
                 )),
                 Material.NETHERRACK,
@@ -1018,7 +1018,7 @@ public class ContractPoolLoader {
                 50,
                 Map.of("unlock_nether_resources", 1),
                 new CompositeReward(List.of(
-                        new MoneyReward(1200, 0.35),
+                        new MoneyReward(1200),
                         new JobSiteXpReward(JobSiteType.QUARRY, 140)
                 )),
                 Material.NETHER_GOLD_ORE,
@@ -1034,7 +1034,7 @@ public class ContractPoolLoader {
                 50,
                 Map.of("unlock_nether_resources", 1),
                 new CompositeReward(List.of(
-                        new MoneyReward(1000, 0.35),
+                        new MoneyReward(1000),
                         new JobSiteXpReward(JobSiteType.QUARRY, 120)
                 )),
                 Material.QUARTZ,
@@ -1050,7 +1050,7 @@ public class ContractPoolLoader {
                 12,
                 Map.of("unlock_nether_resources", 1),
                 new CompositeReward(List.of(
-                        new MoneyReward(3000, 0.35),
+                        new MoneyReward(3000),
                         new JobSiteXpReward(JobSiteType.QUARRY, 350)
                 )),
                 Material.ANCIENT_DEBRIS,
@@ -1072,7 +1072,7 @@ public class ContractPoolLoader {
                 15,
                 Map.of(),
                 new CompositeReward(List.of(
-                        new MoneyReward(600, 0.35),
+                        new MoneyReward(600),
                         new JobSiteXpReward(JobSiteType.QUARRY, 75)
                 )),
                 Material.AMETHYST_CLUSTER,
@@ -1088,7 +1088,7 @@ public class ContractPoolLoader {
                 40,
                 Map.of(),
                 new CompositeReward(List.of(
-                        new MoneyReward(1500, 0.35),
+                        new MoneyReward(1500),
                         new JobSiteXpReward(JobSiteType.QUARRY, 180)
                 )),
                 Material.AMETHYST_BLOCK,
@@ -1110,7 +1110,7 @@ public class ContractPoolLoader {
                 1500,
                 Map.of(),
                 new CompositeReward(List.of(
-                        new MoneyReward(2500, 0.35),
+                        new MoneyReward(2500),
                         new JobSiteXpReward(JobSiteType.QUARRY, 300)
                 )),
                 Material.COBBLESTONE,
@@ -1126,7 +1126,7 @@ public class ContractPoolLoader {
                 300,
                 Map.of(),
                 new CompositeReward(List.of(
-                        new MoneyReward(3500, 0.35),
+                        new MoneyReward(3500),
                         new JobSiteXpReward(JobSiteType.QUARRY, 400)
                 )),
                 Material.COAL_BLOCK,
@@ -1142,7 +1142,7 @@ public class ContractPoolLoader {
                 200,
                 Map.of(),
                 new CompositeReward(List.of(
-                        new MoneyReward(5000, 0.35),
+                        new MoneyReward(5000),
                         new JobSiteXpReward(JobSiteType.QUARRY, 550)
                 )),
                 Material.IRON_BLOCK,
@@ -1158,7 +1158,7 @@ public class ContractPoolLoader {
                 75,
                 Map.of(),
                 new CompositeReward(List.of(
-                        new MoneyReward(7000, 0.35),
+                        new MoneyReward(7000),
                         new JobSiteXpReward(JobSiteType.QUARRY, 750)
                 )),
                 Material.DIAMOND_BLOCK,
@@ -1174,7 +1174,7 @@ public class ContractPoolLoader {
                 300,
                 Map.of("unlock_copper_collection", 1),
                 new CompositeReward(List.of(
-                        new MoneyReward(5500, 0.35),
+                        new MoneyReward(5500),
                         new JobSiteXpReward(JobSiteType.QUARRY, 600)
                 )),
                 Material.COPPER_BLOCK,
@@ -1190,7 +1190,7 @@ public class ContractPoolLoader {
                 150,
                 Map.of("unlock_precious_metals", 1),
                 new CompositeReward(List.of(
-                        new MoneyReward(7500, 0.35),
+                        new MoneyReward(7500),
                         new JobSiteXpReward(JobSiteType.QUARRY, 800)
                 )),
                 Material.GOLD_BLOCK,
@@ -1212,7 +1212,7 @@ public class ContractPoolLoader {
                 500,
                 Map.of("unlock_deep_minerals", 1),
                 new CompositeReward(List.of(
-                        new MoneyReward(6500, 0.35),
+                        new MoneyReward(6500),
                         new JobSiteXpReward(JobSiteType.QUARRY, 700)
                 )),
                 Material.DEEPSLATE,
@@ -1229,7 +1229,7 @@ public class ContractPoolLoader {
                 400,
                 Map.of("unlock_nether_resources", 1),
                 new CompositeReward(List.of(
-                        new MoneyReward(9000, 0.35),
+                        new MoneyReward(9000),
                         new JobSiteXpReward(JobSiteType.QUARRY, 950)
                 )),
                 Material.NETHERRACK,
@@ -1245,7 +1245,7 @@ public class ContractPoolLoader {
                 120,
                 Map.of(),
                 new CompositeReward(List.of(
-                        new MoneyReward(5500, 0.35),
+                        new MoneyReward(5500),
                         new JobSiteXpReward(JobSiteType.QUARRY, 600)
                 )),
                 Material.AMETHYST_BLOCK,
@@ -1269,7 +1269,7 @@ public class ContractPoolLoader {
                 400,
                 Map.of(),
                 new CompositeReward(List.of(
-                        new MoneyReward(10000, 0.35),
+                        new MoneyReward(10000),
                         new JobSiteXpReward(JobSiteType.QUARRY, 1100)
                 )),
                 Material.DIAMOND_PICKAXE,
@@ -1304,7 +1304,7 @@ public class ContractPoolLoader {
                 12,
                 Map.of(),
                 new CompositeReward(List.of(
-                        new MoneyReward(400, 0.35),
+                        new MoneyReward(400),
                         new JobSiteXpReward(JobSiteType.GRAVEYARD, 50)
                 )),
                 Material.ZOMBIE_HEAD,
@@ -1320,7 +1320,7 @@ public class ContractPoolLoader {
                 30,
                 Map.of(),
                 new CompositeReward(List.of(
-                        new MoneyReward(950, 0.35),
+                        new MoneyReward(950),
                         new JobSiteXpReward(JobSiteType.GRAVEYARD, 115)
                 )),
                 Material.ZOMBIE_HEAD,
@@ -1336,7 +1336,7 @@ public class ContractPoolLoader {
                 12,
                 Map.of(),
                 new CompositeReward(List.of(
-                        new MoneyReward(400, 0.35),
+                        new MoneyReward(400),
                         new JobSiteXpReward(JobSiteType.GRAVEYARD, 50)
                 )),
                 Material.SKELETON_SKULL,
@@ -1352,7 +1352,7 @@ public class ContractPoolLoader {
                 30,
                 Map.of(),
                 new CompositeReward(List.of(
-                        new MoneyReward(950, 0.35),
+                        new MoneyReward(950),
                         new JobSiteXpReward(JobSiteType.GRAVEYARD, 115)
                 )),
                 Material.SKELETON_SKULL,
@@ -1368,7 +1368,7 @@ public class ContractPoolLoader {
                 20,
                 Map.of(),
                 new CompositeReward(List.of(
-                        new MoneyReward(550, 0.35),
+                        new MoneyReward(550),
                         new JobSiteXpReward(JobSiteType.GRAVEYARD, 70)
                 )),
                 Material.BONE,
@@ -1384,7 +1384,7 @@ public class ContractPoolLoader {
                 50,
                 Map.of(),
                 new CompositeReward(List.of(
-                        new MoneyReward(1300, 0.35),
+                        new MoneyReward(1300),
                         new JobSiteXpReward(JobSiteType.GRAVEYARD, 160)
                 )),
                 Material.BONE_BLOCK,
@@ -1406,7 +1406,7 @@ public class ContractPoolLoader {
                 15,
                 Map.of(),
                 new CompositeReward(List.of(
-                        new MoneyReward(700, 0.35),
+                        new MoneyReward(700),
                         new JobSiteXpReward(JobSiteType.GRAVEYARD, 85)
                 )),
                 Material.SAND,
@@ -1422,7 +1422,7 @@ public class ContractPoolLoader {
                 35,
                 Map.of(),
                 new CompositeReward(List.of(
-                        new MoneyReward(1500, 0.35),
+                        new MoneyReward(1500),
                         new JobSiteXpReward(JobSiteType.GRAVEYARD, 180)
                 )),
                 Material.SANDSTONE,
@@ -1438,7 +1438,7 @@ public class ContractPoolLoader {
                 15,
                 Map.of(),
                 new CompositeReward(List.of(
-                        new MoneyReward(700, 0.35),
+                        new MoneyReward(700),
                         new JobSiteXpReward(JobSiteType.GRAVEYARD, 85)
                 )),
                 Material.POWDER_SNOW_BUCKET,
@@ -1454,7 +1454,7 @@ public class ContractPoolLoader {
                 35,
                 Map.of(),
                 new CompositeReward(List.of(
-                        new MoneyReward(1500, 0.35),
+                        new MoneyReward(1500),
                         new JobSiteXpReward(JobSiteType.GRAVEYARD, 180)
                 )),
                 Material.PACKED_ICE,
@@ -1476,7 +1476,7 @@ public class ContractPoolLoader {
                 12,
                 Map.of(),
                 new CompositeReward(List.of(
-                        new MoneyReward(1100, 0.35),
+                        new MoneyReward(1100),
                         new JobSiteXpReward(JobSiteType.GRAVEYARD, 130)
                 )),
                 Material.EMERALD,
@@ -1492,7 +1492,7 @@ public class ContractPoolLoader {
                 28,
                 Map.of(),
                 new CompositeReward(List.of(
-                        new MoneyReward(2400, 0.35),
+                        new MoneyReward(2400),
                         new JobSiteXpReward(JobSiteType.GRAVEYARD, 280)
                 )),
                 Material.EMERALD_BLOCK,
@@ -1508,7 +1508,7 @@ public class ContractPoolLoader {
                 12,
                 Map.of(),
                 new CompositeReward(List.of(
-                        new MoneyReward(1100, 0.35),
+                        new MoneyReward(1100),
                         new JobSiteXpReward(JobSiteType.GRAVEYARD, 130)
                 )),
                 Material.TRIDENT,
@@ -1524,7 +1524,7 @@ public class ContractPoolLoader {
                 28,
                 Map.of(),
                 new CompositeReward(List.of(
-                        new MoneyReward(2400, 0.35),
+                        new MoneyReward(2400),
                         new JobSiteXpReward(JobSiteType.GRAVEYARD, 280)
                 )),
                 Material.HEART_OF_THE_SEA,
@@ -1546,7 +1546,7 @@ public class ContractPoolLoader {
                 8,
                 Map.of(),
                 new CompositeReward(List.of(
-                        new MoneyReward(2000, 0.35),
+                        new MoneyReward(2000),
                         new JobSiteXpReward(JobSiteType.GRAVEYARD, 240)
                 )),
                 Material.WITHER_SKELETON_SKULL,
@@ -1562,7 +1562,7 @@ public class ContractPoolLoader {
                 20,
                 Map.of(),
                 new CompositeReward(List.of(
-                        new MoneyReward(4500, 0.35),
+                        new MoneyReward(4500),
                         new JobSiteXpReward(JobSiteType.GRAVEYARD, 520)
                 )),
                 Material.NETHER_STAR,
@@ -1584,7 +1584,7 @@ public class ContractPoolLoader {
                 10,
                 Map.of(),
                 new CompositeReward(List.of(
-                        new MoneyReward(600, 0.35),
+                        new MoneyReward(600),
                         new JobSiteXpReward(JobSiteType.GRAVEYARD, 75)
                 )),
                 Material.SPIDER_EYE,
@@ -1600,7 +1600,7 @@ public class ContractPoolLoader {
                 25,
                 Map.of(),
                 new CompositeReward(List.of(
-                        new MoneyReward(1400, 0.35),
+                        new MoneyReward(1400),
                         new JobSiteXpReward(JobSiteType.GRAVEYARD, 170)
                 )),
                 Material.FERMENTED_SPIDER_EYE,
@@ -1616,7 +1616,7 @@ public class ContractPoolLoader {
                 50,
                 Map.of("mausoleum_horde_size", 3),
                 new CompositeReward(List.of(
-                        new MoneyReward(2800, 0.35),
+                        new MoneyReward(2800),
                         new JobSiteXpReward(JobSiteType.GRAVEYARD, 330)
                 )),
                 Material.COBWEB,
@@ -1638,7 +1638,7 @@ public class ContractPoolLoader {
                 8,
                 Map.of(),
                 new CompositeReward(List.of(
-                        new MoneyReward(800, 0.35),
+                        new MoneyReward(800),
                         new JobSiteXpReward(JobSiteType.GRAVEYARD, 100)
                 )),
                 Material.SOUL_LANTERN,
@@ -1654,7 +1654,7 @@ public class ContractPoolLoader {
                 20,
                 Map.of(),
                 new CompositeReward(List.of(
-                        new MoneyReward(1800, 0.35),
+                        new MoneyReward(1800),
                         new JobSiteXpReward(JobSiteType.GRAVEYARD, 220)
                 )),
                 Material.SOUL_CAMPFIRE,
@@ -1670,7 +1670,7 @@ public class ContractPoolLoader {
                 40,
                 Map.of("soul_harvest", 3),
                 new CompositeReward(List.of(
-                        new MoneyReward(3500, 0.35),
+                        new MoneyReward(3500),
                         new JobSiteXpReward(JobSiteType.GRAVEYARD, 420)
                 )),
                 Material.SOUL_TORCH,
@@ -1692,7 +1692,7 @@ public class ContractPoolLoader {
                 120,
                 Map.of(),
                 new CompositeReward(List.of(
-                        new MoneyReward(4000, 0.35),
+                        new MoneyReward(4000),
                         new JobSiteXpReward(JobSiteType.GRAVEYARD, 450)
                 )),
                 Material.BONE_BLOCK,
@@ -1708,7 +1708,7 @@ public class ContractPoolLoader {
                 100,
                 Map.of(),
                 new CompositeReward(List.of(
-                        new MoneyReward(6000, 0.35),
+                        new MoneyReward(6000),
                         new JobSiteXpReward(JobSiteType.GRAVEYARD, 680)
                 )),
                 Material.WITHER_ROSE,
@@ -1724,7 +1724,7 @@ public class ContractPoolLoader {
                 150,
                 Map.of(),
                 new CompositeReward(List.of(
-                        new MoneyReward(8000, 0.35),
+                        new MoneyReward(8000),
                         new JobSiteXpReward(JobSiteType.GRAVEYARD, 900)
                 )),
                 Material.ZOMBIE_HEAD,
@@ -1740,7 +1740,7 @@ public class ContractPoolLoader {
                 120,
                 Map.of(),
                 new CompositeReward(List.of(
-                        new MoneyReward(9000, 0.35),
+                        new MoneyReward(9000),
                         new JobSiteXpReward(JobSiteType.GRAVEYARD, 1000)
                 )),
                 Material.SKELETON_SKULL,
@@ -1756,7 +1756,7 @@ public class ContractPoolLoader {
                 80,
                 Map.of(),
                 new CompositeReward(List.of(
-                        new MoneyReward(5500, 0.35),
+                        new MoneyReward(5500),
                         new JobSiteXpReward(JobSiteType.GRAVEYARD, 620)
                 )),
                 Material.COBWEB,
@@ -1772,7 +1772,7 @@ public class ContractPoolLoader {
                 60,
                 Map.of(),
                 new CompositeReward(List.of(
-                        new MoneyReward(7500, 0.35),
+                        new MoneyReward(7500),
                         new JobSiteXpReward(JobSiteType.GRAVEYARD, 850)
                 )),
                 Material.SOUL_SAND,
@@ -1788,7 +1788,7 @@ public class ContractPoolLoader {
                 40,
                 Map.of(),
                 new CompositeReward(List.of(
-                        new MoneyReward(12000, 0.35),
+                        new MoneyReward(12000),
                         new JobSiteXpReward(JobSiteType.GRAVEYARD, 1350)
                 )),
                 Material.NETHER_STAR,
@@ -1807,7 +1807,7 @@ public class ContractPoolLoader {
                 250,
                 Map.of(),
                 new CompositeReward(List.of(
-                        new MoneyReward(15000, 0.35),
+                        new MoneyReward(15000),
                         new JobSiteXpReward(JobSiteType.GRAVEYARD, 1700)
                 )),
                 Material.DIAMOND_SWORD,
@@ -1827,7 +1827,7 @@ public class ContractPoolLoader {
                 350,
                 Map.of("mausoleum_spawn_speed", 5, "spawn_speed", 5),
                 new CompositeReward(List.of(
-                        new MoneyReward(22000, 0.35),
+                        new MoneyReward(22000),
                         new JobSiteXpReward(JobSiteType.GRAVEYARD, 2500)
                 )),
                 Material.NETHERITE_SWORD,

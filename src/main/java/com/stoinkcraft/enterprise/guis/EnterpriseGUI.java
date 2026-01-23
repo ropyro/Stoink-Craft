@@ -146,11 +146,11 @@ public class EnterpriseGUI {
                 .addIngredient('G', createJobSiteItem(JobSiteType.GRAVEYARD))
                 .build();
 
-        if (enterprise.isBoosted()) {
-            gui.setItem(4, 4, new SimpleItem(new ItemBuilder(Material.FIRE_CHARGE)
+        if (enterprise.hasActiveBooster()) {
+            gui.setItem(5, 1, new SimpleItem(new ItemBuilder(Material.FIRE_CHARGE)
                     .setDisplayName(" §6§l" + enterprise.getActiveBooster().getMultiplier() + "x booster active!")
                     .addLoreLines(DIVIDER)
-                    .addLoreLines(BULLET + "§7Time Left: ")
+                    .addLoreLines(BULLET + "§7Time Left: ?")
                     .addLoreLines(DIVIDER)));
         }
 

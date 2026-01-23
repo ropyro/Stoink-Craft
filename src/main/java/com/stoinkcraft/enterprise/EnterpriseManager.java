@@ -1,14 +1,13 @@
 package com.stoinkcraft.enterprise;
 
 import com.stoinkcraft.StoinkCore;
-import com.stoinkcraft.earning.jobsites.JobSite;
 import com.stoinkcraft.earning.jobsites.JobSiteManager;
-import com.stoinkcraft.earning.boosters.Booster;
+import com.stoinkcraft.items.booster.Booster;
 import com.stoinkcraft.earning.jobsites.protection.ProtectionManager;
+import com.stoinkcraft.items.booster.BoosterTier;
 import com.stoinkcraft.serialization.EnterpriseStorageJson;
 import com.stoinkcraft.enterprise.shares.ShareManager;
 import com.stoinkcraft.utils.ChatUtils;
-import com.stoinkcraft.utils.SCConstants;
 import net.citizensnpcs.api.npc.NPC;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -17,8 +16,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.time.Duration;
-import java.time.Instant;
 import java.util.*;
 
 
@@ -26,7 +23,6 @@ public class EnterpriseManager {
 
     private static EnterpriseManager enterpriseManager;
 
-    // New: target → list of inviter UUIDs
     private final Map<UUID, List<UUID>> invites = new HashMap<>();
 
     private StoinkCore plugin;
@@ -48,20 +44,8 @@ public class EnterpriseManager {
         return enterpriseList.stream().filter(e -> e.getID().equals(enterpriseID)).findFirst().orElse(null);
     }
 
-    public void setBooster(Enterprise enterprise, Booster booster){
-        enterprise.setActiveBooster(booster);
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                enterprise.setActiveBooster(null);
-                enterprise.getMembers().keySet().forEach(uuid -> {
-                    Player online = Bukkit.getPlayer(uuid);
-                    if (online != null && online.isOnline()) {
-                        ChatUtils.sendMessage(online,ChatColor.GOLD + "" + booster.getMultiplier() + "x booster has expired!");
-                    }
-                });
-            }
-        }.runTaskLater(plugin, booster.getDuration());
+    public void activateBooster(Enterprise enterprise, BoosterTier tier) {
+        StoinkCore.getInstance().getBoosterManager().activateBooster(enterprise, tier);
     }
 
     public void disband(Enterprise enterprise) {

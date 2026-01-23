@@ -3,7 +3,7 @@ package com.stoinkcraft.enterprise;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.stoinkcraft.earning.jobsites.JobSiteManager;
-import com.stoinkcraft.earning.boosters.Booster;
+import com.stoinkcraft.items.booster.Booster;
 import com.stoinkcraft.enterprise.reputation.ReputationCalculator;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -160,16 +160,26 @@ public class Enterprise {
         return priceHistory;
     }
 
-    public boolean isBoosted() {
-        return activeBooster != null;
-    }
-
     public Booster getActiveBooster() {
-        return this.activeBooster;
+        return activeBooster;
     }
 
     public void setActiveBooster(Booster booster) {
         this.activeBooster = booster;
+    }
+
+    public boolean hasActiveBooster() {
+        return activeBooster != null && !activeBooster.isExpired();
+    }
+
+    /**
+     * Gets the current booster multiplier (1.0 if no active booster).
+     */
+    public double getBoosterMultiplier() {
+        if (!hasActiveBooster()) {
+            return 1.0;
+        }
+        return activeBooster.getMultiplier();
     }
 
     public void hireEmployee(UUID employee) {

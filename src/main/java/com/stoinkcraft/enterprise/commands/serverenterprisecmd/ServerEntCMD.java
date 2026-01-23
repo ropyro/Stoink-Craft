@@ -5,12 +5,13 @@ import com.stoinkcraft.earning.jobsites.JobSiteManager;
 import com.stoinkcraft.earning.jobsites.JobsiteLevelHelper;
 import com.stoinkcraft.earning.jobsites.sites.farmland.FarmlandData;
 import com.stoinkcraft.earning.jobsites.sites.farmland.FarmlandGui;
-import com.stoinkcraft.earning.boosters.BoosterItemHelper;
 import com.stoinkcraft.enterprise.Enterprise;
 import com.stoinkcraft.enterprise.EnterpriseManager;
 import com.stoinkcraft.enterprise.ServerEnterprise;
 import com.stoinkcraft.earning.jobsites.sites.graveyard.GraveyardData;
 import com.stoinkcraft.earning.jobsites.sites.quarry.QuarryData;
+import com.stoinkcraft.items.booster.BoosterItem;
+import com.stoinkcraft.items.booster.BoosterTier;
 import com.stoinkcraft.serialization.EnterpriseMigration;
 import com.stoinkcraft.serialization.EnterpriseStorageJson;
 import com.stoinkcraft.enterprise.shares.ShareStorage;
@@ -37,19 +38,47 @@ public class ServerEntCMD implements CommandExecutor {
             sender.sendMessage("Error you do not have permission for this command.");
         }
 
-        //Allows console use of the command
-        if(args.length >= 1 && args[0].equalsIgnoreCase("givebooster")){
-               if(args.length >= 4){
-                   double multiplier = Double.parseDouble(args[2]);
-                   long duration = Long.parseLong(args[3]);
-                   Player target = Bukkit.getPlayer(args[1]);
-                   target.getInventory().addItem(BoosterItemHelper.getBoosterItemStack(multiplier, duration));
-                   ChatUtils.sendMessage(target, "§aYou have received an enterprise booster!");
-               }else{
-                   sender.sendMessage("§cInvalid usage: /serverent givebooster <player> <multiplier> <duration>");
-               }
-               return true;
-       }
+        if (args.length >= 1 && args[0].equalsIgnoreCase("givebooster")) {
+            if (args.length >= 3) {
+                Player target = Bukkit.getPlayer(args[1]);
+                if (target == null) {
+                    sender.sendMessage("§cPlayer not found: " + args[1]);
+                    return true;
+                }
+
+                String tierName = args[2].toUpperCase();
+                BoosterTier tier;
+
+                try {
+                    tier = BoosterTier.valueOf(tierName);
+                } catch (IllegalArgumentException e) {
+                    sender.sendMessage("§cInvalid tier: " + args[2]);
+                    sender.sendMessage("§cValid tiers: SMALL, MEDIUM, LARGE");
+                    return true;
+                }
+
+                int amount = 1;
+                if (args.length >= 4) {
+                    try {
+                        amount = Integer.parseInt(args[3]);
+                    } catch (NumberFormatException e) {
+                        sender.sendMessage("§cInvalid amount: " + args[3]);
+                        return true;
+                    }
+                }
+
+                BoosterItem boosterItem = new BoosterItem(tier);
+                target.getInventory().addItem(boosterItem.createItemStack(amount));
+
+                ChatUtils.sendMessage(target, "§aYou have received a §e" + tier.getDisplayName() + "§a!");
+                sender.sendMessage("§aGave " + amount + "x " + tier.getDisplayName() + " to " + target.getName());
+
+            } else {
+                sender.sendMessage("§cInvalid usage: /serverent givebooster <player> <tier> [amount]");
+                sender.sendMessage("§cTiers: SMALL, MEDIUM, LARGE");
+            }
+            return true;
+        }
 
         if(!(sender instanceof Player)) return false;
        Player player = (Player)sender;
