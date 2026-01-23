@@ -8,6 +8,7 @@ import com.stoinkcraft.earning.jobsites.JobSite;
 import com.stoinkcraft.earning.jobsites.JobSiteManager;
 import com.stoinkcraft.earning.jobsites.JobSiteType;
 import com.stoinkcraft.utils.ContractTimeUtil;
+import org.bukkit.entity.Player;
 
 import java.util.*;
 import java.util.Comparator;
@@ -55,29 +56,48 @@ public class ContractManager {
 
     public void handleContext(Enterprise enterprise, ContractContext context) {
         JobSiteType jobSiteType = context.getJobSiteType();
+        Player player = context.getPlayer();
+        ContractFeedbackManager feedbackManager = StoinkCore.getInstance().getContractFeedbackManager();
 
-        // Find the matching contract with the lowest targetAmount
-        Optional<ActiveContract> lowestContract = getContracts(enterprise, context.getJobSiteType()).stream()
+        // Get initial progress amount from the trigger
+        int remainingProgress = 0;
+
+        // Find ALL matching contracts, sorted by lowest targetAmount first
+        List<ActiveContract> matchingContracts = getContracts(enterprise, jobSiteType).stream()
                 .filter(ActiveContract::canProgress)
                 .filter(c -> !c.isCompleted())
                 .filter(c -> c.getDefinition().trigger().matches(context))
-                .min(Comparator.comparingInt(c -> c.getDefinition().targetAmount()));
+                .sorted(Comparator.comparingInt(c -> c.getDefinition().targetAmount()))
+                .toList();
 
-        if (lowestContract.isPresent()) {
-            ActiveContract contract = lowestContract.get();
-            ContractTrigger trigger = contract.getDefinition().trigger();
-
-            contract.addProgress(
-                    context.getPlayer().getUniqueId(),
-                    trigger.getProgressIncrement(context)
-            );
-
-            ContractFeedbackManager feedbackManager = StoinkCore.getInstance().getContractFeedbackManager();
-            feedbackManager.showBossBar(context.getPlayer(), contract);
-            feedbackManager.clearIfFinished(context.getPlayer(), contract);
+        if (matchingContracts.isEmpty()) {
+            return;
         }
 
-        if(!getContracts(enterprise, jobSiteType).stream().anyMatch(ac -> !ac.isCompleted())){
+        // Get the progress increment from the first matching contract's trigger
+        ContractTrigger trigger = matchingContracts.get(0).getDefinition().trigger();
+        remainingProgress = trigger.getProgressIncrement(context);
+
+        // Distribute progress sequentially with overflow
+        for (ActiveContract contract : matchingContracts) {
+            if (remainingProgress <= 0) {
+                break;
+            }
+
+            int needed = contract.getDefinition().targetAmount() - contract.getProgress();
+            int toAdd = Math.min(remainingProgress, needed);
+
+            if (toAdd > 0) {
+                contract.addProgress(player.getUniqueId(), toAdd);
+                remainingProgress -= toAdd;
+
+                feedbackManager.showBossBar(player, contract);
+                feedbackManager.clearIfFinished(player, contract);
+            }
+        }
+
+        // Check if all contracts are complete and regenerate if needed
+        if (getContracts(enterprise, jobSiteType).stream().noneMatch(ac -> !ac.isCompleted())) {
             regenerateContracts(enterprise, jobSiteType);
         }
     }
