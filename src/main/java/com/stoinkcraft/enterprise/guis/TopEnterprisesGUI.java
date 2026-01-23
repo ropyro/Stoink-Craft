@@ -51,7 +51,7 @@ public class TopEnterprisesGUI {
                         "# # # # x # # # #",
                         "# # # x x x # # #",
                         "# # x x x x x # #",
-                        "# # # < # > # # #")
+                        "# < # # # # # > #")
                 .addIngredient('x', Markers.CONTENT_LIST_SLOT_HORIZONTAL)
                 .addIngredient('#', border)
                 .addIngredient('<', new BackItem())
@@ -156,26 +156,13 @@ public class TopEnterprisesGUI {
                     String name = Bukkit.getOfflinePlayer(member).getName();
                     item.addLoreLines(" §a• §f" + name);
                 }
-
-                item.addLoreLines(" ")
-                        .addLoreLines("§a(!) Click to warp to this enterprise (!)");
             }
-
             return item;
         }
 
         @Override
         public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull InventoryClickEvent event) {
-            if (clickType.isLeftClick()) {
-                if (e.getWarp() == null) {
-                    player.closeInventory();
-                    player.sendMessage("Warp not set for this enterprise.");
-                } else {
-                    player.closeInventory();
-                    player.teleport(e.getWarp());
-                    player.sendMessage("Teleported to " + e.getName() + "'s warp.");
-                }
-            }
+
         }
     }
 

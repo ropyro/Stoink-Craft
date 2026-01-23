@@ -27,6 +27,7 @@ import com.stoinkcraft.misc.playerupgrades.PMenuCommand;
 import com.stoinkcraft.jobsites.sites.commands.FarmlandCommand;
 import com.stoinkcraft.jobsites.sites.commands.QuarryCommand;
 import com.stoinkcraft.jobsites.sites.commands.GraveyardCommand;
+import com.stoinkcraft.items.admin.AdminItemsCMD;
 import com.stoinkcraft.serialization.EnterpriseStorageJson;
 import com.stoinkcraft.enterprise.shares.SharesCMD;
 import com.stoinkcraft.enterprise.shares.ShareManager;
@@ -286,6 +287,7 @@ public class StoinkCore extends JavaPlugin {
         getCommand("farmland").setExecutor(new FarmlandCommand());
         getCommand("quarry").setExecutor(new QuarryCommand());
         getCommand("graveyard").setExecutor(new GraveyardCommand());
+        getCommand("stoinkitems").setExecutor(new AdminItemsCMD());
     }
 
     public void registerListeners(){

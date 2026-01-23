@@ -45,6 +45,11 @@ commands:
     usage: /graveyard
     aliases: ['grave', 'cemetery']
     permission: stoinkcore.jobsite.graveyard
+  stoinkitems:
+    description: Admin GUI to spawn custom items
+    usage: /stoinkitems
+    aliases: ['sitems', 'adminitems']
+    permission: stoinkcraft.admin
 
 permissions:
   stoinkcore.protection.bypass:
@@ -57,6 +62,9 @@ permissions:
       stoinkcore.admin.reload: true
   stoinkcore.admin.reload:
     description: Allow the use of the reload sub command
+    default: op
+  stoinkcraft.admin:
+    description: Admin permission for StoinkCraft
     default: op
   stoinkcore.jobsite.*:
     description: Access to all job site commands

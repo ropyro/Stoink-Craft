@@ -5,6 +5,8 @@ import com.stoinkcraft.jobsites.sites.JobSiteRequirements;
 import com.stoinkcraft.jobsites.sites.JobSiteType;
 import com.stoinkcraft.enterprise.Enterprise;
 import com.stoinkcraft.enterprise.Role;
+import com.stoinkcraft.items.booster.Booster;
+import com.stoinkcraft.items.booster.BoosterTier;
 import com.stoinkcraft.enterprise.listeners.chatactions.ChatDepositAction;
 import com.stoinkcraft.enterprise.listeners.chatactions.ChatWithdrawAction;
 import com.stoinkcraft.enterprise.reputation.ReputationCalculator;
@@ -145,11 +147,21 @@ public class EnterpriseGUI {
                 .build();
 
         if (enterprise.hasActiveBooster()) {
-            gui.setItem(5, 1, new SimpleItem(new ItemBuilder(Material.FIRE_CHARGE)
-                    .setDisplayName(" §6§l" + enterprise.getActiveBooster().getMultiplier() + "x booster active!")
-                    .addLoreLines(DIVIDER)
-                    .addLoreLines(BULLET + "§7Time Left: ?")
-                    .addLoreLines(DIVIDER)));
+            Booster booster = enterprise.getActiveBooster();
+            BoosterTier tier = booster.getTier();
+            String color = tier.getColor().toString();
+
+            AutoUpdateItem boosterItem = new AutoUpdateItem(20, () -> {
+                String timeLeft = booster.getFormattedTimeRemaining();
+                return new ItemBuilder(tier.getMaterial())
+                        .setDisplayName(color + "§l" + booster.getMultiplier() + "x " + tier.getDisplayName() + " Active!")
+                        .addLoreLines(DIVIDER)
+                        .addLoreLines(BULLET + "§fTime Remaining: " + color + timeLeft)
+                        .addLoreLines(DIVIDER)
+                        .addLoreLines("§7All enterprise earnings are multiplied!");
+            });
+            boosterItem.start();
+            gui.setItem(5, 1, boosterItem);
         }
 
         currentWindow = Window.single()

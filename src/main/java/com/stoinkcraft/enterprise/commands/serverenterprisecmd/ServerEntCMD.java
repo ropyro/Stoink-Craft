@@ -361,13 +361,12 @@ public class ServerEntCMD implements CommandExecutor {
 
                int migrated = EnterpriseMigration.migrateAllYamlToJson(false);
 
+
+
                ChatUtils.sendMessage(player, ChatColor.GREEN + "Migration complete!");
                ChatUtils.sendMessage(player, ChatColor.GREEN + "Migrated: " + migrated + " enterprises");
 
                sender.sendMessage(ChatColor.YELLOW + "Old YAML files kept as backup.");
-           }
-           if(args[0].equalsIgnoreCase("farmland")){
-               new FarmlandGui(EnterpriseManager.getEnterpriseManager().getEnterpriseByMember(player.getUniqueId()).getJobSiteManager().getFarmlandSite(), player).openWindow();
            }
        }
         return true;

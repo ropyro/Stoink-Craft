@@ -22,19 +22,19 @@ public enum JobSiteRequirements {
 
     QUARRY(
             JobSiteType.QUARRY,
-            75_000,                 // Cost
-            10,                     // Required Farmland level
+            10_000,                 // Cost
+            5,                     // Required Farmland level
             JobSiteType.FARMLAND,   // Prerequisite
             Material.DIAMOND_PICKAXE,
             "Quarry",
             "Mine valuable ores and minerals.",
-            "Requires Farmland Level 15."
+            "Watch out for spiders..."
     ),
 
     GRAVEYARD(
             JobSiteType.GRAVEYARD,
-            250_000,                // Cost
-            20,                     // Required Farmland level
+            25_000,                // Cost
+            15,                     // Required Quarry level
             JobSiteType.QUARRY,   // Prerequisite (could also require Quarry)
             Material.SKELETON_SKULL,
             "Graveyard",
