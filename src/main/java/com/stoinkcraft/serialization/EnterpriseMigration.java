@@ -87,6 +87,8 @@ public class EnterpriseMigration {
             }
         }
 
+        EnterpriseStorageJson.loadAllEnterprises(true);
+
         Bukkit.getLogger().info("=== Migration Complete ===");
         Bukkit.getLogger().info("Migrated: " + migrated);
         Bukkit.getLogger().info("Failed: " + failed);
@@ -111,19 +113,18 @@ public class EnterpriseMigration {
         if (serverOwned) {
             enterprise = new ServerEnterprise(name);
             enterprise.setEnterpriseID(id);
+            enterprise.setBankBalance(config.getDouble("bankBalance", 0));
         } else {
+            // Constructor: name, ceo, bankBalance, reputation, outstandingShares, activeBooster, enterpriseID
+            // Old YAML has netWorth but not reputation - reputation defaults to 0 for migrated enterprises
             enterprise = new Enterprise(name, ceo,
-                    config.getDouble("bankBalance", 0),
-                    config.getDouble("netWorth", 0),
+                    config.getDouble("bankBalance", 0) + config.getDouble("netWorth", 0),
+                    config.getDouble("reputation", 0), // reputation (new field, default 0)
                     config.getInt("outstandingShares", 0),
                     null, // activeBooster - handle separately if needed
                     id
             );
         }
-
-        // Set additional fields
-        enterprise.setBankBalance(config.getDouble("bankBalance", 0));
-        enterprise.setNetWorth(config.getDouble("netWorth", 0));
 
         // Load members
         if (config.isConfigurationSection("members")) {
@@ -163,15 +164,6 @@ public class EnterpriseMigration {
                 Bukkit.getLogger().warning("Failed to load warp for " + name + ": " + e.getMessage());
             }
         }
-
-        // Load booster if you have that data
-        // if (config.isConfigurationSection("activebooster")) {
-        //     long timeRemaining = config.getLong("activebooster.timeRemaining", 0);
-        //     double multiplier = config.getDouble("activebooster.multiplier", 1.0);
-        //     if (timeRemaining > 0) {
-        //         enterprise.setActiveBooster(new Booster(multiplier, timeRemaining));
-        //     }
-        // }
 
         return enterprise;
     }
