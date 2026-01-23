@@ -1,6 +1,7 @@
 package com.stoinkcraft.utils;
 
 import com.fastasyncworldedit.core.FaweAPI;
+import com.fastasyncworldedit.core.extent.processor.lighting.RelightMode;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.EditSessionBuilder;
 import com.sk89q.worldedit.WorldEdit;
@@ -92,18 +93,23 @@ public class SchematicUtils {
             builder.world(weWorld);
             builder.fastMode(true);
 
-            try (EditSession editSession = builder.build()) {
-                new ClipboardHolder(clipboard)
-                        .createPaste(editSession)
-                        .to(BlockVector3.at(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()))
-                        .ignoreAirBlocks(ignoreAir)
-                        .build();
+            try (EditSession editSession = WorldEdit.getInstance()
+                    .newEditSessionBuilder()
+                    .world(weWorld)
+                    .fastMode(true)
+                    .relightMode(RelightMode.ALL)
+                    .build()) {
 
                 Operation operation = new ClipboardHolder(clipboard)
                         .createPaste(editSession)
-                        .to(BlockVector3.at(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()))
+                        .to(BlockVector3.at(
+                                loc.getBlockX(),
+                                loc.getBlockY(),
+                                loc.getBlockZ()
+                        ))
                         .ignoreAirBlocks(ignoreAir)
                         .build();
+
                 Operations.complete(operation);
                 editSession.flushQueue();
             }
@@ -115,5 +121,6 @@ public class SchematicUtils {
             Bukkit.getLogger().severe("Failed to paste schematic: " + e.getMessage());
             e.printStackTrace();
         }
+
     }
 }
