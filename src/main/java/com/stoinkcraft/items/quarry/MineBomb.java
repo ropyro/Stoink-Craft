@@ -1,7 +1,7 @@
 package com.stoinkcraft.items.quarry;
 
-import com.stoinkcraft.earning.jobsites.JobSite;
-import com.stoinkcraft.earning.jobsites.JobSiteType;
+import com.stoinkcraft.jobsites.sites.JobSite;
+import com.stoinkcraft.jobsites.sites.JobSiteType;
 import com.stoinkcraft.items.JobSiteItem;
 import com.stoinkcraft.utils.ChatUtils;
 import org.bukkit.ChatColor;

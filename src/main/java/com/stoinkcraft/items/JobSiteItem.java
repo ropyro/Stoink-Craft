@@ -1,8 +1,8 @@
 package com.stoinkcraft.items;
 
 import com.stoinkcraft.StoinkCore;
-import com.stoinkcraft.earning.jobsites.JobSite;
-import com.stoinkcraft.earning.jobsites.JobSiteType;
+import com.stoinkcraft.jobsites.sites.JobSite;
+import com.stoinkcraft.jobsites.sites.JobSiteType;
 import com.stoinkcraft.enterprise.Enterprise;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;

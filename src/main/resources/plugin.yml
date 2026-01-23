@@ -47,6 +47,9 @@ commands:
     permission: stoinkcore.jobsite.graveyard
 
 permissions:
+  stoinkcore.protection.bypass:
+    description: bypasses jobsite region protections
+    default: op
   stoinkcore.admin.*:
     description: Allow the use of vein miner for all tool categories
     default: op

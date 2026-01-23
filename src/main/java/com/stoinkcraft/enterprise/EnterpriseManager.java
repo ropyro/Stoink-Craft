@@ -1,9 +1,8 @@
 package com.stoinkcraft.enterprise;
 
 import com.stoinkcraft.StoinkCore;
-import com.stoinkcraft.earning.jobsites.JobSiteManager;
-import com.stoinkcraft.items.booster.Booster;
-import com.stoinkcraft.earning.jobsites.protection.ProtectionManager;
+import com.stoinkcraft.jobsites.sites.JobSiteManager;
+import com.stoinkcraft.jobsites.sites.protection.ProtectionManager;
 import com.stoinkcraft.items.booster.BoosterTier;
 import com.stoinkcraft.serialization.EnterpriseStorageJson;
 import com.stoinkcraft.enterprise.shares.ShareManager;

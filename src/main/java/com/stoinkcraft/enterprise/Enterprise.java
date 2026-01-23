@@ -2,7 +2,7 @@ package com.stoinkcraft.enterprise;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import com.stoinkcraft.earning.jobsites.JobSiteManager;
+import com.stoinkcraft.jobsites.sites.JobSiteManager;
 import com.stoinkcraft.items.booster.Booster;
 import com.stoinkcraft.enterprise.reputation.ReputationCalculator;
 import org.bukkit.Bukkit;

@@ -1,11 +1,9 @@
 package com.stoinkcraft.enterprise.guis;
 
-import com.stoinkcraft.StoinkCore;
-import com.stoinkcraft.earning.jobsites.JobSiteManager;
-import com.stoinkcraft.earning.jobsites.JobSiteRequirements;
-import com.stoinkcraft.earning.jobsites.JobSiteType;
+import com.stoinkcraft.jobsites.sites.JobSiteManager;
+import com.stoinkcraft.jobsites.sites.JobSiteRequirements;
+import com.stoinkcraft.jobsites.sites.JobSiteType;
 import com.stoinkcraft.enterprise.Enterprise;
-import com.stoinkcraft.enterprise.EnterpriseManager;
 import com.stoinkcraft.enterprise.Role;
 import com.stoinkcraft.enterprise.listeners.chatactions.ChatDepositAction;
 import com.stoinkcraft.enterprise.listeners.chatactions.ChatWithdrawAction;
