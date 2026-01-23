@@ -2,6 +2,7 @@ package com.stoinkcraft.earning.jobsites.protection;
 
 import com.stoinkcraft.StoinkCore;
 import com.stoinkcraft.earning.jobsites.JobSite;
+import com.stoinkcraft.earning.jobsites.JobSiteType;
 import com.stoinkcraft.earning.jobsites.components.JobSiteComponent;
 import com.stoinkcraft.enterprise.Enterprise;
 import com.stoinkcraft.utils.ChatUtils;
@@ -12,6 +13,7 @@ import org.bukkit.Tag;
 import org.bukkit.block.Block;
 import org.bukkit.event.Listener;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
@@ -227,6 +229,27 @@ public class ProtectionManager implements Listener {
         if (type == Material.LEVER) return true;
 
         return false;
+    }
+
+    /**
+     * Gets the JobSite at the given location if it matches the specified type.
+     */
+    @Nullable
+    public JobSite getJobSiteAt(Location location, JobSiteType requiredType) {
+        String chunkKey = chunkKey(location);
+        Set<JobSite> jobSites = chunkIndex.get(chunkKey);
+
+        if (jobSites == null || jobSites.isEmpty()) {
+            return null;
+        }
+
+        for (JobSite site : jobSites) {
+            if (site.contains(location) && site.getType() == requiredType) {
+                return site;
+            }
+        }
+
+        return null;
     }
 
     public Set<JobSite> getSitesFromKey(String chunkKey){
