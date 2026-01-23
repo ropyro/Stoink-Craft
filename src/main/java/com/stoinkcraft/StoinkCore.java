@@ -1,6 +1,8 @@
 package com.stoinkcraft;
 
 import com.stoinkcraft.config.ConfigLoader;
+import com.stoinkcraft.items.graveyard.hound.GraveyardHoundListener;
+import com.stoinkcraft.items.graveyard.hound.GraveyardHoundManager;
 import com.stoinkcraft.jobsites.sites.protection.ProtectionListeners;
 import com.stoinkcraft.jobsites.sites.protection.ProtectionManager;
 import com.stoinkcraft.enterprise.*;
@@ -107,6 +109,12 @@ public class StoinkCore extends JavaPlugin {
         return boosterManager;
     }
 
+    private GraveyardHoundManager graveyardHoundManager;
+
+    public GraveyardHoundManager getGraveyardHoundManager() {
+        return graveyardHoundManager;
+    }
+
     @Override
     public void onDisable() {
         getLogger().info("Disabling StoinkCore...");
@@ -114,6 +122,7 @@ public class StoinkCore extends JavaPlugin {
         cfm.clearAll();
         StoinkItemRegistry.clear();
         boosterManager.shutdown();
+        graveyardHoundManager.shutdown();
 
         EnterpriseStorageJson.saveAllEnterprises();
 
@@ -133,7 +142,6 @@ public class StoinkCore extends JavaPlugin {
         ConfigLoader.initialize(this);
 
         registerCommands();
-
         hookLibraries();
         initManagers();
         initFilesAndResources();
@@ -143,6 +151,8 @@ public class StoinkCore extends JavaPlugin {
 
         StoinkItemRegistry.registerItems();
         boosterManager.restoreBoostersOnStartup();
+        graveyardHoundManager.restoreHoundsOnStartup();
+
 
         Bukkit.getScheduler().runTask(this, this::checkCitizensAlreadyLoaded);
 
@@ -289,6 +299,7 @@ public class StoinkCore extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new CitizensLoadListener(this), this);
         getServer().getPluginManager().registerEvents(new ProtectionListeners(this), this);
         getServer().getPluginManager().registerEvents(new StoinkItemListener(), this);
+        getServer().getPluginManager().registerEvents(new GraveyardHoundListener(), this);
         //Jobsite Listeners
         getServer().getPluginManager().registerEvents(new CreatureSpawnListener(ewm.getWorld()), this);
         getServer().getPluginManager().registerEvents(new BlockBreakListener(), this);

@@ -43,6 +43,36 @@ public class ServerEntCMD implements CommandExecutor {
             sender.sendMessage("Error you do not have permission for this command.");
         }
 
+        if (args.length >= 1 && args[0].equalsIgnoreCase("givehound")) {
+            if (args.length >= 2) {
+                Player target = Bukkit.getPlayer(args[1]);
+                if (target == null) {
+                    sender.sendMessage("§cPlayer not found: " + args[1]);
+                    return true;
+                }
+
+                int amount = 1;
+                if (args.length >= 3) {
+                    try {
+                        amount = Integer.parseInt(args[2]);
+                    } catch (NumberFormatException e) {
+                        sender.sendMessage("§cInvalid amount: " + args[2]);
+                        return true;
+                    }
+                }
+
+                StoinkItem hound = StoinkItemRegistry.getById("graveyard_hound");
+                if (hound != null) {
+                    target.getInventory().addItem(hound.createItemStack(amount));
+                    ChatUtils.sendMessage(target, "§bYou received a Graveyard Hound summon!");
+                    sender.sendMessage("§aGave " + amount + "x Graveyard Hound to " + target.getName());
+                }
+            } else {
+                sender.sendMessage("§cUsage: /serverent givehound <player> [amount]");
+            }
+            return true;
+        }
+
         if (args.length >= 1 && args[0].equalsIgnoreCase("givesoulvoucher")) {
             if (args.length >= 3) {
                 Player target = Bukkit.getPlayer(args[1]);
