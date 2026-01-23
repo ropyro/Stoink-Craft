@@ -9,6 +9,8 @@ import com.stoinkcraft.earning.contracts.ContractFeedbackManager;
 import com.stoinkcraft.earning.contracts.ContractPoolLoader;
 import com.stoinkcraft.earning.contracts.ContractManager;
 import com.stoinkcraft.earning.listeners.*;
+import com.stoinkcraft.items.StoinkItemListener;
+import com.stoinkcraft.items.StoinkItemRegistry;
 import com.stoinkcraft.misc.CitizensLoadListener;
 import com.stoinkcraft.misc.daily.DailyCMD;
 import com.stoinkcraft.misc.daily.DailyManager;
@@ -106,6 +108,7 @@ public class StoinkCore extends JavaPlugin {
         getLogger().info("Disabling StoinkCore...");
 
         cfm.clearAll();
+        StoinkItemRegistry.clear();
 
         EnterpriseStorageJson.saveAllEnterprises();
 
@@ -133,9 +136,8 @@ public class StoinkCore extends JavaPlugin {
         ensureServerEnterprises();
         startTasks();
 
-        // Handle hot reload scenario: if Citizens is already fully loaded,
-        // CitizensEnableEvent won't fire again. Check on next tick if Citizens
-        // has NPCs in registry (indicating it's already initialized)
+        StoinkItemRegistry.registerItems();
+
         Bukkit.getScheduler().runTask(this, this::checkCitizensAlreadyLoaded);
 
         getLogger().info("StoinkCore loaded.");
@@ -280,6 +282,7 @@ public class StoinkCore extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new EnderChestListener(), this);
         getServer().getPluginManager().registerEvents(new CitizensLoadListener(this), this);
         getServer().getPluginManager().registerEvents(new ProtectionListeners(this), this);
+        getServer().getPluginManager().registerEvents(new StoinkItemListener(), this);
         //Jobsite Listeners
         getServer().getPluginManager().registerEvents(new CreatureSpawnListener(ewm.getWorld()), this);
         getServer().getPluginManager().registerEvents(new BlockBreakListener(), this);
