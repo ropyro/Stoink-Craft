@@ -1,6 +1,7 @@
 package com.stoinkcraft.enterprise.commands.serverenterprisecmd;
 
 import com.stoinkcraft.StoinkCore;
+import com.stoinkcraft.items.graveyard.SoulVoucherItem;
 import com.stoinkcraft.jobsites.sites.JobSiteManager;
 import com.stoinkcraft.jobsites.sites.JobsiteLevelHelper;
 import com.stoinkcraft.jobsites.sites.sites.farmland.FarmlandData;
@@ -40,6 +41,44 @@ public class ServerEntCMD implements CommandExecutor {
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
         if(sender instanceof Player && !sender.hasPermission(SCConstants.SERVER_ENT_COMMAND)){
             sender.sendMessage("Error you do not have permission for this command.");
+        }
+
+        if (args.length >= 1 && args[0].equalsIgnoreCase("givesoulvoucher")) {
+            if (args.length >= 3) {
+                Player target = Bukkit.getPlayer(args[1]);
+                if (target == null) {
+                    sender.sendMessage("§cPlayer not found: " + args[1]);
+                    return true;
+                }
+
+                int soulAmount;
+                try {
+                    soulAmount = Integer.parseInt(args[2]);
+                } catch (NumberFormatException e) {
+                    sender.sendMessage("§cInvalid soul amount: " + args[2]);
+                    return true;
+                }
+
+                int itemCount = 1;
+                if (args.length >= 4) {
+                    try {
+                        itemCount = Integer.parseInt(args[3]);
+                    } catch (NumberFormatException e) {
+                        sender.sendMessage("§cInvalid item count: " + args[3]);
+                        return true;
+                    }
+                }
+
+                SoulVoucherItem voucher = (SoulVoucherItem) StoinkItemRegistry.getById("soul_voucher");
+                if (voucher != null) {
+                    target.getInventory().addItem(voucher.createItemStack(itemCount, soulAmount));
+                    ChatUtils.sendMessage(target, "§dYou received a Soul Voucher worth §5" + soulAmount + " souls§d!");
+                    sender.sendMessage("§aGave " + itemCount + "x Soul Voucher (" + soulAmount + " souls) to " + target.getName());
+                }
+            } else {
+                sender.sendMessage("§cUsage: /serverent givesoulvoucher <player> <souls> [amount]");
+            }
+            return true;
         }
 
         if (args.length >= 1 && args[0].equalsIgnoreCase("giveminebomb")) {
