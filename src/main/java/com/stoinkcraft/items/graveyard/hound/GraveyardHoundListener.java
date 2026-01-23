@@ -1,5 +1,6 @@
 package com.stoinkcraft.items.graveyard.hound;
 
+import com.stoinkcraft.utils.ChatUtils;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Wolf;
@@ -21,6 +22,8 @@ public class GraveyardHoundListener implements Listener {
     public void onPlayerInteractEntity(PlayerInteractEntityEvent event) {
         if (GraveyardHoundManager.isGraveyardHound(event.getRightClicked())) {
             event.setCancelled(true);
+            long timeRemaining = GraveyardHoundManager.getRemainingTime((Wolf)event.getRightClicked());
+            ChatUtils.sendMessage(event.getPlayer(), "§bThis hound has, §a" + ChatUtils.formatDurationSeconds(timeRemaining) + " §bremaining!");
         }
     }
 
