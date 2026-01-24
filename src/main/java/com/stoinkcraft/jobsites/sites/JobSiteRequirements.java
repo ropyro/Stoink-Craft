@@ -34,7 +34,7 @@ public enum JobSiteRequirements {
     GRAVEYARD(
             JobSiteType.GRAVEYARD,
             25_000,                // Cost
-            15,                     // Required Quarry level
+            5,                     // Required Quarry level
             JobSiteType.QUARRY,   // Prerequisite (could also require Quarry)
             Material.SKELETON_SKULL,
             "Graveyard",
