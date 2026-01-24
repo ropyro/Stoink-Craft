@@ -47,7 +47,6 @@ public class CropGenerator extends JobSiteGenerator implements ProtectedZone {
 
         this.cuboidRegion = getRegion(this.corner1, this.corner2);
 
-        // IMPORTANT: clone the coords before subtracting Y
         Location dirt1 = corner1.clone().add(0, -1, 0);
         Location dirt2 = corner2.clone().add(0, -1, 0);
         this.dirtLayerRegion = getRegion(dirt1, dirt2);

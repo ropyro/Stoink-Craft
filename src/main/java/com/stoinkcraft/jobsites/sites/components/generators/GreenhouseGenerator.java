@@ -92,7 +92,8 @@ public class GreenhouseGenerator extends CropGenerator {
     @Override
     public void setCropType(CropGeneratorType type) {
         getFarmlandData().setGreenhouseCropType(greenhouseIndex, type);
-        regenerateCrops();
+        if(isUnlocked())
+            regenerateCrops();
     }
 
     /**
