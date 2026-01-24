@@ -20,7 +20,7 @@ public class DailyManager {
 
     public void claimDaily(Player player) {
         if(canClaimDaily(player)){
-            Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "crates givekey Treasure " + player.getName() + " 1");
+            Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "crates give p Daily 1 " + player.getName());
             dailyClaimTimes.put(player.getUniqueId(), System.currentTimeMillis());
         }
     }
@@ -28,7 +28,7 @@ public class DailyManager {
     public boolean canClaimDaily(Player player) {
         Long lastClaim = dailyClaimTimes.get(player.getUniqueId());
         if (lastClaim == null) {
-            return true; // never claimed before
+            return true;
         }
 
         long timeSinceLastClaim = System.currentTimeMillis() - lastClaim;
