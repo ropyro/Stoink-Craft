@@ -144,7 +144,8 @@ public class FarmlandSite extends JobSite {
                 spawnPoint.clone().add(mobGenCorner1Offset),
                 spawnPoint.clone().add(mobGenCorner2Offset),
                 this,
-                mobRegionID
+                mobRegionID,
+                new Vector(-46.5, 3.25, 4.5)
         );
 
         farmerJoe = createFarmerJoe(this);
@@ -368,7 +369,7 @@ public class FarmlandSite extends JobSite {
                 10,                    // Same as barn unlock level
                 0,
                 lvl -> 12_000,
-                site -> site.getData().getUnlockableState("barn") == UnlockableState.UNLOCKED,
+                site -> true,
                 (site, lvl) -> {}
         ));
 
