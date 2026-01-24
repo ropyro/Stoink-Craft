@@ -7,12 +7,9 @@ import com.stoinkcraft.jobsites.sites.JobSiteType;
 import com.stoinkcraft.jobsites.sites.sites.graveyard.GraveyardSite;
 import com.stoinkcraft.utils.ChatUtils;
 import org.bukkit.*;
-import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.*;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -28,6 +25,7 @@ public class GraveyardHoundManager {
     private static final NamespacedKey OWNER_KEY = new NamespacedKey(StoinkCore.getInstance(), "hound_owner");
     private static final NamespacedKey JOBSITE_KEY = new NamespacedKey(StoinkCore.getInstance(), "hound_jobsite");
     private static final NamespacedKey REMAINING_TIME_KEY = new NamespacedKey(StoinkCore.getInstance(), "hound_remaining_time");
+    private static final NamespacedKey EXPIRE_TIMESTAMP_KEY = new NamespacedKey(StoinkCore.getInstance(), "hound_expire_timestamp");
 
     // Configuration
     private static final long MAX_ACTIVE_TIME_SECONDS = 5 * 60; // 5 minutes
@@ -46,14 +44,22 @@ public class GraveyardHoundManager {
         final UUID ownerId;
         final UUID jobSiteId;
         final Location entranceLocation;
-        long remainingSeconds;
+        long expireTimestamp; // Absolute time when hound expires
 
-        HoundData(UUID wolfId, UUID ownerId, UUID jobSiteId, Location entranceLocation, long remainingSeconds) {
+        HoundData(UUID wolfId, UUID ownerId, UUID jobSiteId, Location entranceLocation, long expireTimestamp) {
             this.wolfId = wolfId;
             this.ownerId = ownerId;
             this.jobSiteId = jobSiteId;
             this.entranceLocation = entranceLocation;
-            this.remainingSeconds = remainingSeconds;
+            this.expireTimestamp = expireTimestamp;
+        }
+
+        long getRemainingSeconds() {
+            return Math.max(0, (expireTimestamp - System.currentTimeMillis()) / 1000);
+        }
+
+        boolean isExpired() {
+            return System.currentTimeMillis() >= expireTimestamp;
         }
     }
 
@@ -65,7 +71,9 @@ public class GraveyardHoundManager {
         World world = spawnLoc.getWorld();
 
         GraveyardSite graveyard = (GraveyardSite) jobSite;
-        Location entranceLoc = graveyard.getSpawnPoint(); // Entrance/spawn point
+        Location entranceLoc = graveyard.getSpawnPoint();
+
+        long expireTimestamp = System.currentTimeMillis() + (MAX_ACTIVE_TIME_SECONDS * 1000);
 
         Wolf wolf = world.spawn(spawnLoc, Wolf.class, w -> {
             // Basic setup
@@ -85,7 +93,7 @@ public class GraveyardHoundManager {
             pdc.set(HOUND_KEY, PersistentDataType.BOOLEAN, true);
             pdc.set(OWNER_KEY, PersistentDataType.STRING, player.getUniqueId().toString());
             pdc.set(JOBSITE_KEY, PersistentDataType.STRING, jobSite.getEnterprise().getID().toString());
-            pdc.set(REMAINING_TIME_KEY, PersistentDataType.LONG, MAX_ACTIVE_TIME_SECONDS);
+            pdc.set(EXPIRE_TIMESTAMP_KEY, PersistentDataType.LONG, expireTimestamp);
         });
 
         // Apply glowing effect for visual distinction
@@ -101,7 +109,7 @@ public class GraveyardHoundManager {
                 player.getUniqueId(),
                 jobSite.getEnterprise().getID(),
                 entranceLoc,
-                MAX_ACTIVE_TIME_SECONDS
+                expireTimestamp
         ));
 
         // Ensure tick task is running
@@ -138,10 +146,27 @@ public class GraveyardHoundManager {
             Map.Entry<UUID, HoundData> entry = iterator.next();
             HoundData data = entry.getValue();
 
+            // FIRST: Check if expired (regardless of entity state)
+            if (data.isExpired()) {
+                handleExpiredHound(data, iterator);
+                continue;
+            }
+
             Entity entity = Bukkit.getEntity(data.wolfId);
 
-            // Remove if wolf is dead or despawned
-            if (entity == null || entity.isDead() || !(entity instanceof Wolf wolf)) {
+            // Wolf doesn't exist in loaded chunks - could be unloaded or dead
+            if (entity == null) {
+                // Check if chunk is loaded
+                if (!isChunkLoaded(data.entranceLocation)) {
+                    // Chunk unloaded - keep tracking, will handle when loaded or expired
+                    continue;
+                }
+                // Chunk is loaded but entity is null - wolf is dead/removed
+                iterator.remove();
+                continue;
+            }
+
+            if (entity.isDead() || !(entity instanceof Wolf wolf)) {
                 iterator.remove();
                 continue;
             }
@@ -151,29 +176,13 @@ public class GraveyardHoundManager {
             boolean ownerPresent = isOwnerInGraveyard(owner, data.jobSiteId);
 
             if (ownerPresent) {
-                // Decrement active time
-                data.remainingSeconds--;
-
-                // Update PDC
-                wolf.getPersistentDataContainer().set(
-                        REMAINING_TIME_KEY,
-                        PersistentDataType.LONG,
-                        data.remainingSeconds
-                );
-
-                // Check if time expired
-                if (data.remainingSeconds <= 0) {
-                    despawnHound(wolf, owner, "Time's up!");
-                    iterator.remove();
-                    continue;
-                }
-
                 // Active behavior - hunt undead
                 wolf.setSitting(false);
                 targetNearestUndead(wolf);
 
                 // Ambient particles occasionally
-                if (data.remainingSeconds % 10 == 0) {
+                long remaining = data.getRemainingSeconds();
+                if (remaining % 10 == 0) {
                     wolf.getWorld().spawnParticle(
                             Particle.SOUL,
                             wolf.getLocation().add(0, 0.5, 0),
@@ -181,22 +190,139 @@ public class GraveyardHoundManager {
                     );
                 }
 
+                // Warning when low on time
+                if (remaining == 60 || remaining == 30 || remaining == 10) {
+                    ChatUtils.sendMessage(owner,
+                            ChatColor.AQUA + "🐺 " + ChatColor.YELLOW + "Your hound has " +
+                                    ChatColor.WHITE + remaining + "s" + ChatColor.YELLOW + " remaining!");
+                }
+
             } else {
                 // Owner not present - sit at entrance
                 wolf.setSitting(true);
 
                 // Teleport to entrance if too far
-                if (wolf.getLocation().distanceSquared(data.entranceLocation) > 100) { // 10 blocks
+                if (wolf.getLocation().distanceSquared(data.entranceLocation) > 100) {
                     wolf.teleport(data.entranceLocation);
                 }
             }
+
+            updateHoundName(wolf, data);
         }
 
-        // Cancel task if no more hounds
         if (activeHounds.isEmpty() && tickTask != null) {
             tickTask.cancel();
             tickTask = null;
         }
+    }
+
+    /**
+     * Handles an expired hound - removes it regardless of owner presence.
+     */
+    private static void handleExpiredHound(HoundData data, Iterator<Map.Entry<UUID, HoundData>> iterator) {
+        Player owner = Bukkit.getPlayer(data.ownerId);
+        Entity entity = Bukkit.getEntity(data.wolfId);
+
+        if (entity != null && entity instanceof Wolf wolf) {
+            // Wolf exists - despawn with effects
+            despawnHound(wolf, owner, "Time's up!");
+        } else if (isChunkLoaded(data.entranceLocation)) {
+            // Chunk is loaded but wolf is gone - already removed somehow
+            // Just notify owner if online
+            if (owner != null && owner.isOnline()) {
+                ChatUtils.sendMessage(owner,
+                        ChatColor.AQUA + "🐺 " + ChatColor.GRAY + "Your Graveyard Hound has faded away...");
+            }
+        } else {
+            // Chunk not loaded - schedule removal for when it loads
+            scheduleRemovalOnChunkLoad(data);
+        }
+
+        iterator.remove();
+    }
+
+    /**
+     * Schedules wolf removal when its chunk loads.
+     */
+    private static void scheduleRemovalOnChunkLoad(HoundData data) {
+        // Store in a pending removal set that gets checked on chunk load
+        // For simplicity, we'll just let restoreHoundsOnStartup handle it
+        // or rely on the PDC timestamp check
+
+        // Alternative: Force load chunk briefly to remove
+        Location loc = data.entranceLocation;
+        if (loc != null && loc.getWorld() != null) {
+            Bukkit.getScheduler().runTask(StoinkCore.getInstance(), () -> {
+                Chunk chunk = loc.getChunk();
+                boolean wasLoaded = chunk.isLoaded();
+
+                if (!wasLoaded) {
+                    chunk.load();
+                }
+
+                // Find and remove the wolf
+                for (Entity entity : chunk.getEntities()) {
+                    if (entity.getUniqueId().equals(data.wolfId)) {
+                        Player owner = Bukkit.getPlayer(data.ownerId);
+                        if (entity instanceof Wolf wolf) {
+                            despawnHound(wolf, owner, "Time's up!");
+                        } else {
+                            entity.remove();
+                        }
+                        break;
+                    }
+                }
+
+                // Unload if we loaded it
+                if (!wasLoaded) {
+                    chunk.unload();
+                }
+            });
+        }
+    }
+
+    /**
+     * Checks if a chunk at a location is loaded.
+     */
+    private static boolean isChunkLoaded(Location location) {
+        if (location == null || location.getWorld() == null) {
+            return false;
+        }
+        return location.getWorld().isChunkLoaded(
+                location.getBlockX() >> 4,
+                location.getBlockZ() >> 4
+        );
+    }
+
+    /**
+     * Updates the hound's display name with remaining time.
+     */
+    private static void updateHoundName(Wolf wolf, HoundData data) {
+        long remaining = data.getRemainingSeconds();
+        String timeStr = formatTime(remaining);
+
+        Player owner = Bukkit.getPlayer(data.ownerId);
+        String ownerName = owner != null ? owner.getName() : "Unknown";
+
+        ChatColor timeColor;
+        if (remaining <= 30) {
+            timeColor = ChatColor.RED;
+        } else if (remaining <= 60) {
+            timeColor = ChatColor.YELLOW;
+        } else {
+            timeColor = ChatColor.GREEN;
+        }
+
+        wolf.setCustomName(ChatColor.AQUA + ownerName + "'s Hound");
+    }
+
+    /**
+     * Formats seconds into a readable time string.
+     */
+    private static String formatTime(long seconds) {
+        if (seconds <= 0) return "0s";
+        if (seconds < 60) return seconds + "s";
+        return (seconds / 60) + "m " + (seconds % 60) + "s";
     }
 
     /**
@@ -207,7 +333,6 @@ public class GraveyardHoundManager {
             return false;
         }
 
-        // Check if player is in the graveyard jobsite
         JobSite jobSite = StoinkCore.getInstance().getProtectionManager()
                 .getJobSiteAt(owner.getLocation(), JobSiteType.GRAVEYARD);
 
@@ -222,13 +347,11 @@ public class GraveyardHoundManager {
      * Targets the nearest undead mob within range.
      */
     private static void targetNearestUndead(Wolf wolf) {
-        // Don't retarget if already attacking something alive
         LivingEntity currentTarget = wolf.getTarget();
         if (currentTarget != null && !currentTarget.isDead() && isUndead(currentTarget)) {
             return;
         }
 
-        // Find nearest undead
         LivingEntity nearestUndead = null;
         double nearestDistance = TARGETING_RANGE * TARGETING_RANGE;
 
@@ -271,7 +394,7 @@ public class GraveyardHoundManager {
                 entity instanceof WitherSkeleton ||
                 entity instanceof Zoglin ||
                 entity instanceof ZombieVillager ||
-                entity instanceof PigZombie; // Zombified Piglin
+                entity instanceof PigZombie;
     }
 
     /**
@@ -314,8 +437,16 @@ public class GraveyardHoundManager {
     public static long getRemainingTime(Wolf wolf) {
         HoundData data = activeHounds.get(wolf.getUniqueId());
         if (data != null) {
-            return data.remainingSeconds;
+            return data.getRemainingSeconds();
         }
+
+        // Fallback to PDC if not in active map
+        PersistentDataContainer pdc = wolf.getPersistentDataContainer();
+        Long expireTimestamp = pdc.get(EXPIRE_TIMESTAMP_KEY, PersistentDataType.LONG);
+        if (expireTimestamp != null) {
+            return Math.max(0, (expireTimestamp - System.currentTimeMillis()) / 1000);
+        }
+
         return 0;
     }
 
@@ -323,6 +454,9 @@ public class GraveyardHoundManager {
      * Called on server startup to restore hounds from saved wolves.
      */
     public static void restoreHoundsOnStartup() {
+        int restored = 0;
+        int removed = 0;
+
         for (World world : Bukkit.getWorlds()) {
             for (Wolf wolf : world.getEntitiesByClass(Wolf.class)) {
                 if (!isGraveyardHound(wolf)) {
@@ -333,17 +467,29 @@ public class GraveyardHoundManager {
 
                 String ownerIdStr = pdc.get(OWNER_KEY, PersistentDataType.STRING);
                 String jobSiteIdStr = pdc.get(JOBSITE_KEY, PersistentDataType.STRING);
-                Long remainingTime = pdc.get(REMAINING_TIME_KEY, PersistentDataType.LONG);
+                Long expireTimestamp = pdc.get(EXPIRE_TIMESTAMP_KEY, PersistentDataType.LONG);
 
-                if (ownerIdStr == null || jobSiteIdStr == null || remainingTime == null) {
-                    // Invalid data, remove the wolf
+                // Handle legacy data (remaining time instead of timestamp)
+                if (expireTimestamp == null) {
+                    Long remainingTime = pdc.get(REMAINING_TIME_KEY, PersistentDataType.LONG);
+                    if (remainingTime != null && remainingTime > 0) {
+                        // Convert to timestamp (assume time continued while offline)
+                        expireTimestamp = System.currentTimeMillis() + (remainingTime * 1000);
+                        pdc.set(EXPIRE_TIMESTAMP_KEY, PersistentDataType.LONG, expireTimestamp);
+                    }
+                }
+
+                if (ownerIdStr == null || jobSiteIdStr == null || expireTimestamp == null) {
                     wolf.remove();
+                    removed++;
                     continue;
                 }
 
-                // If time already expired, remove
-                if (remainingTime <= 0) {
-                    wolf.remove();
+                // Check if already expired
+                if (System.currentTimeMillis() >= expireTimestamp) {
+                    Player owner = Bukkit.getPlayer(UUID.fromString(ownerIdStr));
+                    despawnHound(wolf, owner, "Time expired while offline");
+                    removed++;
                     continue;
                 }
 
@@ -369,15 +515,20 @@ public class GraveyardHoundManager {
                         ownerId,
                         jobSiteId,
                         entranceLoc,
-                        remainingTime
+                        expireTimestamp
                 ));
+                restored++;
             }
         }
 
         // Start tick task if we found any hounds
         if (!activeHounds.isEmpty()) {
             ensureTickTaskRunning();
-            StoinkCore.getInstance().getLogger().info("Restored " + activeHounds.size() + " Graveyard Hounds");
+        }
+
+        if (restored > 0 || removed > 0) {
+            StoinkCore.getInstance().getLogger().info(
+                    "Graveyard Hounds: Restored " + restored + ", Removed " + removed + " (expired)");
         }
     }
 
@@ -389,7 +540,22 @@ public class GraveyardHoundManager {
             tickTask.cancel();
             tickTask = null;
         }
-        // Don't remove wolves - they persist with their PDC data
         activeHounds.clear();
+    }
+
+    /**
+     * Gets count of active hounds for a player.
+     */
+    public static int getActiveHoundCount(UUID playerId) {
+        return (int) activeHounds.values().stream()
+                .filter(data -> data.ownerId.equals(playerId))
+                .count();
+    }
+
+    /**
+     * Gets all active hound data (for debugging/admin).
+     */
+    public static Collection<UUID> getActiveHoundIds() {
+        return new HashSet<>(activeHounds.keySet());
     }
 }
