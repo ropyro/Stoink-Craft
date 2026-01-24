@@ -4,7 +4,7 @@ import com.stoinkcraft.StoinkCore;
 import com.stoinkcraft.enterprise.Enterprise;
 import com.stoinkcraft.jobsites.sites.JobSite;
 import com.stoinkcraft.jobsites.sites.JobSiteType;
-import com.stoinkcraft.jobsites.sites.sites.graveyard.GraveyardSite;
+import com.stoinkcraft.jobsites.sites.graveyard.GraveyardSite;
 import com.stoinkcraft.utils.ChatUtils;
 import org.bukkit.*;
 import org.bukkit.entity.*;

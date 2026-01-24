@@ -1,7 +1,7 @@
 package com.stoinkcraft.items.graveyard;
 
 import com.stoinkcraft.items.StoinkItem;
-import com.stoinkcraft.jobsites.sites.sites.graveyard.GraveyardSite;
+import com.stoinkcraft.jobsites.sites.graveyard.GraveyardSite;
 import com.stoinkcraft.utils.ChatUtils;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;

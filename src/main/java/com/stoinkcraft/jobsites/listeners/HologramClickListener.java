@@ -3,7 +3,7 @@ package com.stoinkcraft.jobsites.listeners;
 import com.stoinkcraft.StoinkCore;
 import com.stoinkcraft.jobsites.sites.JobSite;
 import com.stoinkcraft.jobsites.sites.JobSiteType;
-import com.stoinkcraft.jobsites.sites.components.JobSiteHologram;
+import com.stoinkcraft.jobsites.components.JobSiteHologram;
 import com.stoinkcraft.enterprise.Enterprise;
 import com.stoinkcraft.utils.ChatUtils;
 import eu.decentsoftware.holograms.api.holograms.Hologram;

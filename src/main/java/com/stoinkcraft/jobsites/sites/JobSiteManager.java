@@ -2,14 +2,14 @@ package com.stoinkcraft.jobsites.sites;
 
 import com.stoinkcraft.StoinkCore;
 import com.stoinkcraft.enterprise.Enterprise;
-import com.stoinkcraft.jobsites.sites.sites.farmland.FarmlandData;
-import com.stoinkcraft.jobsites.sites.sites.graveyard.GraveyardData;
-import com.stoinkcraft.jobsites.sites.sites.graveyard.GraveyardSite;
-import com.stoinkcraft.jobsites.sites.sites.quarry.QuarryData;
-import com.stoinkcraft.jobsites.sites.sites.skyrise.SkyriseData;
-import com.stoinkcraft.jobsites.sites.sites.farmland.FarmlandSite;
-import com.stoinkcraft.jobsites.sites.sites.quarry.QuarrySite;
-import com.stoinkcraft.jobsites.sites.sites.skyrise.SkyriseSite;
+import com.stoinkcraft.jobsites.sites.farmland.FarmlandData;
+import com.stoinkcraft.jobsites.sites.graveyard.GraveyardData;
+import com.stoinkcraft.jobsites.sites.graveyard.GraveyardSite;
+import com.stoinkcraft.jobsites.sites.quarry.QuarryData;
+import com.stoinkcraft.jobsites.sites.skyrise.SkyriseData;
+import com.stoinkcraft.jobsites.sites.farmland.FarmlandSite;
+import com.stoinkcraft.jobsites.sites.quarry.QuarrySite;
+import com.stoinkcraft.jobsites.sites.skyrise.SkyriseSite;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 

@@ -6,7 +6,7 @@ import com.stoinkcraft.jobsites.collections.CollectionManager;
 import com.stoinkcraft.jobsites.contracts.ContractContext;
 import com.stoinkcraft.jobsites.sites.JobSite;
 import com.stoinkcraft.jobsites.sites.JobSiteType;
-import com.stoinkcraft.jobsites.sites.sites.quarry.QuarrySite;
+import com.stoinkcraft.jobsites.sites.quarry.QuarrySite;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.Ageable;

@@ -4,7 +4,7 @@ import com.stoinkcraft.StoinkCore;
 import com.stoinkcraft.enterprise.Enterprise;
 import com.stoinkcraft.jobsites.sites.JobSite;
 import com.stoinkcraft.jobsites.sites.JobSiteType;
-import com.stoinkcraft.jobsites.sites.components.JobSiteNPC;
+import com.stoinkcraft.jobsites.components.JobSiteNPC;
 import com.stoinkcraft.utils.ChatUtils;
 import net.citizensnpcs.api.event.NPCRightClickEvent;
 import net.citizensnpcs.api.npc.NPC;

@@ -3,9 +3,9 @@ package com.stoinkcraft.jobsites.sites;
 import com.google.gson.annotations.Expose;
 import com.stoinkcraft.jobsites.collections.CollectionRegistry;
 import com.stoinkcraft.jobsites.collections.CollectionType;
-import com.stoinkcraft.jobsites.sites.components.unlockable.Unlockable;
-import com.stoinkcraft.jobsites.sites.components.unlockable.UnlockableProgress;
-import com.stoinkcraft.jobsites.sites.components.unlockable.UnlockableState;
+import com.stoinkcraft.jobsites.components.unlockable.Unlockable;
+import com.stoinkcraft.jobsites.components.unlockable.UnlockableProgress;
+import com.stoinkcraft.jobsites.components.unlockable.UnlockableState;
 
 import java.util.*;
 

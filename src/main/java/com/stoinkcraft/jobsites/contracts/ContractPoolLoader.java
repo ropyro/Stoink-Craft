@@ -6,7 +6,7 @@ import com.stoinkcraft.jobsites.contracts.rewards.JobSiteXpReward;
 import com.stoinkcraft.jobsites.contracts.rewards.MoneyReward;
 import com.stoinkcraft.jobsites.contracts.triggers.*;
 import com.stoinkcraft.jobsites.sites.JobSiteType;
-import com.stoinkcraft.jobsites.sites.sites.graveyard.UndeadMobType;
+import com.stoinkcraft.jobsites.sites.graveyard.UndeadMobType;
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 

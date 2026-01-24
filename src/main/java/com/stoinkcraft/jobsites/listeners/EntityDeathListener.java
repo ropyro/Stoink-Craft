@@ -6,7 +6,7 @@ import com.stoinkcraft.jobsites.collections.CollectionManager;
 import com.stoinkcraft.jobsites.contracts.ContractContext;
 import com.stoinkcraft.jobsites.sites.JobSite;
 import com.stoinkcraft.jobsites.sites.JobSiteType;
-import com.stoinkcraft.jobsites.sites.sites.graveyard.GraveyardSite;
+import com.stoinkcraft.jobsites.sites.graveyard.GraveyardSite;
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.LivingEntity;

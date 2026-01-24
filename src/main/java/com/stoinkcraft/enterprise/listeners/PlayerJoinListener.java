@@ -2,9 +2,9 @@ package com.stoinkcraft.enterprise.listeners;
 
 import com.stoinkcraft.StoinkCore;
 import com.stoinkcraft.jobsites.contracts.ActiveContract;
-import com.stoinkcraft.jobsites.sites.sites.farmland.FarmlandSite;
-import com.stoinkcraft.jobsites.sites.sites.graveyard.GraveyardSite;
-import com.stoinkcraft.jobsites.sites.sites.quarry.QuarrySite;
+import com.stoinkcraft.jobsites.sites.farmland.FarmlandSite;
+import com.stoinkcraft.jobsites.sites.graveyard.GraveyardSite;
+import com.stoinkcraft.jobsites.sites.quarry.QuarrySite;
 import com.stoinkcraft.enterprise.Enterprise;
 import com.stoinkcraft.enterprise.EnterpriseManager;
 import com.stoinkcraft.enterprise.guis.UnemployedGUI;
