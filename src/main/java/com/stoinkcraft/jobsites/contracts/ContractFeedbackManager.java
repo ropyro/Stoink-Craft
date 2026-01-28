@@ -20,9 +20,7 @@ public class ContractFeedbackManager {
     private static final long INACTIVITY_TIMEOUT_MS = 10_000; // 10 seconds
     private static final int MAX_BARS_PER_PLAYER = 4; // Limit to prevent UI clutter
 
-    // Map<PlayerId, Map<ContractId, BossBar>>
     private final Map<UUID, Map<String, BossBar>> activeBars = new HashMap<>();
-    // Map<PlayerId, Map<ContractId, LastUpdateTime>>
     private final Map<UUID, Map<String, Long>> lastUpdate = new HashMap<>();
 
 
@@ -34,19 +32,19 @@ public class ContractFeedbackManager {
         String contractId = contract.getDefinition().id();
 
         Map<String, BossBar> playerBars = activeBars.computeIfAbsent(
-                playerId, k -> new LinkedHashMap<>()); // LinkedHashMap preserves insertion order
+                playerId, k -> new LinkedHashMap<>());
 
         Map<String, Long> playerUpdates = lastUpdate.computeIfAbsent(
                 playerId, k -> new HashMap<>());
 
-        // Get or create bar for this specific contract
-        BossBar bar = playerBars.computeIfAbsent(contractId, id -> {
-            // Enforce max bars limit - remove oldest if at capacity
-            if (playerBars.size() >= MAX_BARS_PER_PLAYER) {
-                removeOldestBar(playerBars, playerUpdates);
-            }
-            return Bukkit.createBossBar("", BarColor.GREEN, BarStyle.SOLID);
-        });
+        if (!playerBars.containsKey(contractId) && playerBars.size() >= MAX_BARS_PER_PLAYER) {
+            removeOldestBar(playerBars, playerUpdates);
+        }
+
+        BossBar bar = playerBars.computeIfAbsent(contractId, id ->
+                Bukkit.createBossBar("", BarColor.GREEN, BarStyle.SOLID)
+        );
+
 
         ContractDefinition def = contract.getDefinition();
         double progress = (double) contract.getProgress() / contract.getTarget();
