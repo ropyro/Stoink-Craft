@@ -16,6 +16,7 @@ import com.stoinkcraft.items.booster.BoosterItem;
 import com.stoinkcraft.items.booster.BoosterTier;
 import com.stoinkcraft.items.quarry.MineBomb;
 import com.stoinkcraft.items.quarry.MineBombTier;
+import com.stoinkcraft.misc.DashboardExporter;
 import com.stoinkcraft.serialization.EnterpriseMigration;
 import com.stoinkcraft.serialization.EnterpriseStorageJson;
 import com.stoinkcraft.enterprise.shares.ShareStorage;
@@ -40,6 +41,17 @@ public class ServerEntCMD implements CommandExecutor {
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
         if(sender instanceof Player && !sender.hasPermission(SCConstants.SERVER_ENT_COMMAND)){
             sender.sendMessage("Error you do not have permission for this command.");
+        }
+
+        if(args[0].equalsIgnoreCase("exportdata")){
+            sender.sendMessage("§fExporting data...");
+            try{
+                DashboardExporter.exportAllData(StoinkCore.getInstance().getDataFolder());
+            }catch (Exception e){
+                sender.sendMessage("§cExporting failed...");
+                sender.sendMessage(e.getMessage());
+            }
+            sender.sendMessage("§aData exported successfully!");
         }
 
         if (args.length >= 1 && args[0].equalsIgnoreCase("givehound")) {
