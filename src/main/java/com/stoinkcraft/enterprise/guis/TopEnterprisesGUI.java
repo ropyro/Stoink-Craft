@@ -124,9 +124,9 @@ public class TopEnterprisesGUI {
         @Override
         public ItemProvider getItemProvider() {
             String displayName = "§e#" + rank + " §a" + e.getName() + " §f(§a" + ChatUtils.formatMoney(e.getNetWorth()) + "§f)";
-            String netWorth = String.format("%.2f", e.getNetWorth());
+            String netWorth = ChatUtils.formatMoney(e.getNetWorth());
             double reputation = e.getReputation();
-            String balance = String.format("%.2f", e.getBankBalance());
+            String balance = ChatUtils.formatMoney(e.getBankBalance());
 
             ItemStack skull = new ItemStack(Material.PLAYER_HEAD);
             SkullMeta meta = (SkullMeta) skull.getItemMeta();
@@ -147,7 +147,7 @@ public class TopEnterprisesGUI {
                         .addLoreLines(" §a• §fBalance: §a$" + balance)
                         .addLoreLines(" §a• §fNet Worth: §a$" + netWorth)
                         .addLoreLines(" §a• §fRepuation: §a" + reputation)
-                        .addLoreLines(" §a• §fNetworth Multiplier: §a" + ReputationCalculator.getMultiplier(reputation) + "x")
+                        .addLoreLines(" §a• §fNetworth Multiplier: §a" + ReputationCalculator.getMultiplierDisplay(reputation))
                         .addLoreLines(" ")
                         .addLoreLines(" §a• §fCEO: §a" + Bukkit.getOfflinePlayer(e.getCeo()).getName())
                         .addLoreLines(" §a• §fEmployees §a" + e.getMembers().keySet().size() + "/" + EnterpriseManager.getEnterpriseManager().getMaximumEmployees() + "§f:");

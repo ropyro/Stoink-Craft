@@ -56,6 +56,8 @@ public class PlayerInteractListener implements Listener {
                 enterprise.getJobSiteManager()
                         .resolveJobsite(block.getLocation());
 
+        if(jobSiteType == null) return;
+
         if(jobSiteType.equals(JobSiteType.QUARRY)){
             if(type.equals(Material.BEACON)){
                 event.setCancelled(true);

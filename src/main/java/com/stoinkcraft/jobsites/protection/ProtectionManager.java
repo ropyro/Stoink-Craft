@@ -196,15 +196,16 @@ public class ProtectionManager implements Listener {
      * Default rules when no component claims the location.
      */
     private ProtectionResult applyDefaultRules(ProtectionQuery query) {
-        // Allow interacting with doors, gates, buttons, etc.
         if (query.action() == ProtectionAction.RIGHT_CLICK) {
             Block block = query.location().getBlock();
             Material type = block.getType();
 
             if (isInteractableBlock(type)) {
                 return ProtectionResult.ALLOW;
-            }else if(query.tool().getType().isEdible()){
-                return ProtectionResult.ALLOW;
+            }else if(query.tool() != null){
+                if(query.tool().getType().isEdible()){
+                    return ProtectionResult.ALLOW;
+                }
             }
         }
 

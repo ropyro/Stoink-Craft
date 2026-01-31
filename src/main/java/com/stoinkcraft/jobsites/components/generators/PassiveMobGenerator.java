@@ -73,6 +73,7 @@ public class PassiveMobGenerator extends JobSiteGenerator {
         // Day-only spawning logic
         if (!TimeUtils.isDay(getParent().getSpawnPoint().getWorld())) {
             updateHologram();
+            cleanupDeadMobs();
             return;
         }
 

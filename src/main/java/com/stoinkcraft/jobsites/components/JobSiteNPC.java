@@ -44,15 +44,10 @@ public class JobSiteNPC implements JobSiteComponent{
     public void initializeFromRegistry() {
         JobSiteData data = parent.getData();
         int storedId = data.getNpcId(name);
-
-        Bukkit.getLogger().info("[DEBUG] initializeFromRegistry for '" + name + "' - storedId: " + storedId);
-
         if (storedId != -1) {
             NPCRegistry registry = CitizensAPI.getNPCRegistry();
             npc = registry.getById(storedId);
-            Bukkit.getLogger().info("[DEBUG] Registry lookup result for ID " + storedId + ": " + (npc != null ? "FOUND - " + npc.getName() : "NULL"));
             if (npc == null) {
-                // NPC was deleted or not found - reset ID so it gets recreated on build()
                 data.setNpc(name, -1);
             }
         }

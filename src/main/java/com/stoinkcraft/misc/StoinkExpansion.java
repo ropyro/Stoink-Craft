@@ -4,6 +4,7 @@ import com.stoinkcraft.StoinkCore;
 import com.stoinkcraft.config.ConfigLoader;
 import com.stoinkcraft.enterprise.Enterprise;
 import com.stoinkcraft.enterprise.EnterpriseManager;
+import com.stoinkcraft.jobsites.protection.ProtectionManager;
 import com.stoinkcraft.jobsites.sites.JobSite;
 import com.stoinkcraft.jobsites.sites.JobSiteType;
 import com.stoinkcraft.jobsites.sites.JobsiteLevelHelper;
@@ -21,6 +22,9 @@ import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.Set;
 
 public class StoinkExpansion extends PlaceholderExpansion {
 
@@ -60,6 +64,9 @@ public class StoinkExpansion extends PlaceholderExpansion {
         Player player = offlinePlayer.getPlayer();
         if (player == null) return "";
 
+        JobSite site = getJobSiteAt(player);
+        Enterprise contextEnterprise = site != null ? site.getEnterprise() : null;
+
         Enterprise e = EnterpriseManager.getEnterpriseManager().getEnterpriseByMember(player.getUniqueId());
 
         switch (identifier.toLowerCase()) {
@@ -86,7 +93,58 @@ public class StoinkExpansion extends PlaceholderExpansion {
                 return "$" + ChatUtils.formatMoneyNoCents(PlayerUtils.getPlayerNetworth(player));
 
             case "scoreboard":
+                JobSite js = getJobSiteAt(player);
+
+                if (js != null && !js.getEnterprise().isMember(player.getUniqueId())) {
+                    return "visitor";
+                }
+
+                if (e == null) return "default";
                 return getCurrentJobSiteUnformattedName(player, e);
+
+            // ==================== Visitor Placeholders ====================
+
+            case "visited_enterprise":
+                return contextEnterprise != null
+                        ? contextEnterprise.getName()
+                        : "None";
+
+            case "visited_jobsite":
+                return site != null
+                        ? site.getType().getDisplayName() // or formatted type name
+                        : "None";
+
+            case "visited_jobsite_level":
+                return site != null
+                        ? String.valueOf(site.getLevel())
+                        : "0";
+
+            case "visited_jobsite_xp_bar":
+                return site != null
+                        ? createProgressBar(getXpProgress(site), "e", "7")
+                        : createProgressBar(0, "e", "7");
+
+            case "visited_jobsite_xp_percent":
+                return site != null
+                        ? (int) Math.round(getXpProgress(site) * 100) + "%"
+                        : "0%";
+
+            case "visited_jobsite_extra":
+                if (site == null) return "";
+
+                if (site instanceof FarmlandSite farmland) {
+                    return "Crop: " + formatName(farmland.getData().getCurrentCropType().name());
+                }
+
+                if (site instanceof QuarrySite quarry) {
+                    return "Ore Set: " + getQuarryOreSetName(quarry);
+                }
+
+                if (site instanceof GraveyardSite graveyard) {
+                    return "Souls: " + formatNumber(graveyard.getData().getSouls());
+                }
+
+                return "";
 
             // ==================== Farmland Placeholders ====================
 
@@ -391,6 +449,19 @@ public class StoinkExpansion extends PlaceholderExpansion {
     }
 
 // ==================== New Helper Methods ====================
+
+    @Nullable
+    private JobSite getJobSiteAt(Player player) {
+        ProtectionManager pm = StoinkCore.getInstance().getProtectionManager();
+
+        String key = pm.chunkKey(player.getLocation());
+        Set<JobSite> sites = pm.getSitesFromKey(key);
+
+        if (sites == null || sites.isEmpty()) return null;
+
+        // In case multiple sites overlap chunks, pick highest priority or first
+        return sites.iterator().next();
+    }
 
     private String getXpProgressString(JobSite site) {
         int currentXp = site.getData().getXp();

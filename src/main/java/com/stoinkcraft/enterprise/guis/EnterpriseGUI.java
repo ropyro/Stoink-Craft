@@ -133,12 +133,12 @@ public class EnterpriseGUI {
                                 .addLoreLines(DIVIDER)
                                 .addLoreLines("§7Your enterprise headquarters")
                                 .addLoreLines(DIVIDER)
-                                .addLoreLines(ARROW + "Click to teleport");
+                                .addLoreLines(ARROW + "Coming soon...");
                     }
 
                     @Override
                     public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull InventoryClickEvent inventoryClickEvent) {
-                        enterprise.getJobSiteManager().getSkyriseSite().teleportPlayer(player);
+                        //enterprise.getJobSiteManager().getSkyriseSite().teleportPlayer(player);
                     }
                 })
                 .addIngredient('F', createJobSiteItem(JobSiteType.FARMLAND))
