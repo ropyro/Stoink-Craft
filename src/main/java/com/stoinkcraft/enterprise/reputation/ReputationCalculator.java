@@ -1,7 +1,11 @@
 package com.stoinkcraft.enterprise.reputation;
 
+import com.google.common.util.concurrent.AtomicDouble;
 import com.stoinkcraft.config.ConfigLoader;
 import com.stoinkcraft.enterprise.Enterprise;
+import com.stoinkcraft.jobsites.components.unlockable.Unlockable;
+import com.stoinkcraft.jobsites.sites.JobSite;
+import com.stoinkcraft.jobsites.sites.JobSiteUpgrade;
 
 /**
  * Utility class for calculating reputation-based multipliers and net worth.
@@ -39,11 +43,40 @@ public class ReputationCalculator {
      * Calculate effective net worth based on bank balance and reputation.
      *
      * @param enterprise The enterprise to calculate net worth for
-     * @return The calculated net worth (bankBalance * reputationMultiplier)
+     * @return The calculated net worth (grossValue * reputationMultiplier)
      */
     public static double calculateNetWorth(Enterprise enterprise) {
         double multiplier = getMultiplier(enterprise.getReputation());
-        return enterprise.getBankBalance() * multiplier;
+        return calculateGrossWorth(enterprise) * multiplier;
+    }
+
+    /**
+     * Calculate the gross value of all the enterprise's assets
+     *
+     * @param enterprise The enterprise to calculate gross value for
+     * @return The calculated gross value (bank balance + unlockable costs + upgrade costs)
+     */
+    public static double calculateGrossWorth(Enterprise enterprise){
+        double gross = enterprise.getBankBalance();
+        for (JobSite js : enterprise.getJobSiteManager().getAllJobSites()) {
+            for (Unlockable u : js.getUnlockables()) {
+                if (u.isUnlocked()) {
+                    gross += u.getCost();
+                }
+            }
+            for (JobSiteUpgrade up : js.getUpgrades()) {
+                int currentLevel = js.getData().getLevel(up.id());
+                if (currentLevel <= 0) continue;
+                if (currentLevel == 1) {
+                    gross += up.cost(1);
+                    continue;
+                }
+                for (int l = 1; l <= currentLevel; l++) {
+                    gross += up.cost(l);
+                }
+            }
+        }
+        return gross;
     }
 
     /**
