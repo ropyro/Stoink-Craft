@@ -70,7 +70,7 @@ public class PlayerJoinListener implements Listener {
             long active = contracts.stream().filter(c -> !c.isCompleted()).count();
 
             String contractInfo = completed > 0
-                    ? "§a" + completed + " ready §8| §e" + active + " active"
+                    ? "§a" + completed + " completed §8| §e" + active + " active"
                     : "§e" + active + " active";
             player.sendMessage("§8§l» §7Contracts: " + contractInfo);
 
