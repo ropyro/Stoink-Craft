@@ -15,6 +15,9 @@ public class EnterpriseTypeAdapter implements JsonSerializer<Enterprise>, JsonDe
     public JsonElement serialize(Enterprise enterprise, Type type, JsonSerializationContext context) {
         JsonObject jsonObject = new JsonObject();
 
+        // Add schema version for future migrations
+        jsonObject.addProperty("schemaVersion", StorageConstants.ENTERPRISE_SCHEMA_VERSION);
+
         // Add type discriminator
         jsonObject.addProperty("enterpriseType",
                 enterprise instanceof ServerEnterprise ? "SERVER" : "PLAYER");
@@ -41,6 +44,15 @@ public class EnterpriseTypeAdapter implements JsonSerializer<Enterprise>, JsonDe
     public Enterprise deserialize(JsonElement json, Type type, JsonDeserializationContext context)
             throws JsonParseException {
         JsonObject jsonObject = json.getAsJsonObject();
+
+        // Read schema version (defaults to 0 for pre-versioning data)
+        int schemaVersion = jsonObject.has("schemaVersion")
+                ? jsonObject.get("schemaVersion").getAsInt()
+                : 0;
+
+        // Handle migrations based on schema version if needed in the future
+        // Currently version 0 (legacy) and version 1 are compatible
+        // if (schemaVersion < 1) { migrateFromV0ToV1(jsonObject); }
 
         // Read type discriminator
         String enterpriseType = jsonObject.has("enterpriseType")

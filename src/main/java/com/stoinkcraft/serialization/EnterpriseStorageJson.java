@@ -25,7 +25,7 @@ import java.util.logging.Level;
 
 public class EnterpriseStorageJson {
 
-    private static final File ENTERPRISES_DIR = new File(StoinkCore.getInstance().getDataFolder(), "Enterprises");
+    private static final File ENTERPRISES_DIR = new File(StoinkCore.getInstance().getDataFolder(), StorageConstants.ENTERPRISES_DIR);
     private static Gson gson;
     private static JobSiteStorage jobSiteStorage;
     private static ContractStorage contractStorage;
@@ -76,15 +76,11 @@ public class EnterpriseStorageJson {
             entDir.mkdirs();
         }
 
-        File jsonFile = new File(entDir, "enterprise.json");
-        File backupFile = new File(entDir, "enterprise.json.backup");
+        File jsonFile = new File(entDir, StorageConstants.ENTERPRISE_FILE);
 
         try {
-            // Create backup
-            if (jsonFile.exists()) {
-                Files.copy(jsonFile.toPath(), backupFile.toPath(),
-                        java.nio.file.StandardCopyOption.REPLACE_EXISTING);
-            }
+            // Create rotating backup
+            BackupManager.createRotatingBackup(jsonFile);
 
             // Write enterprise data
             try (Writer writer = new OutputStreamWriter(new FileOutputStream(jsonFile), StandardCharsets.UTF_8)) {
@@ -102,8 +98,9 @@ public class EnterpriseStorageJson {
         } catch (IOException e) {
             Bukkit.getLogger().log(Level.SEVERE, "Failed to save enterprise: " + enterprise.getName(), e);
 
-            // Restore backup
-            if (backupFile.exists() && (!jsonFile.exists() || jsonFile.length() == 0)) {
+            // Restore from most recent backup
+            File backupFile = BackupManager.findMostRecentBackup(jsonFile);
+            if (backupFile != null && (!jsonFile.exists() || jsonFile.length() == 0)) {
                 try {
                     Files.copy(backupFile.toPath(), jsonFile.toPath(),
                             java.nio.file.StandardCopyOption.REPLACE_EXISTING);
@@ -160,7 +157,7 @@ public class EnterpriseStorageJson {
         }
 
         for (File folder : folders) {
-            File jsonFile = new File(folder, "enterprise.json");
+            File jsonFile = new File(folder, StorageConstants.ENTERPRISE_FILE);
 
             if (!jsonFile.exists()) {
                 continue;
@@ -186,8 +183,8 @@ public class EnterpriseStorageJson {
                 failed++;
 
                 // Try backup
-                File backupFile = new File(folder, "enterprise.json.backup");
-                if (backupFile.exists()) {
+                File backupFile = BackupManager.findMostRecentBackup(jsonFile);
+                if (backupFile != null) {
                     try {
                         Bukkit.getLogger().info("Attempting to load from backup...");
                         Enterprise enterprise = loadEnterprise(backupFile);

@@ -78,6 +78,7 @@ public class PlayerJoinListener implements Listener {
             player.sendMessage("§8§l» §7Sites: " + getJobSitesCompact(enterprise));
         }
 
+        System.out.println();
         // Daily reward notification
         if (DailyManager.INSTANCE.canClaimDaily(player)) {
             player.sendMessage("§8§l» §6⬢ §eDaily reward ready! §7(/daily)");

@@ -13,7 +13,7 @@ import java.util.logging.Level;
 
 public class EnterpriseMigration {
 
-    private static final File ENTERPRISES_DIR = new File(StoinkCore.getInstance().getDataFolder(), "Enterprises");
+    private static final File ENTERPRISES_DIR = new File(StoinkCore.getInstance().getDataFolder(), StorageConstants.ENTERPRISES_DIR);
 
     /**
      * Migrate all YAML enterprises to JSON format
@@ -37,8 +37,8 @@ public class EnterpriseMigration {
         }
 
         for (File folder : folders) {
-            File yamlFile = new File(folder, "enterprise.yml");
-            File jsonFile = new File(folder, "enterprise.json");
+            File yamlFile = new File(folder, StorageConstants.ENTERPRISE_YAML_FILE);
+            File jsonFile = new File(folder, StorageConstants.ENTERPRISE_FILE);
 
             // Skip if YAML doesn't exist
             if (!yamlFile.exists()) {
@@ -59,7 +59,7 @@ public class EnterpriseMigration {
                 Enterprise enterprise = loadEnterpriseFromYaml(yamlFile, folder);
 
                 // Load price history if exists
-                File historyFile = new File(folder, "pricehistory.yml");
+                File historyFile = new File(folder, StorageConstants.PRICE_HISTORY_YAML_FILE);
                 if (historyFile.exists()) {
                     loadPriceHistoryFromYaml(enterprise, historyFile);
                 }
@@ -199,8 +199,8 @@ public class EnterpriseMigration {
         if (folders == null) return false;
 
         for (File folder : folders) {
-            File yamlFile = new File(folder, "enterprise.yml");
-            File jsonFile = new File(folder, "enterprise.json");
+            File yamlFile = new File(folder, StorageConstants.ENTERPRISE_YAML_FILE);
+            File jsonFile = new File(folder, StorageConstants.ENTERPRISE_FILE);
 
             // Has YAML but no JSON
             if (yamlFile.exists() && !jsonFile.exists()) {
@@ -222,8 +222,8 @@ public class EnterpriseMigration {
         if (folders == null) return 0;
 
         for (File folder : folders) {
-            File yamlFile = new File(folder, "enterprise.yml");
-            File jsonFile = new File(folder, "enterprise.json");
+            File yamlFile = new File(folder, StorageConstants.ENTERPRISE_YAML_FILE);
+            File jsonFile = new File(folder, StorageConstants.ENTERPRISE_FILE);
 
             if (yamlFile.exists() && !jsonFile.exists()) {
                 count++;

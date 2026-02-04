@@ -22,7 +22,7 @@ import java.util.logging.Level;
 public class ContractStorage {
 
     private static final File ENTERPRISES_DIR =
-            new File(StoinkCore.getInstance().getDataFolder(), "Enterprises");
+            new File(StoinkCore.getInstance().getDataFolder(), StorageConstants.ENTERPRISES_DIR);
 
     private final Gson gson;
 
@@ -37,14 +37,11 @@ public class ContractStorage {
         File dir = getContractsDirectory(enterpriseId);
         if (!dir.exists()) dir.mkdirs();
 
-        File file = new File(dir, "contracts.json");
-        File backup = new File(dir, "contracts.json.backup");
+        File file = new File(dir, StorageConstants.CONTRACTS_FILE);
 
         try {
-            if (file.exists()) {
-                Files.copy(file.toPath(), backup.toPath(),
-                        StandardCopyOption.REPLACE_EXISTING);
-            }
+            // Create rotating backup
+            BackupManager.createRotatingBackup(file);
 
             List<ContractSaveData> data = contracts.stream()
                     .map(ActiveContract::toSaveData)
@@ -61,7 +58,9 @@ public class ContractStorage {
             Bukkit.getLogger().log(Level.SEVERE,
                     "Failed to save contracts for enterprise " + enterpriseId, e);
 
-            if (backup.exists()) {
+            // Restore from most recent backup
+            File backup = BackupManager.findMostRecentBackup(file);
+            if (backup != null) {
                 try {
                     Files.copy(backup.toPath(), file.toPath(),
                             StandardCopyOption.REPLACE_EXISTING);
@@ -78,7 +77,7 @@ public class ContractStorage {
             ContractPool pool
     ) {
 
-        File file = new File(getContractsDirectory(enterpriseId), "contracts.json");
+        File file = new File(getContractsDirectory(enterpriseId), StorageConstants.CONTRACTS_FILE);
         if (!file.exists()) return List.of();
 
         try (Reader reader = new InputStreamReader(
@@ -127,6 +126,6 @@ public class ContractStorage {
 
     private File getContractsDirectory(UUID enterpriseId) {
         return new File(ENTERPRISES_DIR,
-                enterpriseId + "/contracts");
+                enterpriseId + "/" + StorageConstants.CONTRACTS_SUBDIR);
     }
 }

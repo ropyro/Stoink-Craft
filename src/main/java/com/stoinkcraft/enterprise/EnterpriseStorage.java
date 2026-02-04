@@ -20,7 +20,19 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
-@Deprecated
+/**
+ * @deprecated This class is only kept for YAML to JSON migration support.
+ * All new code should use {@link com.stoinkcraft.serialization.EnterpriseStorageJson} instead.
+ * <p>
+ * <strong>DO NOT USE for new features.</strong> This class will be removed once all
+ * servers have been confirmed to migrate from YAML format.
+ * <p>
+ * To migrate existing YAML data, run: {@code /se migrate}
+ *
+ * @see com.stoinkcraft.serialization.EnterpriseStorageJson
+ * @see com.stoinkcraft.serialization.EnterpriseMigration
+ */
+@Deprecated(forRemoval = true)
 public class EnterpriseStorage {
 
     private static final File ENTERPRISES_DIR = new File(StoinkCore.getInstance().getDataFolder(), "Enterprises");

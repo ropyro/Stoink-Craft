@@ -31,7 +31,8 @@ public class Enterprise {
     @Expose
     private double bankBalance;
 
-    @Expose
+    // netWorth field kept for backward compatibility during deserialization
+    // but not serialized - calculated dynamically via ReputationCalculator.calculateNetWorth()
     private double netWorth;
 
     @Expose
@@ -56,6 +57,13 @@ public class Enterprise {
     @Expose
     private int plotIndex = -1;
 
+    /**
+     * List of members currently in enterprise chat mode.
+     * <p>
+     * Intentionally NOT serialized (transient behavior without annotation due to no @Expose).
+     * Players must re-enable enterprise chat after server restart as a safety feature
+     * to prevent accidental message leaks.
+     */
     private List<UUID> activeEnterpriseChat = new ArrayList<>();
 
 
