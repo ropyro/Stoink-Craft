@@ -21,9 +21,6 @@ public class JobSiteStorage {
 
     private static final File ENTERPRISES_DIR = new File(StoinkCore.getInstance().getDataFolder(), StorageConstants.ENTERPRISES_DIR);
 
-    /**
-     * Type registry mapping JobSiteType to its data class.
-     */
     private static final Map<JobSiteType, Class<? extends JobSiteData>> DATA_CLASSES = Map.of(
             JobSiteType.SKYRISE, SkyriseData.class,
             JobSiteType.QUARRY, QuarryData.class,
@@ -37,11 +34,6 @@ public class JobSiteStorage {
         this.gson = gson;
     }
 
-    // ======= SAVE =======
-
-    /**
-     * Save all job site data for an enterprise
-     */
     public boolean saveJobSites(UUID enterpriseID, SkyriseData skyriseData, QuarryData quarryData, FarmlandData farmlandData, GraveyardData graveyardData) {
         File jobSitesDir = getJobSitesDirectory(enterpriseID);
         if (!jobSitesDir.exists()) {
@@ -73,10 +65,8 @@ public class JobSiteStorage {
         File jsonFile = new File(jobSitesDir, fileName);
 
         try {
-            // Create rotating backup
             BackupManager.createRotatingBackup(jsonFile);
 
-            // Write new data
             try (Writer writer = new OutputStreamWriter(new FileOutputStream(jsonFile), StandardCharsets.UTF_8)) {
                 gson.toJson(data, clazz, writer);
             }
@@ -86,7 +76,6 @@ public class JobSiteStorage {
         } catch (IOException e) {
             Bukkit.getLogger().log(Level.SEVERE, "Failed to save job site: " + fileName, e);
 
-            // Restore from most recent backup
             File backupFile = BackupManager.findMostRecentBackup(jsonFile);
             if (backupFile != null && (!jsonFile.exists() || jsonFile.length() == 0)) {
                 try {
@@ -101,16 +90,6 @@ public class JobSiteStorage {
         }
     }
 
-    // ======= LOAD =======
-
-    /**
-     * Generic method to load job site data by type.
-     *
-     * @param enterpriseID The enterprise UUID
-     * @param type The job site type
-     * @param <T> The data class type (must extend JobSiteData)
-     * @return The loaded data, or null if not found or failed to load
-     */
     @SuppressWarnings("unchecked")
     public <T extends JobSiteData> T loadJobSiteData(UUID enterpriseID, JobSiteType type) {
         Class<? extends JobSiteData> dataClass = DATA_CLASSES.get(type);
@@ -124,7 +103,7 @@ public class JobSiteStorage {
         File jsonFile = new File(jobSitesDir, fileName);
 
         if (!jsonFile.exists()) {
-            return null; // Will use defaults
+            return null;
         }
 
         try {
@@ -133,7 +112,6 @@ public class JobSiteStorage {
             Bukkit.getLogger().log(Level.SEVERE,
                     "Failed to load " + type.getDisplayName() + " data for: " + enterpriseID, e);
 
-            // Try backup
             File backupFile = BackupManager.findMostRecentBackup(jsonFile);
             if (backupFile != null) {
                 try {
@@ -147,30 +125,18 @@ public class JobSiteStorage {
         }
     }
 
-    /**
-     * Load Skyrise data (convenience method for backward compatibility)
-     */
     public SkyriseData loadSkyriseData(UUID enterpriseID) {
         return loadJobSiteData(enterpriseID, JobSiteType.SKYRISE);
     }
 
-    /**
-     * Load Quarry data (convenience method for backward compatibility)
-     */
     public QuarryData loadQuarryData(UUID enterpriseID) {
         return loadJobSiteData(enterpriseID, JobSiteType.QUARRY);
     }
 
-    /**
-     * Load Farmland data (convenience method for backward compatibility)
-     */
     public FarmlandData loadFarmlandData(UUID enterpriseID) {
         return loadJobSiteData(enterpriseID, JobSiteType.FARMLAND);
     }
 
-    /**
-     * Load Graveyard data (convenience method for backward compatibility)
-     */
     public GraveyardData loadGraveyardData(UUID enterpriseID) {
         return loadJobSiteData(enterpriseID, JobSiteType.GRAVEYARD);
     }
@@ -181,11 +147,6 @@ public class JobSiteStorage {
         }
     }
 
-    // ======= DELETE =======
-
-    /**
-     * Delete all job site data for an enterprise
-     */
     public void deleteJobSites(UUID enterpriseID) {
         File jobSitesDir = getJobSitesDirectory(enterpriseID);
         if (jobSitesDir.exists()) {
@@ -208,8 +169,6 @@ public class JobSiteStorage {
         }
         return dir.delete();
     }
-
-    // ======= UTILITY =======
 
     private File getJobSitesDirectory(UUID enterpriseID) {
         return new File(ENTERPRISES_DIR, enterpriseID.toString() + "/" + StorageConstants.JOBSITES_SUBDIR);

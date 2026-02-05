@@ -14,9 +14,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-/**
- * Manages active boosters, including expiration scheduling and persistence recovery.
- */
 public class BoosterManager {
 
     private final StoinkCore plugin;
@@ -26,24 +23,15 @@ public class BoosterManager {
         this.plugin = plugin;
     }
 
-    /**
-     * Activates a new booster for an enterprise.
-     */
     public void activateBooster(Enterprise enterprise, BoosterTier tier) {
-        // Cancel any existing expiration task (shouldn't happen, but safety first)
         cancelExpirationTask(enterprise.getID());
 
-        // Create and set the booster
         Booster booster = new Booster(tier);
         enterprise.setActiveBooster(booster);
 
-        // Schedule expiration
         scheduleExpiration(enterprise, booster);
     }
 
-    /**
-     * Called on server startup to restore booster expiration tasks.
-     */
     public void restoreBoostersOnStartup() {
         for (Enterprise enterprise : EnterpriseManager.getEnterpriseManager().getEnterpriseList()) {
             Booster booster = enterprise.getActiveBooster();
@@ -53,12 +41,10 @@ public class BoosterManager {
             }
 
             if (booster.isExpired()) {
-                // Booster expired while server was offline
                 enterprise.setActiveBooster(null);
 
                 plugin.getLogger().info("Cleared expired booster for enterprise: " + enterprise.getName());
             } else {
-                // Schedule remaining time
                 scheduleExpiration(enterprise, booster);
 
                 plugin.getLogger().info("Restored booster for enterprise: " + enterprise.getName() +
@@ -67,14 +53,10 @@ public class BoosterManager {
         }
     }
 
-    /**
-     * Schedules the expiration task for a booster.
-     */
     private void scheduleExpiration(Enterprise enterprise, Booster booster) {
         long remainingTicks = booster.getTimeRemainingTicks();
 
         if (remainingTicks <= 0) {
-            // Already expired
             expireBooster(enterprise, booster);
             return;
         }
@@ -89,14 +71,10 @@ public class BoosterManager {
         expirationTasks.put(enterprise.getID(), task);
     }
 
-    /**
-     * Handles booster expiration.
-     */
     private void expireBooster(Enterprise enterprise, Booster booster) {
         enterprise.setActiveBooster(null);
         expirationTasks.remove(enterprise.getID());
 
-        // Notify online members
         for (UUID memberId : enterprise.getMembers().keySet()) {
             Player online = Bukkit.getPlayer(memberId);
             if (online != null && online.isOnline()) {
@@ -107,9 +85,6 @@ public class BoosterManager {
         }
     }
 
-    /**
-     * Cancels an expiration task if one exists.
-     */
     private void cancelExpirationTask(UUID enterpriseId) {
         BukkitTask task = expirationTasks.remove(enterpriseId);
         if (task != null) {
@@ -117,9 +92,6 @@ public class BoosterManager {
         }
     }
 
-    /**
-     * Called on plugin disable to clean up tasks.
-     */
     public void shutdown() {
         for (BukkitTask task : expirationTasks.values()) {
             task.cancel();
@@ -127,9 +99,6 @@ public class BoosterManager {
         expirationTasks.clear();
     }
 
-    /**
-     * Gets the active multiplier for an enterprise (1.0 if no booster).
-     */
     public double getMultiplier(Enterprise enterprise) {
         if (enterprise == null) {
             return 1.0;

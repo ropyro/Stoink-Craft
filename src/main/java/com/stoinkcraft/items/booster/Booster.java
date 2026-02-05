@@ -2,10 +2,6 @@ package com.stoinkcraft.items.booster;
 
 import com.google.gson.annotations.Expose;
 
-/**
- * Represents an active booster on an Enterprise.
- * Tracks multiplier, duration, and start time for persistence.
- */
 public class Booster {
 
     @Expose
@@ -27,9 +23,6 @@ public class Booster {
         this.startTime = System.currentTimeMillis();
     }
 
-    /**
-     * Reconstruction constructor for loading from save data.
-     */
     public Booster(BoosterTier tier, double multiplier, long durationMillis, long startTime) {
         this.tier = tier;
         this.multiplier = multiplier;
@@ -59,17 +52,13 @@ public class Booster {
     }
 
     public long getTimeRemainingTicks() {
-        return getTimeRemainingMillis() / 50; // 50ms per tick
+        return getTimeRemainingMillis() / 50;
     }
 
     public boolean isExpired() {
         return getTimeRemainingMillis() <= 0;
     }
 
-    /**
-     * Formats remaining time as a human-readable string.
-     * e.g., "4m 30s" or "45s"
-     */
     public String getFormattedTimeRemaining() {
         long seconds = getTimeRemainingMillis() / 1000;
 

@@ -10,7 +10,6 @@ public class ServerEnterprise extends Enterprise {
         super(name, SCConstants.serverCEO, "SERVER");
     }
 
-    // Constructor for Gson deserialization - matches parent signature
     public ServerEnterprise(String name, UUID ceo, double bankBalance, double reputation,
                             int outstandingShares, Booster activeBooster,
                             UUID enterpriseID) {
@@ -19,7 +18,6 @@ public class ServerEnterprise extends Enterprise {
 
     @Override
     public void hireEmployee(UUID employee) {
-        // Server enterprises have no employee limit
         super.getMembers().put(employee, Role.EMPLOYEE);
     }
 }

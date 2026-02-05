@@ -7,10 +7,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.io.File;
 import java.util.logging.Logger;
 
-/**
- * Configuration holder for economy-related settings.
- * Values include player pay splits, enterprise costs, taxes, and share limits.
- */
 public class EconomyConfig {
 
     private final Logger logger;
@@ -40,13 +36,11 @@ public class EconomyConfig {
     private void load(File configFile) {
         FileConfiguration config = YamlConfiguration.loadConfiguration(configFile);
 
-        // Load values with fallbacks to hardcoded defaults
         playerPaySplit = config.getDouble("economy.player-pay-split-percentage", 0.25);
         enterpriseFoundingCost = config.getDouble("economy.enterprise-founding-cost", 10000.0);
         enterpriseDailyTax = config.getDouble("economy.enterprise-daily-tax", 0.0);
         maxShares = config.getInt("economy.max-shares", 100);
 
-        // Reputation settings
         reputationMinMultiplier = config.getDouble("economy.reputation.min-multiplier", 0.75);
         reputationMaxMultiplier = config.getDouble("economy.reputation.max-multiplier", 1.25);
         reputationMidpoint = config.getDouble("economy.reputation.midpoint", 100.0);
@@ -84,8 +78,6 @@ public class EconomyConfig {
             throw new IllegalArgumentException("max-shares must be > 0");
         }
     }
-
-    // Getters
 
     public double getPlayerPaySplit() {
         return playerPaySplit;

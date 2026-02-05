@@ -50,7 +50,6 @@ public class EnterpriseManager {
     public void disband(Enterprise enterprise) {
         if (!enterpriseList.contains(enterprise)) return;
 
-        // Notify online members
         for (UUID uuid : enterprise.getMembers().keySet()) {
             Player p = Bukkit.getPlayer(uuid);
             if (p != null && p.isOnline()) {
@@ -58,7 +57,6 @@ public class EnterpriseManager {
             }
         }
 
-        // Optional: clear member maps (clean up references)
         enterprise.getMembers().clear();
 
 
@@ -68,13 +66,11 @@ public class EnterpriseManager {
         });
 
 
-        // Remove from enterprise list
         enterpriseList.remove(enterprise);
 
         EnterpriseStorageJson.disband(enterprise);
         enterprise.getJobSiteManager().disbandJobSites();
 
-        // Optional: log to console
         Bukkit.getLogger().info("[StoinkCore] Disbanded enterprise: " + enterprise.getName());
     }
 
@@ -218,16 +214,7 @@ public class EnterpriseManager {
         return maximumEmployees;
     }
 
-    /**
-     * Daily bank balance update.
-     * Note: Daily tax has been replaced by the reputation system.
-     * NetWorth is now calculated as bankBalance * reputationMultiplier.
-     */
     public static void updateBankBalances() {
-        // Tax logic removed - reputation system now handles enterprise value incentives.
-        // NetWorth is calculated dynamically from bankBalance * reputationMultiplier.
-        // Completing contracts increases reputation (and thus networth multiplier).
-        // Letting contracts expire decreases reputation.
     }
 
 
@@ -239,7 +226,6 @@ public class EnterpriseManager {
                     JobSiteManager jsm = enterprise.getJobSiteManager();
                     if (jsm == null || !enterprise.isOnline()) continue;
 
-                    // Tick each job site
                     if (jsm.getSkyriseSite() != null) jsm.getSkyriseSite().tick();
                     if (jsm.getQuarrySite() != null) jsm.getQuarrySite().tick();
                     if (jsm.getFarmlandSite() != null) jsm.getFarmlandSite().tick();

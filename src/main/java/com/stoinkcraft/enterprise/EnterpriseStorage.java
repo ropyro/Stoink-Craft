@@ -20,24 +20,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
-/**
- * @deprecated This class is only kept for YAML to JSON migration support.
- * All new code should use {@link com.stoinkcraft.serialization.EnterpriseStorageJson} instead.
- * <p>
- * <strong>DO NOT USE for new features.</strong> This class will be removed once all
- * servers have been confirmed to migrate from YAML format.
- * <p>
- * To migrate existing YAML data, run: {@code /se migrate}
- *
- * @see com.stoinkcraft.serialization.EnterpriseStorageJson
- * @see com.stoinkcraft.serialization.EnterpriseMigration
- */
 @Deprecated(forRemoval = true)
 public class EnterpriseStorage {
 
     private static final File ENTERPRISES_DIR = new File(StoinkCore.getInstance().getDataFolder(), "Enterprises");
 
-    // ======= SAVE =======
     public static void saveAllEnterprises() {
         if (!ENTERPRISES_DIR.exists()) ENTERPRISES_DIR.mkdirs();
 
@@ -87,18 +74,10 @@ public class EnterpriseStorage {
         config.set("outstandingShares", e.getOutstandingShares());
         config.set("serverOwned", e instanceof ServerEnterprise);
 
-        // Members
         Map<String, String> memberMap = new HashMap<>();
         e.getMembers().forEach((uuid, role) -> memberMap.put(uuid.toString(), role.name()));
         config.set("members", memberMap);
-        
-//        long timeRemaining = e.getActiveBooster().getTimeRemaining();
-//        double multiplier = e.getActiveBooster().getMultiplier();
-//
-//        config.set("activebooster.timeRemaining", timeRemaining);
-//        config.set("activebooster.multiplier", multiplier);
 
-        // Warp
         if (e.getWarp() != null) {
             Location loc = e.getWarp();
             config.set("warp.world", loc.getWorld().getName());
@@ -136,7 +115,6 @@ public class EnterpriseStorage {
         }
     }
 
-    // ======= LOAD =======
     public static void loadAllEnterprises() {
         if (!ENTERPRISES_DIR.exists()) return;
 
@@ -152,7 +130,6 @@ public class EnterpriseStorage {
             manager.loadEnterprise(e); // Add to list
         }
 
-        // After all are loaded, sync plot indexes
         StoinkCore.getInstance().getEnterprisePlotManager().resetNextIndex(manager.getEnterpriseList());
     }
 
@@ -172,7 +149,6 @@ public class EnterpriseStorage {
         e.setEnterpriseID(id);
 
 
-        // Members
         if (config.isConfigurationSection("members")) {
             for (String uuidStr : config.getConfigurationSection("members").getKeys(false)) {
                 Role role = Role.valueOf(config.getString("members." + uuidStr));
@@ -180,7 +156,6 @@ public class EnterpriseStorage {
             }
         }
 
-        // Warp
         if (config.isConfigurationSection("warp")) {
             String worldName = config.getString("warp.world");
             World world = Bukkit.getWorld(worldName);

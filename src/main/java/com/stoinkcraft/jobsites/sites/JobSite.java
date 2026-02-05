@@ -62,9 +62,6 @@ public abstract class JobSite {
                 .orElse(null);
     }
 
-    /**
-     * Get all components that implement Unlockable
-     */
     public List<Unlockable> getUnlockables() {
         return components.stream()
                 .filter(component -> component instanceof Unlockable)
@@ -72,9 +69,6 @@ public abstract class JobSite {
                 .toList();
     }
 
-    /**
-     * Get a specific unlockable by ID
-     */
     public @Nullable Unlockable getUnlockable(String id) {
         return getUnlockables().stream()
                 .filter(u -> u.getUnlockableId().equalsIgnoreCase(id))
@@ -179,9 +173,6 @@ public abstract class JobSite {
         return true;
     }
 
-    /**
-     * Purchase any Unlockable (structures, generators, etc.)
-     */
     public boolean purchaseUnlockable(Unlockable unlockable, Player player) {
         if (!enterprise.hasManagementPermission(player.getUniqueId())) return false;
         if (!unlockable.canUnlock()) return false;
@@ -195,9 +186,6 @@ public abstract class JobSite {
         return true;
     }
 
-    /**
-     * @deprecated Use {@link #purchaseUnlockable(Unlockable, Player)} instead
-     */
     @Deprecated
     public boolean purchaseStructure(JobSiteStructure structure, Player player) {
         return purchaseUnlockable(structure, player);
@@ -228,10 +216,6 @@ public abstract class JobSite {
         return components;
     }
 
-    /**
-     * Initialize all NPC components from Citizens registry.
-     * Call this after CitizensEnableEvent has fired.
-     */
     public void initializeNpcsFromRegistry() {
         components.stream()
                 .filter(c -> c instanceof JobSiteNPC)

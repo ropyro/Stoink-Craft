@@ -44,8 +44,6 @@ public class EnterpriseStorageJson {
         contractStorage = new ContractStorage(gson);
     }
 
-    // ======= SAVE =======
-
     public static void saveAllEnterprisesAsync() {
         new BukkitRunnable() {
             @Override
@@ -79,18 +77,14 @@ public class EnterpriseStorageJson {
         File jsonFile = new File(entDir, StorageConstants.ENTERPRISE_FILE);
 
         try {
-            // Create rotating backup
             BackupManager.createRotatingBackup(jsonFile);
 
-            // Write enterprise data
             try (Writer writer = new OutputStreamWriter(new FileOutputStream(jsonFile), StandardCharsets.UTF_8)) {
                 gson.toJson(enterprise, Enterprise.class, writer);
             }
 
-            // Save job site data separately
             saveJobSites(enterprise);
 
-            //save contracts
             saveContracts(enterprise);
 
             return true;
@@ -98,7 +92,6 @@ public class EnterpriseStorageJson {
         } catch (IOException e) {
             Bukkit.getLogger().log(Level.SEVERE, "Failed to save enterprise: " + enterprise.getName(), e);
 
-            // Restore from most recent backup
             File backupFile = BackupManager.findMostRecentBackup(jsonFile);
             if (backupFile != null && (!jsonFile.exists() || jsonFile.length() == 0)) {
                 try {
@@ -128,8 +121,6 @@ public class EnterpriseStorageJson {
         contractStorage.saveContracts(enterprise.getID(), StoinkCore.getInstance().getContractManager().getContracts(enterprise));
     }
 
-    // ======= LOAD =======
-
     public static void loadAllEnterprises(boolean loadJobSites) {
         if (!ENTERPRISES_DIR.exists()) {
             Bukkit.getLogger().info("No enterprises directory found. Creating...");
@@ -137,7 +128,6 @@ public class EnterpriseStorageJson {
             return;
         }
 
-        // Check for YAML migration
         if (EnterpriseMigration.hasYamlFilesToMigrate()) {
             int yamlCount = EnterpriseMigration.getYamlFilesCount();
             Bukkit.getLogger().warning("==============================================");
@@ -166,11 +156,9 @@ public class EnterpriseStorageJson {
             try {
                 Enterprise enterprise = loadEnterprise(jsonFile);
                 if (enterprise != null) {
-                    // Only load job sites if Citizens is ready
                     if (loadJobSites) {
                         loadJobSites(enterprise);
                     }
-                    // Load contracts (these don't depend on Citizens)
                     loadContracts(enterprise);
 
                     manager.loadEnterprise(enterprise);
@@ -182,7 +170,6 @@ public class EnterpriseStorageJson {
                 Bukkit.getLogger().log(Level.SEVERE, "Failed to load enterprise from: " + jsonFile.getPath(), e);
                 failed++;
 
-                // Try backup
                 File backupFile = BackupManager.findMostRecentBackup(jsonFile);
                 if (backupFile != null) {
                     try {
@@ -207,7 +194,6 @@ public class EnterpriseStorageJson {
 
         Bukkit.getLogger().info("Loaded " + loaded + " enterprises" + (loadJobSites ? " with job sites" : " (job sites pending)") + ". Failed: " + failed);
 
-        // Sync plot indexes after loading
         StoinkCore.getInstance().getEnterprisePlotManager().resetNextIndex(manager.getEnterpriseList());
     }
 
@@ -241,16 +227,13 @@ public class EnterpriseStorageJson {
     }
 
     private static void loadJobSites(Enterprise enterprise) {
-        // Initialize the manager
         enterprise.initializeJobSiteManager();
 
-        // Load job site data from separate files
         SkyriseData skyriseData = jobSiteStorage.loadSkyriseData(enterprise.getID());
         QuarryData quarryData = jobSiteStorage.loadQuarryData(enterprise.getID());
         FarmlandData farmlandData = jobSiteStorage.loadFarmlandData(enterprise.getID());
         GraveyardData graveyardData = jobSiteStorage.loadGraveyardData(enterprise.getID());
 
-        // Initialize job sites with loaded data (or defaults if null)
         enterprise.getJobSiteManager().initializeJobSites(skyriseData, quarryData, farmlandData, graveyardData);
     }
 
@@ -267,15 +250,11 @@ public class EnterpriseStorageJson {
         contractManager.setContracts(enterprise, loaded);
     }
 
-    // ======= DELETE =======
-
     public static void disband(Enterprise enterprise) {
         File entDir = new File(ENTERPRISES_DIR, enterprise.getID().toString());
 
-        // Delete job sites data
         jobSiteStorage.deleteJobSites(enterprise.getID());
 
-        // Delete enterprise directory
         if (deleteDirectory(entDir)) {
             Bukkit.getLogger().info("Deleted enterprise folder: " + enterprise.getName());
         } else {
@@ -298,8 +277,6 @@ public class EnterpriseStorageJson {
         }
         return dir.delete();
     }
-
-    // ======= UTILITY =======
 
     public static Gson getGson() {
         return gson;

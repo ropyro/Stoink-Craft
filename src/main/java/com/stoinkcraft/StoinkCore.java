@@ -139,14 +139,12 @@ public class StoinkCore extends JavaPlugin {
     private void hookLibraries(){
         InvUI.getInstance().setPlugin(this);
 
-        //Vault hook
         if (!setupEconomy()) {
             getLogger().severe(String.format("[%s] - Disabled due to no Vault dependency found!", getDescription().getName()));
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
 
-        //PAPI Expansion
         if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
             new StoinkExpansion(this).register();
         }
@@ -195,7 +193,6 @@ public class StoinkCore extends JavaPlugin {
 
         getLogger().info("Citizens ready, initializing NPCs from registry...");
 
-        // Initialize NPCs from Citizens registry for all enterprises
         for (Enterprise enterprise : em.getEnterpriseList()) {
             if (enterprise.getJobSiteManager() != null) {
                 enterprise.getJobSiteManager().initializeNpcsFromRegistry();
@@ -237,18 +234,14 @@ public class StoinkCore extends JavaPlugin {
     }
 
     public void registerListeners(){
-        //Register listeners
         getServer().getPluginManager().registerEvents(new PlayerJoinListener(this), this);
-        //Chat money listeners
         getServer().getPluginManager().registerEvents(new PlayerChatListener(this), this);
-        //Misc listeners
         getServer().getPluginManager().registerEvents(new PhantomSpawnDisabler(), this);
         getServer().getPluginManager().registerEvents(new EnderChestListener(), this);
         getServer().getPluginManager().registerEvents(new CitizensLoadListener(this), this);
         getServer().getPluginManager().registerEvents(new ProtectionListeners(this), this);
         getServer().getPluginManager().registerEvents(new StoinkItemListener(), this);
         getServer().getPluginManager().registerEvents(new GraveyardHoundListener(), this);
-        //Jobsite Listeners
         getServer().getPluginManager().registerEvents(new CreatureSpawnListener(ewm.getWorld()), this);
         getServer().getPluginManager().registerEvents(new BlockBreakListener(), this);
         getServer().getPluginManager().registerEvents(new EntityDeathListener(), this);
@@ -264,15 +257,12 @@ public class StoinkCore extends JavaPlugin {
         startContractResetTask();
         cfm.startCleanupTask(this);
 
-        // Periodic autosave (every 5 minutes):
         new BukkitRunnable() {
             @Override
             public void run() {
                 EnterpriseStorageJson.saveAllEnterprisesAsync();
             }
         }.runTaskTimerAsynchronously(this, 20L * 60 * 20, 20L * 60 * 20);
-
-        //em.startDailyTaxes(this);
     }
 
     public static StoinkCore getInstance() {
