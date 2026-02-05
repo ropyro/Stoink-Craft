@@ -68,53 +68,15 @@ public class StoinkCore extends JavaPlugin {
     private boolean jobSitesLoaded = false;
 
     private EnterpriseManager em;
-    public EnterpriseManager getEnterpriseManager(){
-        return em;
-    }
-
     private DailyManager dm;
-    public DailyManager getDailyManager(){
-        return dm;
-    }
-
     private ShareManager sm;
-    public ShareManager getShareManager(){
-        return sm;
-    }
-
     private EnterpriseWorldManager ewm;
-    public EnterpriseWorldManager getEnterpriseWorldManager(){
-        return ewm;
-    }
-
     private EnterprisePlotManager epm;
-    public EnterprisePlotManager getEnterprisePlotManager(){
-        return epm;
-    }
-
     private ContractManager cm;
-    public ContractManager getContractManager(){
-        return cm;
-    }
-
     private ContractFeedbackManager cfm;
-    public ContractFeedbackManager getContractFeedbackManager(){
-        return cfm;
-    }
-
     private ProtectionManager pm;
-    public ProtectionManager getProtectionManager() {return pm;}
-
     private BoosterManager boosterManager;
-    public BoosterManager getBoosterManager(){
-        return boosterManager;
-    }
-
     private GraveyardHoundManager graveyardHoundManager;
-
-    public GraveyardHoundManager getGraveyardHoundManager() {
-        return graveyardHoundManager;
-    }
 
     @Override
     public void onDisable() {
@@ -160,31 +122,21 @@ public class StoinkCore extends JavaPlugin {
         getLogger().info("StoinkCore loaded.");
     }
 
-    /**
-     * Checks if Citizens was already loaded before StoinkCore (hot reload scenario).
-     * This handles the case where only StoinkCore is reloaded (not Citizens).
-     * We delay the check to give CitizensEnableEvent a chance to fire first.
-     */
     private void checkCitizensAlreadyLoaded() {
-        // Delay check by 10 ticks to allow CitizensEnableEvent to fire if Citizens is also reloading
         Bukkit.getScheduler().runTaskLater(this, () -> {
-            if (jobSitesLoaded) return; // Event already fired, we're good
+            if (jobSitesLoaded) return;
 
             try {
-                // If we get here, CitizensEnableEvent didn't fire - true hot reload of StoinkCore only
-                // Check if Citizens has NPCs loaded (indicating it's truly ready)
                 if (CitizensAPI.getNPCRegistry() != null && CitizensAPI.getNPCRegistry().iterator().hasNext()) {
                     getLogger().info("Hot reload detected (StoinkCore only), Citizens has NPCs. Initializing...");
                     onCitizensReady();
                 }
             } catch (Exception e) {
-                // Citizens not ready yet, event listener will handle it
             }
         }, 10L);
     }
 
     private void hookLibraries(){
-        //GUI util hook
         InvUI.getInstance().setPlugin(this);
 
         //Vault hook
@@ -220,8 +172,6 @@ public class StoinkCore extends JavaPlugin {
 
         saveResourceFolder("schematics", false);
 
-        // Load enterprises with job sites - NPCs are created as objects but not
-        // looked up in Citizens registry yet (deferred to CitizensEnableEvent)
         EnterpriseStorageJson.loadAllEnterprises(true);
         getLogger().info("Enterprises and job sites loaded. Waiting for CitizensEnableEvent to initialize NPCs...");
 
@@ -239,10 +189,6 @@ public class StoinkCore extends JavaPlugin {
         getLogger().info("Protection regions successfully indexed!");
     }
 
-    /**
-     * Called by CitizensLoadListener when CitizensEnableEvent fires.
-     * This event fires AFTER Citizens has loaded all NPCs into the registry.
-     */
     public void onCitizensReady() {
         if (jobSitesLoaded) return;
         jobSitesLoaded = true;
@@ -334,24 +280,19 @@ public class StoinkCore extends JavaPlugin {
     }
 
     public void startContractResetTask() {
-        // Immediately clean up any expired contracts from before plugin start
         getContractManager().handleDailyReset();
         getContractManager().handleWeeklyReset();
 
-        // Calculate initial delay until next contract expiry (midnight)
         long now = System.currentTimeMillis();
         long initialDelay = ContractTimeUtil.nextDay() - now;
-        long dailyPeriod = 24L * 60 * 60 * 1000; // 24 hours in ms
+        long dailyPeriod = 24L * 60 * 60 * 1000;
 
-        // Convert to ticks (1 tick = 50ms)
         long initialDelayTicks = initialDelay / 50;
         long periodTicks = dailyPeriod / 50;
 
-        // Repeating daily reset task - starts at next midnight, repeats every 24 hours
         Bukkit.getScheduler().runTaskTimer(this, () -> {
             getContractManager().handleDailyReset();
 
-            // Check if it's also Monday for weekly reset
             if (java.time.LocalDate.now().getDayOfWeek() == java.time.DayOfWeek.MONDAY) {
                 getContractManager().handleWeeklyReset();
             }
@@ -365,7 +306,6 @@ public class StoinkCore extends JavaPlugin {
     }
 
     public void updateTopCeoNpcs() {
-        // Run async for data sorting and lookups
         Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
             List<Enterprise> sorted = EnterpriseManager
                     .getEnterpriseManager()
@@ -383,7 +323,6 @@ public class StoinkCore extends JavaPlugin {
                 top3.add(new TopCeoData(i, ceoName, displayName));
             }
 
-            // Update NPCs safely on the main thread
             Bukkit.getScheduler().runTask(this, () -> {
                 for (TopCeoData data : top3) {
                     NPC npc = getNpcByPosition(data.position());
@@ -400,9 +339,6 @@ public class StoinkCore extends JavaPlugin {
         });
     }
 
-    /**
-     * Starts automatic updates every 10 minutes.
-     */
     public void startAutoTopCEOUpdate() {
         Bukkit.getScheduler().runTaskTimer(this, this::updateTopCeoNpcs, 20L, 20L * 60 * 10);
     }
@@ -427,7 +363,6 @@ public class StoinkCore extends JavaPlugin {
 
         try (InputStream stream = getResource(path)) {
             if (stream == null) {
-                // It’s a directory, not a single file — iterate contents manually
                 URL url = getClassLoader().getResource(path);
                 if (url == null) return;
 
@@ -448,7 +383,6 @@ public class StoinkCore extends JavaPlugin {
                     });
                 }
             } else {
-                // Single file resource
                 File outFile = new File(outDir, new File(path).getName());
                 if (!outFile.exists() || replace) {
                     Files.copy(stream, outFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
@@ -475,4 +409,41 @@ public class StoinkCore extends JavaPlugin {
         return econ;
     }
 
+    public EnterpriseManager getEnterpriseManager(){
+        return em;
+    }
+
+    public DailyManager getDailyManager(){
+        return dm;
+    }
+
+    public ShareManager getShareManager(){
+        return sm;
+    }
+
+    public EnterpriseWorldManager getEnterpriseWorldManager(){
+        return ewm;
+    }
+
+    public EnterprisePlotManager getEnterprisePlotManager(){
+        return epm;
+    }
+
+    public ContractManager getContractManager(){
+        return cm;
+    }
+
+    public ContractFeedbackManager getContractFeedbackManager(){
+        return cfm;
+    }
+
+    public ProtectionManager getProtectionManager() {return pm;}
+
+    public BoosterManager getBoosterManager(){
+        return boosterManager;
+    }
+
+    public GraveyardHoundManager getGraveyardHoundManager() {
+        return graveyardHoundManager;
+    }
 }
