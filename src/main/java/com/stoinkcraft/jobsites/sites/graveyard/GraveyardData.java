@@ -13,7 +13,7 @@ public class GraveyardData extends JobSiteData {
     private int souls = 0;
 
     @Expose
-    private int tombstonesPurchased = 4; // Start with 4 active
+    private int tombstonesPurchased = 4;
 
     @Expose
     private Map<Integer, UndeadMobType> tombstoneAttunements;

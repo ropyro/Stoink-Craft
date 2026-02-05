@@ -31,8 +31,6 @@ public class Enterprise {
     @Expose
     private double bankBalance;
 
-    // netWorth field kept for backward compatibility during deserialization
-    // but not serialized - calculated dynamically via ReputationCalculator.calculateNetWorth()
     private double netWorth;
 
     @Expose
@@ -57,17 +55,9 @@ public class Enterprise {
     @Expose
     private int plotIndex = -1;
 
-    /**
-     * List of members currently in enterprise chat mode.
-     * <p>
-     * Intentionally NOT serialized (transient behavior without annotation due to no @Expose).
-     * Players must re-enable enterprise chat after server restart as a safety feature
-     * to prevent accidental message leaks.
-     */
     private List<UUID> activeEnterpriseChat = new ArrayList<>();
 
 
-    // NOT serialized directly - loaded/saved separately
     private transient JobSiteManager jobSiteManager;
 
 
@@ -93,7 +83,6 @@ public class Enterprise {
         this.enterpriseType = type;
     }
 
-    // Initialize JobSiteManager after loading
     public JobSiteManager initializeJobSiteManager() {
         if (jobSiteManager == null) {
             jobSiteManager = new JobSiteManager(this, plotIndex);
@@ -105,7 +94,6 @@ public class Enterprise {
         return jobSiteManager;
     }
 
-    // ... rest of your methods ...
 
     public String getEnterpriseType() {
         return enterpriseType;
@@ -180,9 +168,6 @@ public class Enterprise {
         return activeBooster != null && !activeBooster.isExpired();
     }
 
-    /**
-     * Gets the current booster multiplier (1.0 if no active booster).
-     */
     public double getBoosterMultiplier() {
         if (!hasActiveBooster()) {
             return 1.0;
@@ -293,21 +278,13 @@ public class Enterprise {
         this.bankBalance -= value;
     }
 
-    /**
-     * @deprecated NetWorth is now calculated. Use increaseBankBalance() instead.
-     */
     @Deprecated
     public void increaseNetworth(double value) {
-        // Redirect to bank balance since networth is now calculated
         this.bankBalance += value;
     }
 
-    /**
-     * @deprecated NetWorth is now calculated. Use decreaseBankBalance() instead.
-     */
     @Deprecated
     public void decreaseNetworth(double value) {
-        // Redirect to bank balance since networth is now calculated
         this.bankBalance -= value;
     }
 
@@ -315,21 +292,12 @@ public class Enterprise {
         this.bankBalance = bankBalance;
     }
 
-    /**
-     * NetWorth is now calculated dynamically based on bankBalance and reputation.
-     * Formula: netWorth = bankBalance * reputationMultiplier
-     */
     public double getNetWorth() {
         return ReputationCalculator.calculateNetWorth(this);
     }
 
-    /**
-     * @deprecated NetWorth is now calculated, not stored.
-     */
     @Deprecated
-    public void setNetWorth(double netWorth) {
-        // No-op - networth is now calculated
-    }
+    public void setNetWorth(double netWorth) {}
 
     public double getReputation() {
         return reputation;
@@ -382,10 +350,6 @@ public class Enterprise {
         });
     }
 
-    /**
-     * Send personalized messages to each online member
-     * @param messageBuilder Function that takes a Player and returns their custom message lines
-     */
     public void sendPersonalizedMessage(Function<Player, String[]> messageBuilder) {
         getOnlineMembers().forEach(player -> {
             String[] lines = messageBuilder.apply(player);

@@ -71,8 +71,6 @@ public class StoinkExpansion extends PlaceholderExpansion {
 
         switch (identifier.toLowerCase()) {
 
-            // ==================== Existing Placeholders ====================
-
             case "enterprise":
                 if (e == null) return "§7Unemployed";
                 return e.getName();
@@ -102,7 +100,6 @@ public class StoinkExpansion extends PlaceholderExpansion {
                 if (e == null) return "default";
                 return getCurrentJobSiteUnformattedName(player, e);
 
-            // ==================== Visitor Placeholders ====================
 
             case "visited_enterprise":
                 return contextEnterprise != null
@@ -146,7 +143,6 @@ public class StoinkExpansion extends PlaceholderExpansion {
 
                 return "";
 
-            // ==================== Farmland Placeholders ====================
 
             case "farmland_level":
                 if (e == null) return "0";
@@ -210,7 +206,6 @@ public class StoinkExpansion extends PlaceholderExpansion {
                 if (farmland == null) return "0";
                 return String.valueOf(farmland.getMobGenerator().getCurrentMobCount());
 
-            // ==================== Quarry Placeholders ====================
 
             case "quarry_level":
                 if (e == null) return "0";
@@ -265,7 +260,6 @@ public class StoinkExpansion extends PlaceholderExpansion {
                 if (quarry == null) return "None";
                 return getQuarryHasteLevel(quarry);
 
-            // ==================== Graveyard Placeholders ====================
 
             case "graveyard_level":
                 if (e == null) return "0";
@@ -327,7 +321,6 @@ public class StoinkExpansion extends PlaceholderExpansion {
                 if (graveyard == null) return "0";
                 return String.valueOf(graveyard.getData().getTombstonesPurchased());
 
-            // ==================== Dynamic JobSite Placeholders ====================
 
             case "current_jobsite_header":
                 return getCurrentJobSiteHeader(player, e);
@@ -344,111 +337,13 @@ public class StoinkExpansion extends PlaceholderExpansion {
             case "current_jobsite":
                 return getCurrentJobSiteName(player, e);
 
-            // ==================== Time Clock Placeholder ====================
 
-            case "time_clock":
-                return getTimeClock(player);
 
             default:
                 return null;
         }
     }
 
-    /**
-     * Creates an immersive RPG-style clock display showing the current time of day.
-     * Features a moving celestial indicator that travels left to right across the sky.
-     *
-     * Layout: ☀ ─────●───── ☽
-     * The orb (●) moves from sun to moon as the day progresses.
-     */
-    private String getTimeClock(Player player) {
-        long time = player.getWorld().getTime() % 24000;
-
-        // Calculate position (0.0 to 1.0) through the full day cycle
-        double progress = time / 24000.0;
-
-        // Track has 12 segments
-        int trackLength = 12;
-        int orbPosition = (int) Math.round(progress * trackLength);
-        orbPosition = Math.max(0, Math.min(trackLength, orbPosition));
-
-        // Determine time period for colors
-        boolean isDawn = time >= 22000 || time < 2000;
-        boolean isDay = time >= 2000 && time < 10000;
-        boolean isDusk = time >= 10000 && time < 14000;
-        boolean isNight = time >= 14000 && time < 22000;
-
-        StringBuilder clock = new StringBuilder();
-
-        // Sun icon - bright during day, dim at night
-        if (isDay || isDawn) {
-            clock.append("§6✦§e☀§6✦");
-        } else if (isDusk) {
-            clock.append("§c✦§6☀§c✦");
-        } else {
-            clock.append("§8✧§7☀§8✧");
-        }
-
-        clock.append(" ");
-
-        // Build the track with moving orb
-        for (int i = 0; i <= trackLength; i++) {
-            if (i == orbPosition) {
-                // The moving celestial orb
-                if (isDawn) {
-                    clock.append("§e§l◉");
-                } else if (isDay) {
-                    clock.append("§6§l◉");
-                } else if (isDusk) {
-                    clock.append("§c§l◉");
-                } else {
-                    clock.append("§d§l◉");
-                }
-            } else {
-                // Track segment - color based on position and time
-                String segmentColor;
-                double segmentProgress = (double) i / trackLength;
-
-                if (segmentProgress < 0.25) {
-                    // Dawn zone
-                    segmentColor = isDawn || isDay ? "§e" : "§8";
-                } else if (segmentProgress < 0.5) {
-                    // Day zone
-                    segmentColor = isDay ? "§6" : "§8";
-                } else if (segmentProgress < 0.75) {
-                    // Dusk zone
-                    segmentColor = isDusk ? "§c" : "§8";
-                } else {
-                    // Night zone
-                    segmentColor = isNight ? "§5" : "§8";
-                }
-
-                // Use different track chars for visual interest
-                if (i < orbPosition) {
-                    // Behind the orb - trail
-                    clock.append(segmentColor).append("━");
-                } else {
-                    // Ahead of the orb - path
-                    clock.append("§8").append("╍");
-                }
-            }
-        }
-
-        clock.append(" ");
-
-        // Moon icon - bright during night, dim during day
-        if (isNight) {
-            clock.append("§5✦§d☽§5✦");
-        } else if (isDusk) {
-            clock.append("§5✧§7☽§5✧");
-        } else {
-            clock.append("§8✧§8☽§8✧");
-        }
-
-        return clock.toString();
-    }
-
-// ==================== New Helper Methods ====================
 
     @Nullable
     private JobSite getJobSiteAt(Player player) {
@@ -459,7 +354,6 @@ public class StoinkExpansion extends PlaceholderExpansion {
 
         if (sites == null || sites.isEmpty()) return null;
 
-        // In case multiple sites overlap chunks, pick highest priority or first
         return sites.iterator().next();
     }
 
@@ -476,8 +370,6 @@ public class StoinkExpansion extends PlaceholderExpansion {
     }
 
     private String getQuarryOreSetName(QuarrySite quarry) {
-        // Adjust based on your QuarrySite implementation
-        // This assumes you have a method to get current ore set
         try {
             OreSet oreSet = quarry.getData().getCurrentOreSet();
             if (oreSet == null) return "Basic";
@@ -488,7 +380,6 @@ public class StoinkExpansion extends PlaceholderExpansion {
     }
 
     private String getQuarryPowerStatus(QuarrySite quarry) {
-        // Adjust based on your PowerCellStructure implementation
         try {
             PowerCellStructure powerCell = quarry.getPowerCell();
             if (powerCell == null) return "§cLocked";
@@ -505,7 +396,6 @@ public class StoinkExpansion extends PlaceholderExpansion {
     }
 
     private String getQuarryHasteLevel(QuarrySite quarry) {
-        // Adjust based on your implementation
         try {
             PowerCellStructure powerCell = quarry.getPowerCell();
             if (powerCell == null || !powerCell.isUnlocked()) return "§cNone";
@@ -551,7 +441,6 @@ public class StoinkExpansion extends PlaceholderExpansion {
         }
     }
 
-// ==================== Existing Helper Methods ====================
 
     private JobSiteType getCurrentJobSiteType(Player player, Enterprise e) {
         if (e == null) return null;

@@ -25,7 +25,6 @@ public class EnterprisePlotManager {
         return nextIndex++;
     }
 
-    // Optional: on load, find the max assigned index and start from there
     public void resetNextIndex(Collection<Enterprise> enterprises) {
         int max = enterprises.stream()
                 .mapToInt(e -> e.getPlotIndex())

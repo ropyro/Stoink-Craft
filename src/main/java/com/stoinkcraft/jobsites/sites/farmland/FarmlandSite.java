@@ -42,10 +42,10 @@ public class FarmlandSite extends JobSite {
     private JobSiteNPC farmerJoe;
     private String farmerJoeTexture = "ewogICJ0aW1lc3RhbXAiIDogMTc0NDA5MzMxMTMxMCwKICAicHJvZmlsZUlkIiA6ICJiOWIzY2RlZmIyZmQ0YWY1ODQxMGViZWZjY2ZmYTBhYiIsCiAgInByb2ZpbGVOYW1lIiA6ICJpbnRlcnNlY2F0byIsCiAgInNpZ25hdHVyZVJlcXVpcmVkIiA6IHRydWUsCiAgInRleHR1cmVzIiA6IHsKICAgICJTS0lOIiA6IHsKICAgICAgInVybCIgOiAiaHR0cDovL3RleHR1cmVzLm1pbmVjcmFmdC5uZXQvdGV4dHVyZS9kY2Y1Mzk3YmEwNTc5ZTI3NGMxZDJhN2I4M2ExMmU1MDQ0NDBjYjQzOTgzODZkNTI4MTk5NmQ0MWMwNjc3N2M1IgogICAgfQogIH0KfQ==";
     private String farmerJoeSignature = "k+SC0/ie439qZpjQQXSiYWRP4MWW4RLOsPdhc0KB/YBmJZGs1K/KhVtRrn1KFFV263foaBjEQtE/yoX9L5VYKmgJmTxscpDlX0KwnTVpZgDOwTU0rGUxg0VElmyqxRt49FH7UzJeuFs880jzHDBxuoRw28gHOMkaiE2WtdSDOXF6KcfwyZbZ/IlybI6ydcgzsVe6L8OXJuVEFStEuaPoE27qzz4OZX5wrYpW4FtmGIkISVXIEgh4Cd+R/toaXBLV7Egz/IuWrueihUv48QXv3lbPSncCuOcpqIjfJ+JSR1CcvkypbqhKdBMko7hTH77libQrz1k79Ghtppjw7cC6/tRdPAqOtNSAPk82nHbogctI7X7RBv+5ETtKK2nw8ckTyuqikgICYwjbmDNhhuSZHodb16pQy9LaGPXqi5ti4TgMFxsY98+Yys4N1Fz0WuMl1UDm44mjmH4o1aqsjeZKem/cqZbh3rppzLGZ/4lhmooTChGfPIONGCPdpgDh1yxzw8k96RNpG0bDJo5VzQB5LzuENiHgi1vBxFXdAQii5o7XZd6SPexmmwz4BNGymebjhnQ/VSj8PfTpF/SBBEYoJF3T7WR6Y/8UpbqDCbUQJhHxRSGu+qTg5CX2nkq1hw4bhKklOGRRlC0retK7oYGJhE3aJSY8m+wLQeJGL19+A8Y=";
-    public static Vector farmerJoeOffset = new Vector(-27, 0, -14); // Adjust as needed
+    public static Vector farmerJoeOffset = new Vector(-27, 0, -14);
 
     /**
-     * Greenhouses (3 total, replacing single CropGenerator)
+     * Greenhouses
      */
     private Map<Integer, GreenhouseGenerator> greenhouses = new HashMap<>();
     private Map<Integer, GreenhouseHologram> greenhouseHolograms = new HashMap<>();
@@ -131,7 +131,6 @@ public class FarmlandSite extends JobSite {
 
         welcomeHologramId = enterprise.getID() + "_" + JobSiteType.FARMLAND.name() + "_welcome";
 
-        // Create 3 greenhouses with their holograms
         createGreenhouse(1, spawnPoint, enterprise,
                 greenhouse1Corner1Offset, greenhouse1Corner2Offset, greenhouse1HologramOffset);
         createGreenhouse(2, spawnPoint, enterprise,
@@ -203,12 +202,6 @@ public class FarmlandSite extends JobSite {
 
     private void registerUpgrades() {
 
-        // =========================
-        // GREENHOUSE UNLOCKS
-        // =========================
-        // Greenhouse 1 is always unlocked
-        // Greenhouse 2 unlocks at level 8
-        // Greenhouse 3 unlocks at level 15
 
         upgrades.add(new JobSiteUpgrade(
                 "unlock_greenhouse_2",
@@ -219,7 +212,6 @@ public class FarmlandSite extends JobSite {
                 lvl -> 15_000,
                 site -> true,
                 (site, lvl) -> {
-                    // Trigger greenhouse unlock
                     FarmlandSite farmland = (FarmlandSite) site;
                     GreenhouseGenerator gh = farmland.getGreenhouse(2);
                     GreenhouseHologram hologram = farmland.getGreenhouseHologram(2);
@@ -237,7 +229,6 @@ public class FarmlandSite extends JobSite {
                 lvl -> 40_000,
                 site -> site.getData().getLevel("unlock_greenhouse_2") > 0,
                 (site, lvl) -> {
-                    // Trigger greenhouse unlock
                     FarmlandSite farmland = (FarmlandSite) site;
                     GreenhouseGenerator gh = farmland.getGreenhouse(3);
                     GreenhouseHologram hologram = farmland.getGreenhouseHologram(3);
@@ -246,10 +237,6 @@ public class FarmlandSite extends JobSite {
                 }
         ));
 
-        // =========================
-        // GREENHOUSE GROWTH SPEED (Individual per greenhouse)
-        // =========================
-        // Each greenhouse has its own growth speed upgrade
 
         upgrades.add(new JobSiteUpgrade(
                 "greenhouse_1_growth_speed",
@@ -284,17 +271,13 @@ public class FarmlandSite extends JobSite {
                 (site, lvl) -> {}
         ));
 
-        // =========================
-        // CROP UNLOCKS (shared across all greenhouses)
-        // =========================
-        // Single-purchase unlocks, spread across progression
 
         upgrades.add(new JobSiteUpgrade(
                 "unlock_carrot",
                 "Unlock Carrots",
                 1,
                 5,
-                0,                     // single purchase, no increment
+                0,
                 lvl -> 8_000,
                 site -> true,
                 (site, lvl) -> {}
@@ -322,28 +305,18 @@ public class FarmlandSite extends JobSite {
                 (site, lvl) -> {}
         ));
 
-        // =========================
-        // ANIMAL SPAWN SPEED
-        // =========================
-        // Affects spawn interval: BASE_INTERVAL - (level * 9) ticks
-        // Level 0: 100 ticks, Level 10: 10 ticks
 
         upgrades.add(new JobSiteUpgrade(
                 "mob_spawn_speed",
                 "Animal Spawn Speed",
                 10,
-                3,                     // requires barn proximity (level 3 feels right)
-                2,                     // +2 per level
-                // Level 1 @ JS3, Level 2 @ JS5... Level 10 @ JS21
-                lvl -> 2000 + (lvl * 2000),  // 4000, 6000, 8000... 22000
+                3,
+                2,
+                lvl -> 2000 + (lvl * 2000),
                 site -> true,
                 (site, lvl) -> {}
         ));
 
-        // =========================
-        // ANIMAL CAPACITY
-        // =========================
-        // Base: 10 mobs, +5 per level = 60 max at level 10
 
         upgrades.add(new JobSiteUpgrade(
                 "mob_capacity",
@@ -351,22 +324,16 @@ public class FarmlandSite extends JobSite {
                 10,
                 4,
                 2,
-                // Level 1 @ JS4, Level 2 @ JS6... Level 10 @ JS22
-                lvl -> 3000 + (lvl * 2500),  // 5500, 8000, 10500... 28000
+                lvl -> 3000 + (lvl * 2500),
                 site -> true,
                 (site, lvl) -> {}
         ));
-
-        // =========================
-        // ANIMAL UNLOCKS
-        // =========================
-        // Requires barn to be built first
 
         upgrades.add(new JobSiteUpgrade(
                 "unlock_sheep",
                 "Unlock Sheep",
                 1,
-                10,                    // Same as barn unlock level
+                10,
                 0,
                 lvl -> 12_000,
                 site -> true,
@@ -406,19 +373,14 @@ public class FarmlandSite extends JobSite {
                 (site, lvl) -> {}
         ));
 
-        // =========================
-        // HONEY GENERATION SPEED
-        // =========================
-        // Requires bee hives structure
 
         upgrades.add(new JobSiteUpgrade(
                 "honey_speed",
                 "Honey Generation Speed",
                 10,
-                20,                    // Same as bee hive unlock
+                20,
                 2,
-                // Level 1 @ JS20, Level 2 @ JS22... Level 10 @ JS38
-                lvl -> 5000 + (lvl * 4000),  // 9000, 13000, 17000... 45000
+                lvl -> 5000 + (lvl * 4000),
                 site -> site.getData().getUnlockableState("beehive") == UnlockableState.UNLOCKED,
                 (site, lvl) -> {}
         ));
