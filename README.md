@@ -1,6 +1,6 @@
 # 💸 Stoink Craft
 
-> A Minecraft economy plugin powering the StoinkCraft server — where players form enterprises, grind for profits, and compete to become the richest in a player-driven marketplace.
+> A Minecraft economy plugin powering the StoinkCraft server where players form enterprises, grind for profits, and compete to become the richest in a player-driven marketplace.
 
 ---
 
