@@ -120,7 +120,7 @@ public class Enterprise {
     }
 
     public double getShareValue() {
-        return netWorth / com.stoinkcraft.utils.SCConstants.MAX_SHARES;
+        return getNetWorth() / com.stoinkcraft.utils.SCConstants.MAX_SHARES;
     }
 
     public int getAvailableShares() {
